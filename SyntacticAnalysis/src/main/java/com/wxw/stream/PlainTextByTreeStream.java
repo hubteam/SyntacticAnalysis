@@ -1,4 +1,4 @@
-package com.wxw.sample;
+package com.wxw.stream;
 
 import java.io.BufferedReader;
 import java.io.IOException;

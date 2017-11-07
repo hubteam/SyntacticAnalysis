@@ -9,7 +9,7 @@ import java.util.Properties;
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisContextGeneratorConf {
+public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisContextGenerator{
 
 	//chunk
 	private boolean chunkandpostag0Set;

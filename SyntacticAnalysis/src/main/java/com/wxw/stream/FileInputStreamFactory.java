@@ -1,4 +1,4 @@
-package com.wxw.sample;
+package com.wxw.stream;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -1,9 +1,10 @@
 package com.wxw.tree;
 
-import java.awt.event.FocusEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.wxw.stream.SyntacticAnalysisSample;
 
 /**
  * 根据句法树得到动作序列
@@ -298,78 +299,77 @@ public class TreeToActions {
 	 * @param tree 树
 	 * @throws CloneNotSupportedException
 	 */
-	public void treeToAction(TreeNode tree) throws CloneNotSupportedException{
-		getActionPOS(tree);
-		
+	public SyntacticAnalysisSample treeToAction(TreeNode tree) throws CloneNotSupportedException{
+		getActionPOS(tree);		
 		getActionCHUNK(tree, pos);
 		getActionBUILDandCHECK(tree, combine(chunk));
-
+		return new SyntacticAnalysisSample(words,pos,chunk,buildAndCheckTree,actions);
 	}
-	
-	/**
-	 * 得到第一步后的子树
-	 * @return
-	 */
-	public List<TreeNode> getPos(){
-		return pos;
-	}
-	
-	/**
-	 * 得到第2步后的子树
-	 * @return
-	 */
-	public List<TreeNode> getChunk(){
-		return chunk;
-	}
-	
-	/**
-	 * 得到第3步后的子树
-	 * @return
-	 */
-	public List<List<TreeNode>> getBulidAndCheck(){
-		return buildAndCheckTree;
-	}
-	
-	/**
-	 * 得到动作序列
-	 * @return
-	 */
-	public List<String> getActions(){
-		return actions;
-	}
-	
-	/**
-	 * 得到当前的句子
-	 * @return
-	 */
-	public List<String> getWords(){
-		return words;
-	}
-	
-	@org.junit.Test
-	public void test() throws CloneNotSupportedException{
-		String treeStr = "(S(NP(PRP I))(VP(VP(VBD saw)(NP(DT the)(NN man)))(PP(IN with)(NP(DT the)(NN telescope)))))";
-		PhraseGenerateTree gst = new PhraseGenerateTree();
-	    TreeNode tree = gst.generateTree(treeStr);
-	    System.out.println(tree.toString().equals(treeStr));
-	    getActionPOS(tree);
-	    
-	    getActionCHUNK(tree,pos);
-
-	    List<TreeNode> chunkCombine = combine(chunk);
-
-	    getActionBUILDandCHECK(tree,chunkCombine);
-	    
-	    ActionsToTree a2t = new ActionsToTree();
-	    String[] words = {"Mr.","Vinken","is","chairman","of","Elsevier","N.V.",",","the","Dutch","publishing","group"};
-
-	    TreeNode completeTree = a2t.actionsToTree(Arrays.asList(words), actions);
-	      
-	    for (List<TreeNode> node : buildAndCheckTree) {
-			for (TreeNode treeNode : node) {
-				System.out.println(treeNode.toString());
-			}
-			System.out.println();
-		}
-	}
+//	
+//	/**
+//	 * 得到第一步后的子树
+//	 * @return
+//	 */
+//	public List<TreeNode> getPos(){
+//		return pos;
+//	}
+//	
+//	/**
+//	 * 得到第2步后的子树
+//	 * @return
+//	 */
+//	public List<TreeNode> getChunk(){
+//		return chunk;
+//	}
+//	
+//	/**
+//	 * 得到第3步后的子树
+//	 * @return
+//	 */
+//	public List<List<TreeNode>> getBulidAndCheck(){
+//		return buildAndCheckTree;
+//	}
+//	
+//	/**
+//	 * 得到动作序列
+//	 * @return
+//	 */
+//	public List<String> getActions(){
+//		return actions;
+//	}
+//	
+//	/**
+//	 * 得到当前的句子
+//	 * @return
+//	 */
+//	public List<String> getWords(){
+//		return words;
+//	}
+//	
+//	@org.junit.Test
+//	public void test() throws CloneNotSupportedException{
+//		String treeStr = "(S(NP(PRP I))(VP(VP(VBD saw)(NP(DT the)(NN man)))(PP(IN with)(NP(DT the)(NN telescope)))))";
+//		PhraseGenerateTree gst = new PhraseGenerateTree();
+//	    TreeNode tree = gst.generateTree(treeStr);
+//	    System.out.println(tree.toString().equals(treeStr));
+//	    getActionPOS(tree);
+//	    
+//	    getActionCHUNK(tree,pos);
+//
+//	    List<TreeNode> chunkCombine = combine(chunk);
+//
+//	    getActionBUILDandCHECK(tree,chunkCombine);
+//	    
+//	    ActionsToTree a2t = new ActionsToTree();
+//	    String[] words = {"Mr.","Vinken","is","chairman","of","Elsevier","N.V.",",","the","Dutch","publishing","group"};
+//
+//	    TreeNode completeTree = a2t.actionsToTree(Arrays.asList(words), actions);
+//	      
+//	    for (List<TreeNode> node : buildAndCheckTree) {
+//			for (TreeNode treeNode : node) {
+//				System.out.println(treeNode.toString());
+//			}
+//			System.out.println();
+//		}
+//	}
 }

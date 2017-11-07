@@ -14,10 +14,12 @@ public class ActionsToTree {
 			TreeNode actionsNode = new TreeNode(actions.get(i));
 			actionsNode.addChild(node);
 			node.setParent(actionsNode);
+			actionsNode.setHeadWords(node.getNodeName());//需要设置头结点
 			postree.add(actionsNode);
 		}
 		
 		//第二部chunk
+		//不用在这里设置头结点
 		List<TreeNode> chunktree = new ArrayList<TreeNode>();
 		int len = words.size();
 		for (int i = 0; i < len; i++) {
@@ -28,6 +30,7 @@ public class ActionsToTree {
 		}
 		
 		//第三部合并
+		//需要为合并后的结点设置头结点
 		List<TreeNode> combine = new ArrayList<TreeNode>();
 		//遍历所有子树
 		for (int i = 0; i < chunktree.size(); i++) {		
@@ -49,11 +52,15 @@ public class ActionsToTree {
 						break;				
 					}			
 				}
+				//头结点
+				node.setHeadWords(GenerateHeadWords.getHeadWords(node));
 				//将一颗合并过的完整子树加入列表
 				combine.add(node);
 				//标记为other的，去掉other		 
 			}else if(chunktree.get(i).getNodeName().equals("other")){										
-				chunktree.get(i).getChildren().get(0).setParent(null);			
+				chunktree.get(i).getChildren().get(0).setParent(null);	
+				//其实这里的头结点就是在pos步骤中设置的头结点
+				chunktree.get(i).getChildren().get(0).setHeadWords(chunktree.get(i).getChildren().get(0).getHeadWords());
 				combine.add(chunktree.get(i).getChildren().get(0));		
 			}
 		}
@@ -87,6 +94,8 @@ public class ActionsToTree {
 					combineNode.addChild(combine.get(k).getChildren().get(0));
 					combine.get(k).getChildren().get(0).setParent(combineNode);
 				}
+				//设置头结点
+				combineNode.setHeadWords(GenerateHeadWords.getHeadWords(combineNode));
 				combine.set(preIndex, combineNode);
 				//删除那些用于合并的join
 				for (int k = currentIndex; k >= preIndex+1; k--) {
@@ -108,12 +117,12 @@ public class ActionsToTree {
 		return combine.get(0);
 	}
 	
-	@org.junit.Test
-	public void test(){
-		String[] words = {"I","saw","the","man","with","the","telescope"};
-		String[] actions = {"PRP","VBD","DT","NN","IN","DT","NN","start_NP","other","start_NP","join_NP","other","start_NP","join_NP",
-				"start_S","no","start_VP","no","join_VP","yes","start_VP","no","start_PP","no","join_PP","yes","join_VP","yes","join_S","yes"};
-		TreeNode tree = actionsToTree(Arrays.asList(words),Arrays.asList(actions));
-		System.out.println(tree.toString());
-	}
+//	@org.junit.Test
+//	public void test(){
+//		String[] words = {"I","saw","the","man","with","the","telescope"};
+//		String[] actions = {"PRP","VBD","DT","NN","IN","DT","NN","start_NP","other","start_NP","join_NP","other","start_NP","join_NP",
+//				"start_S","no","start_VP","no","join_VP","yes","start_VP","no","start_PP","no","join_PP","yes","join_VP","yes","join_S","yes"};
+//		TreeNode tree = actionsToTree(Arrays.asList(words),Arrays.asList(actions));
+//		System.out.println(tree.toString());
+//	}
 }

@@ -16,15 +16,15 @@ public class Tree2Action2TreeTest extends TestCase{
 		PlainTextByTreeStream lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File("data\\train\\wsj_0076.mrg")), "utf8");
 		String txt = lineStream.read();
 //		System.out.println(txt);
-		//生成一棵树
+
 		PhraseGenerateTree pgt = new PhraseGenerateTree();
 		TreeNode tree = pgt.generateTree(txt);
-		//生成动作
+
 		TreeToActions tta = new TreeToActions();
 		tta.treeToAction(tree);
 		List<String> words = tta.getWords();
 		List<String> actions = tta.getActions();
-		//由动作生成树
+
 		ActionsToTree att = new ActionsToTree();
 		TreeNode newTree = att.actionsToTree(words, actions);
 		System.out.println(newTree.toString());

@@ -79,7 +79,7 @@ public class TreeNode implements Cloneable{
 		return this.nodename;
 	}
 	//头节点
-	public String getHeadWOrds(){
+	public String getHeadWords(){
 		return this.headwords;
 	}
 	
@@ -102,7 +102,7 @@ public class TreeNode implements Cloneable{
 		if(this.children.size() == 0){
 			return " "+this.nodename;
 		}else{
-			String treestr = "("+this.nodename;
+			String treestr = "("+this.nodename+"{"+this.headwords+"}";
 			for (TreeNode node:this.children) {
 				treestr += node.toString();
 			}

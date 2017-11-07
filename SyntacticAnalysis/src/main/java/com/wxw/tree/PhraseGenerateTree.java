@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import org.junit.Test;
+
 import com.wxw.tree.TreeNode;
 
 /**
@@ -13,6 +15,8 @@ import com.wxw.tree.TreeNode;
  */
 public class PhraseGenerateTree {
 
+	
+	
 	/**
 	 * 格式化为形如：(A(B1(C1 d1)(C2 d2))(B2 d3)) 的括号表达式。叶子及其父节点用一个空格分割，其他字符紧密相连。
 	 * @param tree 从训练语料拼接出的一棵树
@@ -79,9 +83,15 @@ public class PhraseGenerateTree {
 					temp.peek().setIndex(indexTree++);
 					node.addChild(temp.pop());
 				}
-				
-				if(!node.isLeaf()){
-					node.setHeadWords(""+j++);
+				//设置头节点的部分
+				//为每一个非终结符，且不是词性标记的设置头节点
+				//对于词性标记的头节点就是词性标记对应的词本身				
+				//(1)为词性标记的时候，头节点为词性标记下的词语
+				if(node.getChildren().size() == 1 && node.getChildren().get(0).getChildren().size() == 0){
+					node.setHeadWords(node.getChildren().get(0).getNodeName());
+				//(2)为非终结符，且不是词性标记的时候，由规则推出
+				}else if(!node.isLeaf()){
+					node.setHeadWords(GenerateHeadWords.getHeadWords(node));
 				}
 				tree.push(node);
 //				System.out.println(tree.toString());

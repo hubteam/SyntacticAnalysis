@@ -61,6 +61,7 @@ public class TreeToActions {
 				actions.add("start_"+treeCopy.getParent().getNodeName());
 				TreeNode node = new TreeNode("start_"+treeCopy.getParent().getNodeName());
 				node.addChild(treeCopy);
+				node.setHeadWords(treeCopy.getParent().getHeadWords());
 				treeCopy.setParent(node);
 				chunk.add(node);
 				//当前节点的父节点不止一个，就遍历所有的子树，判断当前节点是否为flat结构
@@ -85,6 +86,7 @@ public class TreeToActions {
 						actions.add("start_"+treeCopy.getParent().getNodeName());
 						TreeNode node = new TreeNode("start_"+treeCopy.getParent().getNodeName());
 						node.addChild(treeCopy);
+						node.setHeadWords(treeCopy.getParent().getHeadWords());
 						treeCopy.setParent(node);
 						chunk.add(node);
 					}else{
@@ -92,6 +94,7 @@ public class TreeToActions {
 						actions.add("join_"+treeCopy.getParent().getNodeName());
 						TreeNode node = new TreeNode("join_"+treeCopy.getParent().getNodeName());
 						node.addChild(treeCopy);
+						node.setHeadWords(treeCopy.getParent().getHeadWords());
 						treeCopy.setParent(node);
 						chunk.add(node);
 					}
@@ -100,6 +103,7 @@ public class TreeToActions {
 					actions.add("other");
 					TreeNode node = new TreeNode("other");
 					node.addChild(treeCopy);
+					node.setHeadWords(treeCopy.getParent().getHeadWords());
 					treeCopy.setParent(node);
 					chunk.add(node);
 				}		
@@ -128,11 +132,13 @@ public class TreeToActions {
 				//所以遇到start就生成新的子树
 				TreeNode node = new TreeNode(subTree.get(i).getNodeName().split("_")[1]);
 				node.addChild(subTree.get(i).getChildren().get(0));
+				node.setHeadWords(subTree.get(i).getHeadWords());
 				subTree.get(i).getChildren().get(0).setParent(node);
 				for (int j = i+1; j < subTree.size(); j++) {
 					//判断start后是否有join如果有，就和之前的start合并
 					if(subTree.get(j).getNodeName().split("_")[0].equals("join")){
 						node.addChild(subTree.get(j).getChildren().get(0));
+						node.setHeadWords(subTree.get(j).getHeadWords());
 						subTree.get(j).getChildren().get(0).setParent(node);
 					}else if(subTree.get(j).getNodeName().split("_")[0].equals("start") ||
 							subTree.get(j).getNodeName().split("_")[0].equals("other")){
@@ -144,6 +150,7 @@ public class TreeToActions {
 				//标记为other的，去掉other
 			}else if(subTree.get(i).getNodeName().equals("other")){
 				subTree.get(i).getChildren().get(0).setParent(null);
+				subTree.get(i).getChildren().get(0).setHeadWords(subTree.get(i).getChildren().get(0).getHeadWords());
 				combineChunk.add(subTree.get(i).getChildren().get(0));
 			}
 		}
@@ -170,6 +177,7 @@ public class TreeToActions {
 				//改变subTreeCopy
 				TreeNode node = new TreeNode("start_"+tree.getParent().getNodeName());
 				node.addChild(subTree.get(i));
+				node.setHeadWords(subTree.get(i).getHeadWords());
 				subTree.get(i).setParent(node);
 				subTree.set(i, node);
 				subTreeCopy = new ArrayList<TreeNode>(subTree);
@@ -178,6 +186,7 @@ public class TreeToActions {
 				//合并
 				TreeNode tempnode = new TreeNode(tree.getParent().getNodeName());
 				tempnode.setParent(tree.getParent().getParent());
+				tempnode.setHeadWords(tree.getParent().getHeadWords());
 				tempnode.addChild(tree.getParent().getChildren().get(0));
 				tree.getParent().getChildren().get(0).setParent(tempnode);
 				subTree.set(i, tree.getParent());
@@ -196,6 +205,7 @@ public class TreeToActions {
 					actions.add("start_"+tree.getParent().getNodeName());	
 					TreeNode node = new TreeNode("start_"+tree.getParent().getNodeName());
 					node.addChild(subTree.get(i));
+					node.setHeadWords(tree.getParent().getHeadWords());
 					subTree.get(i).setParent(node);
 					subTree.set(i, node);
 					subTreeCopy = new ArrayList<TreeNode>(subTree);
@@ -214,6 +224,7 @@ public class TreeToActions {
 					actions.add("join_"+tree.getParent().getNodeName());
 					TreeNode tempnode = new TreeNode("join_"+tree.getParent().getNodeName());
 					tempnode.addChild(subTree.get(i));
+					tempnode.setHeadWords(tree.getParent().getHeadWords());
 					subTree.get(i).setParent(tempnode);
 					subTree.set(i, tempnode);
 					subTreeCopy = new ArrayList<TreeNode>(subTree);
@@ -222,11 +233,12 @@ public class TreeToActions {
 					//需要合并,node为合并后的父节点
 					TreeNode node = new TreeNode(tree.getParent().getNodeName());
 					node.setParent(tree.getParent().getParent());
+					node.setHeadWords(tree.getParent().getHeadWords());
 					for (int j = 0; j < tree.getParent().getChildren().size(); j++) {								
 						node.addChild(tree.getParent().getChildren().get(j));
 						tree.getParent().getChildren().get(j).setParent(node);						
 					}
-					System.out.println(tree.getParent().getChildren().size());
+//					System.out.println(tree.getParent().getChildren().size());
 					//对subTreeCopy更改
 					//要更改的位置
 					int index = i - tree.getParent().getChildren().size() + 1;
@@ -252,6 +264,7 @@ public class TreeToActions {
 					actions.add("join_"+tree.getParent().getNodeName());
 					TreeNode node = new TreeNode("join_"+tree.getParent().getNodeName());
 					node.addChild(subTree.get(i));
+					node.setHeadWords(tree.getParent().getHeadWords());
 					subTree.get(i).setParent(node);
 					subTree.set(i, node);
 					subTreeCopy = new ArrayList<TreeNode>(subTree);

@@ -45,18 +45,15 @@ public class SyntacticAnalysisSampleStream extends FilterObjectStream<String,Syn
 					TreeNode tree = pgt.generateTree(sentence);
 					sample = tta.treeToAction(tree);
 				}catch(Exception e){
-					if (logger.isLoggable(Level.WARNING)) {
-						
+					if (logger.isLoggable(Level.WARNING)) {						
 	                    logger.warning("Error during parsing, ignoring sentence: " + sentence);
-	                }
-					sample = new SyntacticAnalysisSample(new ArrayList<String>(),new ArrayList<TreeNode>(),new ArrayList<TreeNode>(),
-							new ArrayList<List<TreeNode>>(),new ArrayList<String>());
+	                }					
 				}
 
+				sample = new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 				return sample;
 			}else {
-				sample = new SyntacticAnalysisSample(new ArrayList<String>(),new ArrayList<TreeNode>(),new ArrayList<TreeNode>(),
-						new ArrayList<List<TreeNode>>(),new ArrayList<String>());
+				sample = new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 				return sample;
 			}
 		}

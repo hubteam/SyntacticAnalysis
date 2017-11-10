@@ -29,6 +29,10 @@ public class TreeNode implements Cloneable{
 		this.nodename = nodename;
 	}
 	
+	public void setNewName(String name){
+		this.nodename = name;
+	}
+	
 	//设置头节点
 	public void setHeadWords(String headwords){
 		this.headwords = headwords;

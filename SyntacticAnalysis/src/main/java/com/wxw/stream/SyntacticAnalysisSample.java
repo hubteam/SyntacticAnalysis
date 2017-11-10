@@ -1,5 +1,6 @@
 package com.wxw.stream;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,20 +13,21 @@ import com.wxw.tree.TreeNode;
  */
 public class SyntacticAnalysisSample {
 
-	private List<String> words;
+	private List<String> words = new ArrayList<String>();
+	private List<String> poses = new ArrayList<String>();
 	private List<TreeNode> posTree;
 	private List<TreeNode> chunkTree;
 	private List<List<TreeNode>> buildAndCheckTree;
 	private List<String> actions;
 	private String[][] addtionalContext;
 	
-	public SyntacticAnalysisSample(List<String> words, List<TreeNode> posTree, List<TreeNode> chunkTree, List<List<TreeNode>> buildAndCheckTree, List<String> actions){
-		this(words,posTree,chunkTree,buildAndCheckTree,actions,null);
+	public SyntacticAnalysisSample(List<TreeNode> posTree, List<TreeNode> chunkTree, List<List<TreeNode>> buildAndCheckTree, List<String> actions){
+		this(posTree,chunkTree,buildAndCheckTree,actions,null);
 	}
 	
-    public SyntacticAnalysisSample(List<String> words, List<TreeNode> posTree, List<TreeNode> chunkTree, List<List<TreeNode>> buildAndCheckTree, List<String> actions,String[][] additionalContext){
-        this.words = Collections.unmodifiableList(words);     
-        this.posTree = Collections.unmodifiableList(posTree);
+    public SyntacticAnalysisSample(List<TreeNode> posTree, List<TreeNode> chunkTree, List<List<TreeNode>> buildAndCheckTree, List<String> actions,String[][] additionalContext){   
+    	wordsToCharacters(posTree);
+    	this.posTree = Collections.unmodifiableList(posTree);
         this.chunkTree = Collections.unmodifiableList(chunkTree);
         this.buildAndCheckTree = Collections.unmodifiableList(buildAndCheckTree);
         this.actions = Collections.unmodifiableList(actions);
@@ -44,7 +46,21 @@ public class SyntacticAnalysisSample {
         }
         this.addtionalContext = ac;
 	}
-	
+
+
+	/**
+     * 将得到的词性标注子树转成字符和字符标记
+     * @param posTree
+     */
+    public void wordsToCharacters(List<TreeNode> posTree){
+    	for (int i = 0; i < posTree.size(); i++) {
+    		String word = posTree.get(i).getChildren().get(0).getNodeName();
+    		poses.add(posTree.get(i).getNodeName());
+			words.add(word);
+				
+		}
+    }
+    
 	/**
 	 * 获取词语
 	 * @return
@@ -53,6 +69,14 @@ public class SyntacticAnalysisSample {
 		return this.words;
 	}
 
+	/**
+	 * 获取词性
+	 * @return
+	 */
+	public List<String> getPoses(){
+		return this.poses;
+	}
+	
 	/**
 	 * pos操作得到的子树序列
 	 * @return

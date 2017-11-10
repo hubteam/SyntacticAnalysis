@@ -13,14 +13,13 @@ import com.wxw.stream.SyntacticAnalysisSample;
  */
 public class TreeToActions {
 
-	//句子的词语序列
-	private List<String> words = new ArrayList<String>();
+	
 	//动作序列
 	private List<String> actions = new ArrayList<String>();
 	//第一步POS后得到的n颗子树
-	private List<TreeNode> pos = new ArrayList<TreeNode>();
+	private List<TreeNode> posTree = new ArrayList<TreeNode>();
 	//记录第二部CHUNK后得到的n棵子树
-	private List<TreeNode> chunk = new ArrayList<TreeNode>();
+	private List<TreeNode> chunkTree = new ArrayList<TreeNode>();
 	//第三部得到的列表
 	private List<List<TreeNode>> buildAndCheckTree = new ArrayList<List<TreeNode>>();
 		
@@ -32,9 +31,8 @@ public class TreeToActions {
 
 		//如果是叶子节点，肯定是具体的词，父节点是词性
 		if(tree.getChildren().size() == 0){
-			pos.add(tree.getParent());
+			posTree.add(tree.getParent());
 			actions.add(tree.getParent().getNodeName());
-			words.add(tree.getNodeName());
 		}else{
 			//不是叶子节点的时候，递归
 			for (TreeNode node:tree.getChildren()) {
@@ -64,7 +62,7 @@ public class TreeToActions {
 				node.addChild(treeCopy);
 				node.setHeadWords(treeCopy.getParent().getHeadWords());
 				treeCopy.setParent(node);
-				chunk.add(node);
+				chunkTree.add(node);
 				//当前节点的父节点不止一个，就遍历所有的子树，判断当前节点是否为flat结构
 			}else if(treeCopy.getParent().getChildren().size() > 1){
 				int record = -1;
@@ -89,7 +87,7 @@ public class TreeToActions {
 						node.addChild(treeCopy);
 						node.setHeadWords(treeCopy.getParent().getHeadWords());
 						treeCopy.setParent(node);
-						chunk.add(node);
+						chunkTree.add(node);
 					}else{
 						//不是第一个
 						actions.add("join_"+treeCopy.getParent().getNodeName());
@@ -97,7 +95,7 @@ public class TreeToActions {
 						node.addChild(treeCopy);
 						node.setHeadWords(treeCopy.getParent().getHeadWords());
 						treeCopy.setParent(node);
-						chunk.add(node);
+						chunkTree.add(node);
 					}
 				//当前节点的父节点的子树不满足flat结构	，用other标记
 				}else{
@@ -106,7 +104,7 @@ public class TreeToActions {
 					node.addChild(treeCopy);
 					node.setHeadWords(treeCopy.getParent().getHeadWords());
 					treeCopy.setParent(node);
-					chunk.add(node);
+					chunkTree.add(node);
 				}		
 			}
 		}else{
@@ -301,9 +299,9 @@ public class TreeToActions {
 	 */
 	public SyntacticAnalysisSample treeToAction(TreeNode tree) throws CloneNotSupportedException{
 		getActionPOS(tree);		
-		getActionCHUNK(tree, pos);
-		getActionBUILDandCHECK(tree, combine(chunk));
-		return new SyntacticAnalysisSample(words,pos,chunk,buildAndCheckTree,actions);
+		getActionCHUNK(tree, posTree);
+		getActionBUILDandCHECK(tree, combine(chunkTree));
+		return new SyntacticAnalysisSample(posTree,chunkTree,buildAndCheckTree,actions);
 	}
 //	
 //	/**

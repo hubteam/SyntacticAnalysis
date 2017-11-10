@@ -138,8 +138,8 @@ public class GenerateHeadWords {
 					return node.getChildren().get(i).getHeadWords();
 				}
 			}
-			//如果所有的规则都没有匹配，返回最右边的第一个
-			return node.getChildren().get(node.getChildren().size() - 1).getHeadWords();
+			//如果所有的规则都没有匹配，返回最左边的第一个
+			return node.getChildren().get(0).getHeadWords();
 		}
 		
 		return null;

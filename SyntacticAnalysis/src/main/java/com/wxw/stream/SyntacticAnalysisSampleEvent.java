@@ -36,12 +36,13 @@ public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<Syntactic
 	@Override
 	protected Iterator<Event> createEvents(SyntacticAnalysisSample sample) {
 		List<String> words = sample.getWords();
+		List<String> poses = sample.getPoses();
 		List<String> actions = sample.getActions();
-		List<TreeNode> posTree = sample.getPosTree();
+	
 		List<TreeNode> chunkTree = sample.getChunkTree();
-		List<List<TreeNode>> buildAndCheck = sample.getBuildAndCheckTree();
+		List<List<TreeNode>> buildAndCheckTree = sample.getBuildAndCheckTree();
 		String[][] ac = sample.getAdditionalContext();
-		List<Event> events = generateEvents(words,posTree, chunkTree, buildAndCheck,actions,ac);
+		List<Event> events = generateEvents(words, poses, chunkTree, buildAndCheckTree,actions,ac);
         return events.iterator();
 	}
 
@@ -55,24 +56,20 @@ public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<Syntactic
 	 * @param ac
 	 * @return
 	 */
-	private List<Event> generateEvents(List<String> words, List<TreeNode> posTree, List<TreeNode> chunkTree,
-			List<List<TreeNode>> buildAndCheck, List<String> actions, String[][] ac) {
+	private List<Event> generateEvents( List<String> words, List<String> poses, List<TreeNode> chunkTree,
+			List<List<TreeNode>> buildAndCheckTree, List<String> actions, String[][] ac) {
 		List<Event> events = new ArrayList<Event>(actions.size());
-		//pos
-		for (int i = 0; i < words.size(); i++) {		
-			String[] context = null;
-            events.add(new Event(actions.get(i), context));
-		}
+		
 		//chunk
 		for (int i = words.size(); i < 2*words.size(); i++) {		
-			String[] context = null;
+			String[] context = generator.getContextForChunk(i,chunkTree, actions, ac);
             events.add(new Event(actions.get(i), context));
 		}
 		//buildAndCheck
 		for (int i = 2*words.size(); i < actions.size(); i=i+2) {
-			String[] buildContext = null;
+			String[] buildContext = generator.getContextForBuild(i,buildAndCheckTree, actions, ac);
             events.add(new Event(actions.get(i), buildContext));
-            String[] checkContext = null;
+            String[] checkContext = generator.getContextForCheck(i+1,buildAndCheckTree, actions, ac);
             events.add(new Event(actions.get(i+1), checkContext));
 		}
 		return events;

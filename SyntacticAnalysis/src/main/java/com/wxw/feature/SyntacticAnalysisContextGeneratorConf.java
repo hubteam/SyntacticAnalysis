@@ -2,7 +2,10 @@ package com.wxw.feature;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
+
+import com.wxw.tree.TreeNode;
 
 /**
  * 根据配置文件生成特征
@@ -11,6 +14,25 @@ import java.util.Properties;
  */
 public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisContextGenerator{
 
+	//pos
+	private boolean w_2Set;
+    private boolean w_1Set;
+    private boolean w0Set;
+    private boolean w1Set;
+    private boolean w2Set;
+    private boolean t_1Set;
+    private boolean t_2t_1Set;
+    private boolean prefix1Set;
+    private boolean prefix2Set;
+    private boolean prefix3Set;
+    private boolean prefix4Set;
+    private boolean suffix1Set;
+    private boolean suffix2Set;
+    private boolean suffix3Set;
+    private boolean suffix4Set;
+    private boolean numberSet;
+    private boolean uppercaseSet;
+    private boolean hypenSet;
 	//chunk
 	private boolean chunkandpostag0Set;
     private boolean chunkandpostag_1Set;
@@ -122,6 +144,26 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @param properties
 	 */
 	private void init(Properties config) {
+		//pos
+		w0Set = (config.getProperty("pos.w0", "true").equals("true"));
+		w1Set = (config.getProperty("pos.w1", "true").equals("true"));
+		w2Set = (config.getProperty("pos.w2", "true").equals("true"));
+		w_1Set = (config.getProperty("pos.w_1", "true").equals("true"));
+		w_2Set = (config.getProperty("pos.w_2", "true").equals("true"));
+		t_1Set = (config.getProperty("pos.t_1", "true").equals("true"));
+		t_2t_1Set = (config.getProperty("pos.t_2t_1", "true").equals("true"));
+		prefix1Set = (config.getProperty("pos.prefix1", "true").equals("true"));
+		prefix2Set = (config.getProperty("pos.prefix2", "true").equals("true"));
+		prefix3Set = (config.getProperty("pos.prefix3", "true").equals("true"));
+		prefix4Set = (config.getProperty("pos.prefix4", "true").equals("true"));
+		suffix1Set = (config.getProperty("pos.suffix1", "true").equals("true"));
+		suffix2Set = (config.getProperty("pos.suffix2", "true").equals("true"));
+		suffix3Set = (config.getProperty("pos.suffix3", "true").equals("true"));
+		suffix4Set = (config.getProperty("pos.suffix4", "true").equals("true"));
+		numberSet = (config.getProperty("pos.number", "true").equals("true"));
+		uppercaseSet = (config.getProperty("pos.uppercase", "true").equals("true"));
+		hypenSet = (config.getProperty("pos.hypen", "true").equals("true"));
+		
 		//chunk
 		chunkandpostag0Set = (config.getProperty("tree.chunkandpostag0", "true").equals("true"));
 		chunkandpostag1Set = (config.getProperty("tree.chunkandpostag1", "true").equals("true"));
@@ -208,5 +250,130 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 		surround_2ASet = (config.getProperty("tree.surround_2*", "true").equals("true"));
 		
 		checkdefaultSet = (config.getProperty("tree.checkdefault", "true").equals("true"));
+	}
+
+	/**
+	 * 生成词性标注的上下文特征
+	 * @param index 当前位置
+	 * @param words 词语
+	 * @param poses 词性
+	 * @return
+	 */
+	public String[] getContextForPos(int index, List<String> words, List<String> poses) {
+		String w1, w2, w0, w_1, w_2;
+        w1 = w2 = w0 = w_1 = w_2 = null;
+        String t_1 = null;
+        String t_2 = null;
+        
+        w0 = words.get(index);
+        if (words.size() > index + 1) {
+            w1 = words.get(index)+1;
+            if (words.size() > index + 2) {
+                w2 = words.get(index)+2;
+            }
+        }
+
+        if (index - 1 >= 0) {
+            w_1 = words.get(index-1);
+            t_1 = poses.get(index-1);
+            if (index - 2 >= 0) {
+                w_2 = words.get(index-2);
+                t_2 = poses.get(index-2);
+            }
+        }
+        
+		return null;
+	}
+
+	/**
+	 * chunk步的上下文特征
+	 * @param index 当前位置
+	 * @param chunkTree 子树序列
+	 * @param actions 动作序列
+	 * @return
+	 */
+	public String[] getContextForChunk(int index, List<TreeNode> chunkTree, List<String> actions) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * build步的上下文特征
+	 * @param index 当前位置
+	 * @param buildAndCheckTree 子树序列
+	 * @param actions 动作序列
+	 * @return
+	 */
+	public String[] getContextForBuild(int index, List<List<TreeNode>> buildAndCheckTree, List<String> actions) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * build步的上下文特征
+	 * @param index 当前位置
+	 * @param buildAndCheckTree 子树序列
+	 * @param actions 动作序列
+	 * @return
+	 */
+	public String[] getContextForCheck(int index, List<List<TreeNode>> buildAndCheckTree, List<String> actions) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * 生成词性标注的上下文特征
+	 * @param index 当前位置
+	 * @param words 词语
+	 * @param poses 词性
+	 * @param ac 
+	 * @return
+	 */
+	@Override
+	public String[] getContextForPos(int index, List<String> words, List<String> poses, Object[] ac) {
+
+		return getContextForPos(index,words,poses);
+	}
+
+	/**
+	 * chunk步的上下文特征
+	 * @param index 当前位置
+	 * @param chunkTree 子树序列
+	 * @param actions 动作序列
+	 * @param ac 
+	 * @return
+	 */
+	@Override
+	public String[] getContextForChunk(int index, List<TreeNode> chunkTree, List<String> actions, Object[] ac) {
+
+		return getContextForChunk(index,chunkTree,actions);
+	}
+
+	/**
+	 * build步的上下文特征
+	 * @param index 当前位置
+	 * @param buildAndCheckTree 子树序列
+	 * @param actions 动作序列
+	 * @param ac 
+	 * @return
+	 */
+	@Override
+	public String[] getContextForBuild(int index, List<List<TreeNode>> buildAndCheckTree, List<String> actions, Object[] ac) {
+
+		return getContextForBuild(index,buildAndCheckTree,actions);
+	}
+
+	/**
+	 * build步的上下文特征
+	 * @param index 当前位置
+	 * @param buildAndCheckTree 子树序列
+	 * @param actions 动作序列
+	 * @param ac 
+	 * @return
+	 */
+	@Override
+	public String[] getContextForCheck(int index, List<List<TreeNode>> buildAndCheckTree, List<String> actions, Object[] ac) {
+
+		return getContextForCheck(index,buildAndCheckTree,actions);
 	}
 }

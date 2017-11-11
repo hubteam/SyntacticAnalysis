@@ -67,14 +67,24 @@ public class PlainTextByTreeStream  implements ObjectStream<String>{
 		// 一次读取n行,jie
 		String line = "";
 		String readContent = "";
-		while((line = this.in.readLine())!=null){
-			line = line.trim().replaceAll("\n","");
-			if(!line.trim().equals("") && line.charAt(0) == '('){
-				readContent += line;
-				if(line.charAt(1) == '.'){
+		int left = 0;
+		int right = 0;
+		while((line = this.in.readLine()) != null){
+			if(line != "" && !line.equals("")){
+				line = line.replaceAll("\n","");
+				char[] c = line.trim().toCharArray();
+				readContent += line.trim();
+				for (int i = 0; i < c.length; i++) {
+					if(c[i] == '('){
+						left++;
+					}else if(c[i] == ')'){
+						right++;
+					}
+				}
+				if(left == right){
 					break;
 				}
-			}			
+			}
 		}
 		return readContent;
 	}

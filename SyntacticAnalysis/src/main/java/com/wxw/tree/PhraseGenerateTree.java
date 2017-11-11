@@ -20,21 +20,7 @@ public class PhraseGenerateTree {
 	 */
 	public TreeNode generateTree(String treeStr){
 		int indexTree;//记录当前是第几颗子树
-
-		List<String> parts = new ArrayList<String>();
-        for (int index = 0; index < treeStr.length(); ++index) {
-            if (treeStr.charAt(index) == '(' || treeStr.charAt(index) == ')' || treeStr.charAt(index) == ' ') {
-                parts.add(Character.toString(treeStr.charAt(index)));
-            } else {
-                for (int i = index + 1; i < treeStr.length(); ++i) {
-                    if (treeStr.charAt(i) == '(' || treeStr.charAt(i) == ')' || treeStr.charAt(i) == ' ') {
-                        parts.add(treeStr.substring(index, i));
-                        index = i - 1;
-                        break;
-                    }
-                }
-            }
-        }
+		List<String> parts = stringToList(treeStr);
         Stack<TreeNode> tree = new Stack<TreeNode>();
         for (int i = 0; i < parts.size(); i++) {
 			if(!parts.get(i).equals(")") && !parts.get(i).equals(" ")){
@@ -73,5 +59,65 @@ public class PhraseGenerateTree {
         TreeNode treeStruct = tree.pop();
 
         return treeStruct;
+	}
+	
+	/**
+	 * 为预处理产生的句法树
+	 * @param treeStr 括号表达式
+	 * @return
+	 */
+	public TreeNode generateTreeForPreTreatment(String treeStr){
+		List<String> parts = stringToList(treeStr);
+        Stack<TreeNode> tree = new Stack<TreeNode>();
+        for (int i = 0; i < parts.size(); i++) {
+			if(!parts.get(i).equals(")") && !parts.get(i).equals(" ")){
+				TreeNode tn = new TreeNode(parts.get(i));
+				tn.setFlag(true);
+				tree.push(tn);
+			}else if(parts.get(i).equals(" ")){
+				
+			}else if(parts.get(i).equals(")")){
+				Stack<TreeNode> temp = new Stack<TreeNode>();
+				while(!tree.peek().getNodeName().equals("(")){
+					if(!tree.peek().getNodeName().equals(" ")){
+						temp.push(tree.pop());
+					}
+				}
+				tree.pop();
+				TreeNode node = temp.pop();
+				while(!temp.isEmpty()){		
+					temp.peek().setParent(node);
+					node.addChild(temp.pop());
+				}
+				tree.push(node);
+			}
+		}
+        TreeNode treeStruct = tree.pop();
+//        System.out.println(treeStruct.toNewSample());
+        return treeStruct;
+	}
+	
+	/**
+	 * 将括号表达式去掉空格转成列表的形式
+	 * @param treeStr 括号表达式
+	 * @return
+	 */
+	public List<String> stringToList(String treeStr){
+
+		List<String> parts = new ArrayList<String>();
+        for (int index = 0; index < treeStr.length(); ++index) {
+            if (treeStr.charAt(index) == '(' || treeStr.charAt(index) == ')' || treeStr.charAt(index) == ' ') {
+                parts.add(Character.toString(treeStr.charAt(index)));
+            } else {
+                for (int i = index + 1; i < treeStr.length(); ++i) {
+                    if (treeStr.charAt(i) == '(' || treeStr.charAt(i) == ')' || treeStr.charAt(i) == ' ') {
+                        parts.add(treeStr.substring(index, i));
+                        index = i - 1;
+                        break;
+                    }
+                }
+            }
+        }
+        return parts;
 	}
 }

@@ -66,10 +66,27 @@ public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<Syntactic
             events.add(new Event(actions.get(i), context));
 		}
 		//buildAndCheck
+		//两个变量i j
+		//i控制第几个list
+		//j控制list中的第几个
+		int j = 0;
+		//计数变量
+		int count = 0;
 		for (int i = 2*words.size(); i < actions.size(); i=i+2) {
-			String[] buildContext = generator.getContextForBuild(i,buildAndCheckTree, actions, ac);
+			if(actions.get(i).startsWith("join")){
+				count++;
+			}else if(actions.get(i).startsWith("start")){
+				count = 0;
+			}
+			String[] buildContext = generator.getContextForBuild(j,buildAndCheckTree.get(i-2*words.size()), actions, ac);
             events.add(new Event(actions.get(i), buildContext));
-            String[] checkContext = generator.getContextForCheck(i+1,buildAndCheckTree, actions, ac);
+            
+            if(actions.get(i+1).equals("yes")){
+            	j = j-count;
+            }else if(actions.get(i+1).equals("no")){            	
+                j++;
+            }
+            String[] checkContext = generator.getContextForCheck(j,buildAndCheckTree.get(i+1-2*words.size()), actions, ac);
             events.add(new Event(actions.get(i+1), checkContext));
 		}
 		return events;

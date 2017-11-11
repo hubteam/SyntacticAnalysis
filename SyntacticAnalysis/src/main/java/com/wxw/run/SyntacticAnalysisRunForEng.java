@@ -1,16 +1,30 @@
 package com.wxw.run;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Properties;
 
+import com.wxw.evaluate.SyntacticAnalysisErrorPrinter;
+import com.wxw.evaluate.SyntacticAnalysisEvaluator;
+import com.wxw.evaluate.SyntacticAnalysisMeasure;
+import com.wxw.feature.FeatureForPosTools;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
 import com.wxw.model.SyntacticAnalysisME;
+import com.wxw.model.SyntacticAnalysisMEForPos;
 import com.wxw.model.SyntacticAnalysisModel;
+import com.wxw.model.SyntacticAnalysisModelForPos;
+import com.wxw.stream.FileInputStreamFactory;
+import com.wxw.stream.SyntacticAnalysisSample;
+import com.wxw.stream.SyntacticAnalysisSampleStream;
+import com.wxw.tree.TreePreTreatment;
 
+import opennlp.tools.util.ObjectStream;
+import opennlp.tools.util.PlainTextByLineStream;
 import opennlp.tools.util.TrainingParameters;
 
 /**
@@ -28,8 +42,10 @@ public class SyntacticAnalysisRunForEng {
 		public String encoding;
 		public String trainFile;
 		public String testFile;
-		public String modelbinaryFile;
-		public String modeltxtFile;
+		public String posmodelbinaryFile;
+		public String posmodeltxtFile;
+		public String treemodelbinaryFile;
+		public String treemodeltxtFile;
 		public String errorFile;
 	}
 	
@@ -62,16 +78,20 @@ public class SyntacticAnalysisRunForEng {
 			String encoding = config.getProperty(name + "." + "corpus.encoding");
 			String trainFile = config.getProperty(name + "." + "corpus.train.file");
 			String testFile = config.getProperty(name+"."+"corpus.test.file");
-			String modelbinaryFile = config.getProperty(name + "." + "corpus.modelbinary.file");
-			String modeltxtFile = config.getProperty(name + "." + "corpus.modeltxt.file");
+			String posmodelbinaryFile = config.getProperty(name + "." + "corpus.posmodelbinary.file");
+			String posmodeltxtFile = config.getProperty(name + "." + "corpus.posmodeltxt.file");
+			String treemodelbinaryFile = config.getProperty(name + "." + "corpus.treemodelbinary.file");
+			String treemodeltxtFile = config.getProperty(name + "." + "corpus.treemodeltxt.file");
 			String errorFile = config.getProperty(name + "." + "corpus.error.file");
 			Corpus corpus = new Corpus();
 			corpus.name = name;
 			corpus.encoding = encoding;
 			corpus.trainFile = trainFile;
 			corpus.testFile = testFile;
-			corpus.modeltxtFile = modeltxtFile;
-			corpus.modelbinaryFile = modelbinaryFile;
+			corpus.posmodeltxtFile = posmodeltxtFile;
+			corpus.posmodelbinaryFile = posmodelbinaryFile;
+			corpus.treemodeltxtFile = treemodeltxtFile;
+			corpus.treemodelbinaryFile = treemodelbinaryFile;
 			corpus.errorFile = errorFile;
 			corpuses[i] = corpus;			
 		}
@@ -96,8 +116,10 @@ public class SyntacticAnalysisRunForEng {
 	 * 主函数
 	 * @param args 命令行参数
 	 * @throws IOException
+	 * @throws CloneNotSupportedException 
+	 * @throws UnsupportedOperationException 
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, UnsupportedOperationException, CloneNotSupportedException {
 		String cmd = args[0];
 		if(cmd.equals("-train")){
 			flag = "train";
@@ -117,8 +139,10 @@ public class SyntacticAnalysisRunForEng {
 	/**
 	 * 根据配置文件获取特征处理类
 	 * @throws IOException
+	 * @throws CloneNotSupportedException 
+	 * @throws UnsupportedOperationException 
 	 */
-	private static void runFeature() throws IOException {
+	private static void runFeature() throws IOException, UnsupportedOperationException, CloneNotSupportedException {
 		TrainingParameters params = TrainingParameters.defaultParams();
 		params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(3));
 	
@@ -138,9 +162,13 @@ public class SyntacticAnalysisRunForEng {
 	 * @param contextGen 特征类
 	 * @param corpora 内部类对象，语料信息
 	 * @param params 训练模型的参数
+	 * @throws CloneNotSupportedException 
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
+	 * @throws UnsupportedOperationException 
 	 */
 	private static void runFeatureOnCorporaByFlag(SyntacticAnalysisContextGenerator contextGen, Corpus[] corpora,
-			TrainingParameters params) {
+			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		if(flag == "train" || flag.equals("train")){
 			for (int i = 0; i < corpora.length; i++) {
 				trainOnCorpus(contextGen,corpora[i],params);
@@ -161,11 +189,41 @@ public class SyntacticAnalysisRunForEng {
 	 * @param contextGen 特征类
 	 * @param corpora 内部类对象，语料信息
 	 * @param params 训练模型的参数
+	 * @throws CloneNotSupportedException 
+	 * @throws IOException 
 	 */
 	private static void evaluateOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
-			TrainingParameters params) {
-		// TODO Auto-generated method stub
-		
+			TrainingParameters params) throws IOException, CloneNotSupportedException {
+		System.out.println("ContextGenerator: " + contextGen);
+
+        SyntacticAnalysisModelForPos posmodel = SyntacticAnalysisMEForPos.readModel(new File(corpus.posmodeltxtFile), params, contextGen, corpus.encoding);	
+        SyntacticAnalysisModel treemodel = SyntacticAnalysisME.readModel(new File(corpus.treemodeltxtFile), params, contextGen, corpus.encoding);	
+        SyntacticAnalysisMEForPos postagger = new SyntacticAnalysisMEForPos(posmodel, contextGen);
+        SyntacticAnalysisME treetagger = new SyntacticAnalysisME(treemodel,contextGen);
+        
+        SyntacticAnalysisMeasure measure = new SyntacticAnalysisMeasure();
+        SyntacticAnalysisEvaluator evaluator = null;
+        SyntacticAnalysisErrorPrinter printer = null;
+        if(corpus.errorFile != null){
+        	System.out.println("Print error to file " + corpus.errorFile);
+        	printer = new SyntacticAnalysisErrorPrinter(new FileOutputStream(corpus.errorFile));    	
+        	evaluator = new SyntacticAnalysisEvaluator(postagger,treetagger,printer);
+        }else{
+        	evaluator = new SyntacticAnalysisEvaluator(postagger,treetagger);
+        }
+        evaluator.setMeasure(measure);
+        //读测试语料之前也要预处理
+        //第一步预处理训练语料，得到处理之后的一个完整的训练语料
+        TreePreTreatment.pretreatment("test");
+        //根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数
+        HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(corpus.testFile), "utf-8");
+        FeatureForPosTools tools = new FeatureForPosTools(dict);
+        ObjectStream<String> linesStream = new PlainTextByLineStream(new FileInputStreamFactory(new File(corpus.testFile)), corpus.encoding);
+        ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(linesStream);
+        evaluator.evaluate(sampleStream);
+        SyntacticAnalysisMeasure measureRes = evaluator.getMeasure();
+        System.out.println("--------结果--------");
+        System.out.println(measureRes);
 	}
 
 	/**
@@ -173,11 +231,24 @@ public class SyntacticAnalysisRunForEng {
 	 * @param contextGen 特征类
 	 * @param corpora 内部类对象，语料信息
 	 * @param params 训练模型的参数
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
+	 * @throws UnsupportedOperationException 
+	 * @throws CloneNotSupportedException 
 	 */
 	private static void modelOutOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
-			TrainingParameters params) {
-		// TODO Auto-generated method stub
-		
+			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
+		System.out.println("ContextGenerator: " + contextGen);       
+		 //第一步预处理训练语料，得到处理之后的一个完整的训练语料
+		TreePreTreatment.pretreatment("train");
+		//根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数
+		HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(corpus.trainFile), "utf-8");
+		FeatureForPosTools tools = new FeatureForPosTools(dict);
+		//训练模型
+		//(1)训练词性标记模型
+		SyntacticAnalysisMEForPos.train(new File(corpus.trainFile), new File(corpus.posmodelbinaryFile),new File(corpus.posmodeltxtFile),params, contextGen, corpus.encoding);
+		//（2）训练句法分析模型
+		SyntacticAnalysisME.train(new File(corpus.trainFile), new File(corpus.treemodelbinaryFile),new File(corpus.treemodeltxtFile),params, contextGen, corpus.encoding);
 	}
 
 	/**
@@ -185,14 +256,23 @@ public class SyntacticAnalysisRunForEng {
 	 * @param contextGen 特征类
 	 * @param corpus 内部类对象，语料信息
 	 * @param params 训练模型的参数
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
+	 * @throws UnsupportedOperationException 
+	 * @throws CloneNotSupportedException 
 	 */
 	private static void trainOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
-			TrainingParameters params) {
-		System.out.println("ContextGenerator: " + contextGen);
-        //第一步预处理训练语料，得到处理之后的一个完整的训练语料
-		
+			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
+		System.out.println("ContextGenerator: " + contextGen);       
+		 //第一步预处理训练语料，得到处理之后的一个完整的训练语料
+		TreePreTreatment.pretreatment("train");
 		//根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数
-		
+		HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(corpus.trainFile), "utf-8");
+		FeatureForPosTools tools = new FeatureForPosTools(dict);
 		//训练模型
+		//(1)训练词性标记模型
+		SyntacticAnalysisMEForPos.train(new File(corpus.trainFile), params, contextGen, corpus.encoding);
+		//（2）训练句法分析模型
+		SyntacticAnalysisME.train(new File(corpus.trainFile), params, contextGen, corpus.encoding);
 	}
 }

@@ -20,6 +20,8 @@ public class TreeNode implements Cloneable{
 	private List<TreeNode> children = new ArrayList<TreeNode>();
 	//当前父节点下的第几颗子树
 	private int index;
+	//为预处理步骤所用，标记当前节点是否要用
+	private boolean flag;
 	
 	public TreeNode(){
 		
@@ -47,6 +49,9 @@ public class TreeNode implements Cloneable{
 		this.index = index;
 	}
 	
+	public void setFlag(boolean flag){
+		this.flag = flag;
+	}
 //	public void setParent(String parent){
 //		this.parent = new TreeNode(parent);
 //	}
@@ -106,7 +111,7 @@ public class TreeNode implements Cloneable{
 		if(this.children.size() == 0){
 			return " "+this.nodename;
 		}else{
-			String treestr = "("+this.nodename+"{"+this.headwords+"}";
+			String treestr = "("+this.nodename;
 			for (TreeNode node:this.children) {
 				treestr += node.toString();
 			}
@@ -128,5 +133,25 @@ public class TreeNode implements Cloneable{
 	
 	public TreeNode clone() throws CloneNotSupportedException{
 		return (TreeNode) super.clone();
+	}
+	
+	public String toNewSample(){
+		if(this.children.size() == 0 && this.flag == true){
+			return " "+this.nodename;
+		}else{
+			String treestr = "";
+			if(this.flag == true){
+				treestr = "("+this.nodename;
+			}	
+			for (TreeNode node:this.children) {
+				
+				treestr += node.toNewSample();
+			}
+			if(this.flag == true){
+				treestr += ")";
+			}
+			
+			return treestr;
+		}
 	}
 }

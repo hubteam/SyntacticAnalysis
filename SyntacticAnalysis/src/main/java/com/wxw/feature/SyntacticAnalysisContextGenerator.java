@@ -1,11 +1,17 @@
 package com.wxw.feature;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.wxw.tree.TreeNode;
 
+/**
+ * 特征生成接口
+ * @author 王馨苇
+ *
+ */
 public interface SyntacticAnalysisContextGenerator {
-
+	
 	/**
 	 * 生成词性标注的上下文特征
 	 * @param index 当前位置
@@ -34,7 +40,7 @@ public interface SyntacticAnalysisContextGenerator {
 	 * @param ac 
 	 * @return
 	 */
-	public String[] getContextForBuild(int index,List<List<TreeNode>> buildAndCheckTree, List<String> actions, Object[] ac);
+	public String[] getContextForBuild(int index,List<TreeNode> buildAndCheckTree, List<String> actions, Object[] ac);
 	
 	/**
 	 * build步的上下文特征
@@ -44,6 +50,6 @@ public interface SyntacticAnalysisContextGenerator {
 	 * @param ac 
 	 * @return
 	 */
-	public String[] getContextForCheck(int index,List<List<TreeNode>> buildAndCheckTree, List<String> actions, Object[] ac);
+	public String[] getContextForCheck(int index,List<TreeNode> buildAndCheckTree, List<String> actions, Object[] ac);
 	
 }

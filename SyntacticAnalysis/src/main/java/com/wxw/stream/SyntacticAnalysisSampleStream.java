@@ -27,7 +27,7 @@ public class SyntacticAnalysisSampleStream extends FilterObjectStream<String,Syn
 	 * 构造
 	 * @param samples 样本流
 	 */
-	protected SyntacticAnalysisSampleStream(ObjectStream<String> samples) {
+	public SyntacticAnalysisSampleStream(ObjectStream<String> samples) {
 		super(samples);
 	}
 

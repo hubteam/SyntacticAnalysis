@@ -1,4 +1,4 @@
-package com.wxw.stream;
+package com.wxw.tree;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,8 +13,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.wxw.tree.PhraseGenerateTree;
-import com.wxw.tree.TreeNode;
+import com.wxw.stream.FileInputStreamFactory;
+import com.wxw.stream.PlainTextByTreeStream;
 
 /**
  * 训练语料中树的初始化处理
@@ -23,42 +23,8 @@ import com.wxw.tree.TreeNode;
  */
 public class TreePreTreatment{
 
-	/**
-	 * 预处理
-	 * @throws UnsupportedOperationException
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 */
-	public static void pretreatment() throws UnsupportedOperationException, FileNotFoundException, IOException{
-		//读取一颗树
-		String filename = "";
-		PlainTextByTreeStream lineStream = null;
-		PhraseGenerateTree pgt = new PhraseGenerateTree();		
-		//创建输出流
-		BufferedWriter bw = new BufferedWriter(new FileWriter("data\\train\\train.txt"));
-//		for (int i = 0; i < 200; i++) {
-//			if(i<100){
-//				filename = "00" + i;
-//			}else{
-//				filename = "0" + i;
-//			}
-			lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File("data\\train\\wsj_0076.mrg")), "utf8");
-			String tree = "";
-			while((tree = lineStream.read()) != null){
-				String treeStr = format(tree);
-				TreeNode node = pgt.generateTree(tree);
-				//对树进行遍历
-				travelTree(node);
-				System.out.println("res:"+node.toString());
-				bw.write(node.toString());
-				bw.newLine();
-			}
-//		}
-		bw.close();
-		lineStream.close();
-	}
 	
-	static HashSet<Character> hsalbdigit = new HashSet<>();
+	private static HashSet<Character> hsalbdigit = new HashSet<>();
 	
 	static{
 		//罗列了半角和全角的情况
@@ -66,6 +32,45 @@ public class TreePreTreatment{
 		for (int i = 0; i < albdigits.length(); i++) {
 			hsalbdigit.add(albdigits.charAt(i));
 		}
+	}
+	
+	/**
+	 * 预处理
+	 * @param path 路径
+	 * @throws UnsupportedOperationException
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static void pretreatment(String path) throws UnsupportedOperationException, FileNotFoundException, IOException{
+		//读取一颗树
+		String filename = "";
+		PlainTextByTreeStream lineStream = null;
+		PhraseGenerateTree pgt = new PhraseGenerateTree();		
+		//创建输出流
+		BufferedWriter bw = new BufferedWriter(new FileWriter("data\\tree\\"+path+".txt"));
+		for (int i = 1; i < 200; i++) {
+			if(i < 10){
+				filename = "000" + i;
+			}else if(i < 100){
+				filename = "00" + i;
+			}else{
+				filename = "0" + i;
+			}
+//			System.out.println(filename);
+			lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File("data\\"+path+"\\wsj_"+filename+".mrg")), "utf8");
+			String tree = "";
+			while((tree = lineStream.read()) != ""){
+				String treeStr = format(tree);
+				TreeNode node = pgt.generateTreeForPreTreatment(tree);
+				//对树进行遍历
+				travelTree(node);				
+				bw.write(node.toNewSample());
+//				System.out.println(node.toNewSample());
+				bw.newLine();
+			}
+		}
+		bw.close();
+		lineStream.close();
 	}
 	
 	//判断是否是数字【中文数字，阿拉伯数字（全角和半角）】
@@ -98,27 +103,38 @@ public class TreePreTreatment{
         return newTree;
 	}
 	
+
+	/**
+	 * 对树进行遍历删除NONE【这里的删除试将属性flag设置为false】
+	 * @param node 一棵树
+	 */
 	public static void travelTree(TreeNode node){
-//		System.out.println(node.toString());
+		if(node.getChildren().size() != 0){
+			for (TreeNode treenode:node.getChildren()) {
+				travelTree(treenode);
+			}
+		}		
 		if(!node.isLeaf()){
 			if(node.getNodeName().contains("NONE")){
 				//该节点的父节点只有空节点一个孩子
 				if(node.getParent().getChildren().size() > 1){
-					node.getParent().getChildren().remove(node.getIndex());
+					//将NONE和NONE的子节点标记位false
+					node.setFlag(false);
+					node.getChildren().get(0).setFlag(false);			
 				}else if(node.getParent().getChildren().size() == 1){
-					int index = node.getParent().getIndex();
-					node = node.getParent().getParent();
-					node.getChildren().remove(index);
-//					travelTree(node);
-//					return;
+					//将NONE和NONE的子节点和父节点标记位false
+					node.setFlag(false);
+					node.getChildren().get(0).setFlag(false);
+					node.getParent().setFlag(false);
 				}
 			}else if(isDigit(node.getNodeName().charAt(node.getNodeName().length()-1))){
-				node.setNewName(node.getNodeName().substring(0, node.getNodeName().length()-2));
+//				node.setNewName(node.getNodeName().substring(0, node.getNodeName().length()-2));
+				if(isDigit(node.getNodeName().charAt(node.getNodeName().length()-2))){
+					node.setNewName(node.getNodeName().substring(0, node.getNodeName().length()-3));
+				}else{
+					node.setNewName(node.getNodeName().substring(0, node.getNodeName().length()-2));
+				}
 			}
 		}
-		for (TreeNode treenode:node.getChildren()) {
-			travelTree(treenode);
-		}
-		
 	}
 }

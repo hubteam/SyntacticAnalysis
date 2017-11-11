@@ -3,7 +3,6 @@ package com.wxw.evaluate;
 import com.wxw.model.SyntacticAnalysisME;
 import com.wxw.model.SyntacticAnalysisMEForPos;
 import com.wxw.stream.SyntacticAnalysisSample;
-import com.wxw.wordpos.evaluate.WordPosMeasure;
 
 import opennlp.tools.util.eval.Evaluator;
 

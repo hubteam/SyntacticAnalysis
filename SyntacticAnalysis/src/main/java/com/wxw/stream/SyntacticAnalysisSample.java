@@ -1,6 +1,7 @@
 package com.wxw.stream;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -116,4 +117,18 @@ public class SyntacticAnalysisSample {
 	public String[][] getAdditionalContext(){
 		return this.addtionalContext;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+            return true;
+        } else if (obj instanceof SyntacticAnalysisSample) {
+        	SyntacticAnalysisSample a = (SyntacticAnalysisSample) obj;
+            return Arrays.equals(getActions().stream().toArray(), a.getActions().stream().toArray());
+        } else {
+            return false;
+        }
+	}
+	
+	
 }

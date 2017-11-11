@@ -837,4 +837,69 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 
 		return getContextForCheck(index,buildAndCheckTree,actions);
 	}
+
+	/**
+	 * 用于训练句法树模型的特征
+	 */
+	@Override
+	public String toString() {
+		return "SyntacticAnalysisContextGeneratorConf{" + "chunkandpostag0Set=" + chunkandpostag0Set + 
+                ", chunkandpostag_1Set=" + chunkandpostag_1Set + ", chunkandpostag_2Set=" + chunkandpostag_2Set + 
+                ", chunkandpostag1Set=" + chunkandpostag1Set + ", chunkandpostag2Set=" + chunkandpostag2Set +  
+                ", chunkandpostag0*Set=" + chunkandpostag0ASet + 
+                ", chunkandpostag_1*Set=" + chunkandpostag_1ASet + ", chunkandpostag_2*Set=" + chunkandpostag_2ASet + 
+                ", chunkandpostag1*Set=" + chunkandpostag1ASet + ", chunkandpostag2*Set=" + chunkandpostag2ASet +  
+                ", chunkandpostag_10Set=" + chunkandpostag_10Set + ", chunkandpostag_1*0Set=" + chunkandpostag_1A0Set +  
+                ", chunkandpostag_1*0ASet=" + chunkandpostag_1A0ASet + ", chunkandpostag_10*Set=" + chunkandpostag_10ASet + 
+                ", chunkandpostag01Set=" + chunkandpostag01Set + ", chunkandpostag0*1Set=" + chunkandpostag0A1Set +  
+                ", chunkandpostag0*1ASet=" + chunkandpostag0A1ASet + ", chunkandpostag01*Set=" + chunkandpostag01ASet +
+                ", chunkdefaultSet=" + chunkdefaultSet + 
+                ", cons0Set=" + cons0Set + 
+                ", cons_1Set=" + cons_1Set + ", cons_2Set=" + cons_2Set + 
+                ", cons1Set=" + cons1Set + ", cons2Set=" + cons2Set +  
+                ", cons0*Set=" + cons0ASet + 
+                ", cons_1*Set=" + cons_1ASet + ", cons_2*Set=" + cons_2ASet + 
+                ", cons1*Set=" + cons1ASet + ", cons2*Set=" + cons2ASet + 
+                ", cons_10Set=" + cons_10Set + ", cons_1*0Set=" + cons_1A0Set +  
+                ", cons_1*0*Set=" + cons_1A0ASet + ", cons_10*Set=" + cons_10ASet + 
+                ", cons01Set=" + cons01Set + ", cons0*1Set=" + cons0A1Set +  
+                ", cons0*1*Set=" + cons0A1ASet + ", cons01*Set=" + cons01ASet + 
+                ", cons_2_10Set=" + cons_2_10Set + 
+                ", cons_2*_1*0*Set=" + cons_2A_1A0ASet + ", cons_2*_1*0Set=" + cons_2A_1A0Set + 
+                ", cons_2*_10Set=" + cons_2A_10Set + ", cons_2_1*0Set=" + cons_2_1A0Set +  
+                ", cons012Set=" + cons012Set + 
+                ", cons0*1*2*Set=" + cons0A1A2ASet + ", cons01*2*Set=" + cons01A2ASet + 
+                ", cons01*2Set=" + cons01A2Set + ", cons012*Set=" + cons012ASet +  
+                ", cons_101Set=" + cons_101Set + 
+                ", cons_1*0*1*Set=" + cons_1A0A1ASet + ", cons_1*01*Set=" + cons_1A01ASet + 
+                ", cons_101*Set=" + cons_101ASet + ", cons_1*01Set=" + cons_1A01Set +
+                ", punctuationSet=" + punctuationSet + ", builddefaultSet=" + builddefaultSet +
+                ", checkcons_lastSet=" + checkcons_lastSet + ", checkcons_last*Set=" + checkcons_lastASet + 
+                ", checkcons_beginSet=" + checkcons_beginSet + ", checkcons_begin*Set=" + checkcons_beginASet +  
+                ", checkcons_ilastSet=" + checkcons_ilastSet + ", checkcons_i*lastSet=" + checkcons_iAlastSet + 
+                ", checkcons_ilast*Set=" + checkcons_ilastASet + ", checkcons_i*last*Set=" + checkcons_iAlastASet + 
+                ", productionSet=" + productionSet + 
+                ", surround1Set=" + surround1Set + ", surround2Set=" + surround2Set + 
+                ", surround_1Set=" + surround_1Set + ", surround_2Set=" + surround_2Set + 
+                ", surround1*Set=" + surround1ASet + ", surround2*Set=" + surround2ASet + 
+                ", surround_1*Set=" + surround_1ASet + ", surround_2*Set=" + surround_2ASet + 
+                ", checkdefaultSet=" + checkdefaultSet + 
+                '}';
+	}	
+	
+	/**
+	 * 用于训练词性标记模型的特征
+	 * @return
+	 */
+	public String toPosString() {
+		return "SyntacticAnalysisContextGeneratorConf{" + "w_2Set=" + w_2Set + ", w_1Set=" + w_1Set + 
+                ", w0Set=" + w0Set + ", w1Set=" + w1Set + ", w2Set=" + w2Set + 
+                ", t_1Set=" + t_1Set + ", t_2t_1Set=" + t_2t_1Set + 
+                ", prefix1Set=" + prefix1Set + ", prefix2Set=" + prefix2Set +  
+                ", prefix3Set=" + prefix3Set + ", prefix4Set=" + prefix4Set + 
+                ", suffix1Set=" + suffix1Set + ", suffix2Set=" + suffix2Set +  
+                ", suffix3Set=" + suffix3Set + ", suffix4Set=" + suffix4Set + 
+                ", numberSet=" + numberSet + ", uppercaseSet=" + uppercaseSet +  ", hypenSet=" + hypenSet + 
+                '}';
+	}	
 }

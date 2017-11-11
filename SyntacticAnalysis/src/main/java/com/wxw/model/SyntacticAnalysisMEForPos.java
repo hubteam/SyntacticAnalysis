@@ -12,17 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
-import com.wxw.sequence.DefaultSyntacticAnalysisSequenceValidator;
-import com.wxw.sequence.SyntacticAnalysisBeamSearch;
-import com.wxw.sequence.SyntacticAnalysisSequenceClassificationModel;
-import com.wxw.sequence.SyntacticAnalysisSequenceValidator;
+import com.wxw.sequence.DefaultSyntacticAnalysisSequenceValidatorForPos;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.SyntacticAnalysisSample;
-import com.wxw.stream.SyntacticAnalysisSampleEvent;
+import com.wxw.stream.SyntacticAnalysisSampleEventForPos;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
-import com.wxw.tree.PhraseGenerateTree;
-import com.wxw.tree.TreeNode;
-import com.wxw.tree.TreeToActions;
 
 import opennlp.tools.ml.BeamSearch;
 import opennlp.tools.ml.EventTrainer;
@@ -37,32 +31,32 @@ import opennlp.tools.ml.model.SequenceClassificationModel;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.PlainTextByLineStream;
 import opennlp.tools.util.Sequence;
+import opennlp.tools.util.SequenceValidator;
 import opennlp.tools.util.TrainingParameters;
 
 /**
- * 训练模型
+ * 训练词性标注模型
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisME {
-
+public class SyntacticAnalysisMEForPos {
 	public static final int DEFAULT_BEAM_SIZE = 20;
 	private SyntacticAnalysisContextGenerator contextGenerator;
 	private int size;
 	private Sequence bestSequence;
-	private SyntacticAnalysisSequenceClassificationModel model;
-	private SyntacticAnalysisModel modelPackage;
+	private SequenceClassificationModel<String> model;
+	private SyntacticAnalysisModelForPos modelPackage;
 	private List<String> characters = new ArrayList<>();
 	private List<String> tags = new ArrayList<>();
 
-    private SyntacticAnalysisSequenceValidator sequenceValidator;
+    private SequenceValidator<String> sequenceValidator;
 	
 	/**
 	 * 构造函数，初始化工作
 	 * @param model 模型
 	 * @param contextGen 特征
 	 */
-	public SyntacticAnalysisME(SyntacticAnalysisModel model, SyntacticAnalysisContextGenerator contextGen) {
+	public SyntacticAnalysisMEForPos(SyntacticAnalysisModelForPos model, SyntacticAnalysisContextGenerator contextGen) {
 		init(model , contextGen);
 	}
     /**
@@ -70,8 +64,8 @@ public class SyntacticAnalysisME {
      * @param model 模型
      * @param contextGen 特征
      */
-	private void init(SyntacticAnalysisModel model, SyntacticAnalysisContextGenerator contextGen) {
-		int beamSize = SyntacticAnalysisME.DEFAULT_BEAM_SIZE;
+	private void init(SyntacticAnalysisModelForPos model, SyntacticAnalysisContextGenerator contextGen) {
+		int beamSize = SyntacticAnalysisMEForPos.DEFAULT_BEAM_SIZE;
 
         String beamSizeString = model.getManifestProperty(BeamSearch.BEAM_SIZE_PARAMETER);
 
@@ -83,12 +77,12 @@ public class SyntacticAnalysisME {
 
         contextGenerator = contextGen;
         size = beamSize;
-        sequenceValidator = new DefaultSyntacticAnalysisSequenceValidator();
-        if (model.getTreeSequenceModel() != null) {
-            this.model = model.getTreeSequenceModel();
+        sequenceValidator = new DefaultSyntacticAnalysisSequenceValidatorForPos();
+        if (model.getWordPosSequenceModel() != null) {
+            this.model = model.getWordPosSequenceModel();
         } else {
-            this.model = new SyntacticAnalysisBeamSearch(beamSize,
-                    model.getTreeModel(), 0);
+            this.model = new BeamSearch<String>(beamSize,
+                    model.getWordPosModel(), 0);
         }
 		
 	}
@@ -103,13 +97,13 @@ public class SyntacticAnalysisME {
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	public static SyntacticAnalysisModel train(File file, TrainingParameters params, SyntacticAnalysisContextGenerator contextGen,
+	public static SyntacticAnalysisModelForPos train(File file, TrainingParameters params, SyntacticAnalysisContextGenerator contextGen,
 			String encoding){
-		SyntacticAnalysisModel model = null;
+		SyntacticAnalysisModelForPos model = null;
 		try {
 			ObjectStream<String> lineStream = new PlainTextByLineStream(new FileInputStreamFactory(file), encoding);
 			ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
-			model = SyntacticAnalysisME.train("zh", sampleStream, params, contextGen);
+			model = SyntacticAnalysisMEForPos.train("zh", sampleStream, params, contextGen);
 			return model;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -129,10 +123,10 @@ public class SyntacticAnalysisME {
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	public static SyntacticAnalysisModel train(String languageCode, ObjectStream<SyntacticAnalysisSample> sampleStream, TrainingParameters params,
+	public static SyntacticAnalysisModelForPos train(String languageCode, ObjectStream<SyntacticAnalysisSample> sampleStream, TrainingParameters params,
 			SyntacticAnalysisContextGenerator contextGen) throws IOException {
 		String beamSizeString = params.getSettings().get(BeamSearch.BEAM_SIZE_PARAMETER);
-		int beamSize = SyntacticAnalysisME.DEFAULT_BEAM_SIZE;
+		int beamSize = SyntacticAnalysisMEForPos.DEFAULT_BEAM_SIZE;
         if (beamSizeString != null) {
             beamSize = Integer.parseInt(beamSizeString);
         }
@@ -143,16 +137,16 @@ public class SyntacticAnalysisME {
         SequenceClassificationModel<String> seqPosModel = null;
         if (TrainerType.EVENT_MODEL_TRAINER.equals(trainerType)) {
         	//sampleStream为PhraseAnalysisSampleStream对象
-            ObjectStream<Event> es = new SyntacticAnalysisSampleEvent(sampleStream, contextGen);
+            ObjectStream<Event> es = new SyntacticAnalysisSampleEventForPos(sampleStream, contextGen);
             EventTrainer trainer = TrainerFactory.getEventTrainer(params.getSettings(),
                     manifestInfoEntries);
             posModel = trainer.train(es);                       
         }
 
         if (posModel != null) {
-            return new SyntacticAnalysisModel(languageCode, posModel, beamSize, manifestInfoEntries);
+            return new SyntacticAnalysisModelForPos(languageCode, posModel, beamSize, manifestInfoEntries);
         } else {
-            return new SyntacticAnalysisModel(languageCode, seqPosModel, manifestInfoEntries);
+            return new SyntacticAnalysisModelForPos(languageCode, seqPosModel, manifestInfoEntries);
         }
 	}
 
@@ -166,20 +160,20 @@ public class SyntacticAnalysisME {
 	 * @param encoding 编码方式
 	 * @return
 	 */
-	public static SyntacticAnalysisModel train(File file, File modelbinaryFile, File modeltxtFile, TrainingParameters params,
+	public static SyntacticAnalysisModelForPos train(File file, File modelbinaryFile, File modeltxtFile, TrainingParameters params,
 			SyntacticAnalysisContextGenerator contextGen, String encoding) {
 		OutputStream modelOut = null;
 		PlainTextGISModelWriter modelWriter = null;
-		SyntacticAnalysisModel model = null;
+		SyntacticAnalysisModelForPos model = null;
 		try {
 			ObjectStream<String> lineStream = new PlainTextByLineStream(new FileInputStreamFactory(file), encoding);
 			ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
-			model = SyntacticAnalysisME.train("zh", sampleStream, params, contextGen);
+			model = SyntacticAnalysisMEForPos.train("zh", sampleStream, params, contextGen);
 			 //模型的持久化，写出的为二进制文件
             modelOut = new BufferedOutputStream(new FileOutputStream(modelbinaryFile));           
             model.serialize(modelOut);
             //模型的写出，文本文件
-            modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getTreeModel(), modeltxtFile);
+            modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getWordPosModel(), modeltxtFile);
             modelWriter.persist();
             return model;
 		} catch (FileNotFoundException e) {
@@ -213,14 +207,14 @@ public class SyntacticAnalysisME {
 	 * @param encoding 编码方式
 	 * @return
 	 */
-	public static SyntacticAnalysisModel readModel(File modelFile, TrainingParameters params, SyntacticAnalysisContextGenerator contextGen,
+	public static SyntacticAnalysisModelForPos readModel(File modelFile, TrainingParameters params, SyntacticAnalysisContextGenerator contextGen,
 			String encoding) {
 		PlainTextGISModelReader modelReader = null;
 		AbstractModel abModel = null;
-		SyntacticAnalysisModel model = null;
+		SyntacticAnalysisModelForPos model = null;
 		String beamSizeString = params.getSettings().get(BeamSearch.BEAM_SIZE_PARAMETER);
 	      
-        int beamSize = SyntacticAnalysisME.DEFAULT_BEAM_SIZE;
+        int beamSize = SyntacticAnalysisMEForPos.DEFAULT_BEAM_SIZE;
         if (beamSizeString != null) {
             beamSize = Integer.parseInt(beamSizeString);
         }
@@ -229,7 +223,7 @@ public class SyntacticAnalysisME {
 			Map<String, String> manifestInfoEntries = new HashMap<String, String>();
 			modelReader = new PlainTextGISModelReader(modelFile);			
 			abModel = modelReader.getModel();
-			model =  new SyntacticAnalysisModel(encoding, abModel, beamSize,manifestInfoEntries);
+			model =  new SyntacticAnalysisModelForPos(encoding, abModel, beamSize,manifestInfoEntries);
 	
 			System.out.println("读取模型成功");
             return model;
@@ -244,38 +238,5 @@ public class SyntacticAnalysisME {
 			e.printStackTrace();
 		} 
 		return null;
-	}
-	
-	
-	/**
-	 * 统计词语出现的个数
-	 * @param file 训练语料
-	 * @param encoding 编码
-	 * @return
-	 * @throws IOException
-	 * @throws CloneNotSupportedException 
-	 */
-	public static HashMap<String,Integer> buildDictionary(File file, String encoding) throws IOException, CloneNotSupportedException{
-		HashMap<String,Integer> dict = new HashMap<String,Integer>();
-		PlainTextByLineStream lineStream = new PlainTextByLineStream(new FileInputStreamFactory(file), "utf8");
-		PhraseGenerateTree pgt = new PhraseGenerateTree();
-		TreeToActions tta = new TreeToActions();
-		String txt = "";
-		while((txt = lineStream.read())!= null){
-			TreeNode tree = pgt.generateTree(txt);
-			SyntacticAnalysisSample sample = tta.treeToAction(tree);
-			List<String> words = sample.getWords();
-			for (int i = 0; i < words.size(); i++) {
-				if(dict.containsKey(words.get(i))){
-					Integer count = dict.get(words.get(i));
-					count++;
-					dict.put(words.get(i), count);
-				}else{
-					dict.put(words.get(i), 1);
-				}
-			}
-		}
-		lineStream.close();
-		return dict;
 	}
 }

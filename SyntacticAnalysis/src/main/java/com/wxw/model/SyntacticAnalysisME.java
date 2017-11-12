@@ -52,8 +52,6 @@ public class SyntacticAnalysisME {
 	private Sequence bestSequence;
 	private SyntacticAnalysisSequenceClassificationModel model;
 	private SyntacticAnalysisModel modelPackage;
-	private List<String> characters = new ArrayList<>();
-	private List<String> tags = new ArrayList<>();
 
     private SyntacticAnalysisSequenceValidator sequenceValidator;
 	

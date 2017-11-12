@@ -62,7 +62,7 @@ public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<Syntactic
 		
 		//chunk
 		for (int i = words.size(); i < 2*words.size(); i++) {		
-			String[] context = generator.getContextForChunk(i,chunkTree, actions, ac);
+			String[] context = generator.getContextForChunk(i-words.size(),chunkTree, actions, ac);
             events.add(new Event(actions.get(i), context));
 		}
 		//buildAndCheck
@@ -83,13 +83,15 @@ public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<Syntactic
             
             if(actions.get(i+1).equals("yes")){
             	j = j-count;
+            	count = 0;
+            	String[] checkContext = generator.getContextForCheck(j,buildAndCheckTree.get(i+1-2*words.size()), actions, ac);
+                events.add(new Event(actions.get(i+1), checkContext));
             }else if(actions.get(i+1).equals("no")){            	
-                j++;
-            }
-            String[] checkContext = generator.getContextForCheck(j,buildAndCheckTree.get(i+1-2*words.size()), actions, ac);
-            events.add(new Event(actions.get(i+1), checkContext));
+            	String[] checkContext = generator.getContextForCheck(j,buildAndCheckTree.get(i+1-2*words.size()), actions, ac);
+                events.add(new Event(actions.get(i+1), checkContext));
+            	j++;
+            }  
 		}
 		return events;
 	}
-
 }

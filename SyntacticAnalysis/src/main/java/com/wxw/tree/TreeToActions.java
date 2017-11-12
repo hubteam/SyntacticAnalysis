@@ -285,11 +285,12 @@ public class TreeToActions {
 			}
 		}
 //		for (List<TreeNode> treeNode : buildAndCheckTree) {
-//		for (TreeNode treeNode2 : treeNode) {
-//			System.out.println(treeNode2);
+//			for (TreeNode treeNode2 : treeNode) {
+//				System.out.println(treeNode2);
+//		
+//			}		
+//			System.out.println();
 //		}
-//		System.out.println();
-//	}
 	}
 	
 	/**
@@ -303,47 +304,7 @@ public class TreeToActions {
 		getActionBUILDandCHECK(tree, combine(chunkTree));
 		return new SyntacticAnalysisSample(posTree,chunkTree,buildAndCheckTree,actions);
 	}
-//	
-//	/**
-//	 * 得到第一步后的子树
-//	 * @return
-//	 */
-//	public List<TreeNode> getPos(){
-//		return pos;
-//	}
-//	
-//	/**
-//	 * 得到第2步后的子树
-//	 * @return
-//	 */
-//	public List<TreeNode> getChunk(){
-//		return chunk;
-//	}
-//	
-//	/**
-//	 * 得到第3步后的子树
-//	 * @return
-//	 */
-//	public List<List<TreeNode>> getBulidAndCheck(){
-//		return buildAndCheckTree;
-//	}
-//	
-//	/**
-//	 * 得到动作序列
-//	 * @return
-//	 */
-//	public List<String> getActions(){
-//		return actions;
-//	}
-//	
-//	/**
-//	 * 得到当前的句子
-//	 * @return
-//	 */
-//	public List<String> getWords(){
-//		return words;
-//	}
-//	
+	
 //	@org.junit.Test
 //	public void test() throws CloneNotSupportedException{
 //		String treeStr = "(S(NP(PRP I))(VP(VP(VBD saw)(NP(DT the)(NN man)))(PP(IN with)(NP(DT the)(NN telescope)))))";

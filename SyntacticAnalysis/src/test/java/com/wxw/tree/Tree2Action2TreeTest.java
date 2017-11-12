@@ -27,7 +27,6 @@ public class Tree2Action2TreeTest extends TestCase{
 	public void testLoadTree() throws FileNotFoundException, IOException, CloneNotSupportedException{
 		PlainTextByTreeStream lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File("data\\train\\wsj_0076.mrg")), "utf8");
 		String txt = lineStream.read();
-//		System.out.println(txt);
 
 		PhraseGenerateTree pgt = new PhraseGenerateTree();
 		TreeNode tree = pgt.generateTree(txt);

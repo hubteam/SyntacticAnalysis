@@ -288,8 +288,6 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
             }
         }
         List<String> features = new ArrayList<String>();
-        FeatureForPosTools tools = new FeatureForPosTools();
-        HashMap<String,Integer> dict = tools.getDict();
       //这里特征有两种，当前词的个数小于，与大于等于5
         //下面这部分特征是共有的
         if(w_1 != null){
@@ -323,11 +321,11 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
         	}
         }
         //下面部分的特征根据词语出现的次数进行选择
-        if(dict.get(w0) >= 5){
+        if(FeatureForPosTools.overFive(w0)){
         	if(w0Set){
         		features.add("w0="+w0);
         	}
-        }else if(dict.get(w0) < 5){
+        }else{
         	if(prefix1Set){
         		features.add("prefix1="+w0.charAt(0));
         	}

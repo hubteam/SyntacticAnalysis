@@ -46,8 +46,6 @@ public class SyntacticAnalysisMEForPos {
 	private Sequence bestSequence;
 	private SequenceClassificationModel<String> model;
 	private SyntacticAnalysisModelForPos modelPackage;
-	private List<String> characters = new ArrayList<>();
-	private List<String> tags = new ArrayList<>();
 
     private SequenceValidator<String> sequenceValidator;
 	

@@ -10,7 +10,7 @@ import java.util.HashSet;
  */
 public class FeatureForPosTools {
 
-	private HashMap<String,Integer> dict;
+	private static HashMap<String,Integer> dict;
 	
 	static HashSet<Character> hsalbdigit = new HashSet<>();
 	
@@ -19,13 +19,22 @@ public class FeatureForPosTools {
 	}
 	
 	public FeatureForPosTools(HashMap<String,Integer> dict){
-		this.dict = dict;
+		FeatureForPosTools.dict = dict;
 	}
+	
 	static{
 		//罗列了半角和全角的情况
 		String albdigits = "０１２３４５６７８９0123456789";
 		for (int i = 0; i < albdigits.length(); i++) {
 			hsalbdigit.add(albdigits.charAt(i));
+		}
+	}
+	
+	public static boolean overFive(String w){
+		if(dict.get(w) >= 5 ){
+			return true;
+		}else{
+			return false;
 		}
 	}
 	

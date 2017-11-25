@@ -3,6 +3,7 @@ package com.wxw.tree;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
@@ -21,8 +22,10 @@ public class TreePreTreatmentTest extends TestCase{
 		PlainTextByTreeStream lineStream1 = null;
 		PhraseGenerateTree pgt = new PhraseGenerateTree();	
 		TreePreTreatment tpt = new TreePreTreatment();
-		lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File("data\\pretreatment\\wsj_0015.mrg")), "utf8");
-		lineStream1 = new PlainTextByTreeStream(new FileInputStreamFactory(new File("data\\pretreatment\\wsj_0015new.mrg")), "utf8");
+		URL url1 = TreePreTreatmentTest.class.getClassLoader().getResource("com/wxw/test/wsj_0015.mrg");
+		URL url2 = TreePreTreatmentTest.class.getClassLoader().getResource("com/wxw/test/wsj_0015new.mrg");
+		lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(url1.getFile())), "utf8");
+		lineStream1 = new PlainTextByTreeStream(new FileInputStreamFactory(new File(url2.getFile())), "utf8");
 		String tree = "";
 		String tree1 = "";
 		while((tree = lineStream.read()) != "" && (tree1 = lineStream1.read())!=""){
@@ -30,7 +33,9 @@ public class TreePreTreatmentTest extends TestCase{
 			TreeNode node = pgt.generateTreeForPreTreatment(tree);
 			TreeNode node1 = pgt.generateTreeForPreTreatment(tree1);
 			//对树进行遍历
-			tpt.travelTree(node);				
+			tpt.travelTree(node);
+			System.out.println(node.toString());
+			System.out.println(node1.toString());
 			assertEquals(node.toNewSample(), node1.toNewSample());
 		}	
 		lineStream.close();

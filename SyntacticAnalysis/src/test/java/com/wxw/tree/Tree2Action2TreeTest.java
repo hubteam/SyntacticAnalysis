@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.List;
 
 import com.wxw.stream.FileInputStreamFactory;
@@ -29,34 +30,14 @@ public class Tree2Action2TreeTest extends TestCase{
 	 * @throws CloneNotSupportedException
 	 */
 	public void testLoadTree() throws FileNotFoundException, IOException, CloneNotSupportedException{
-		InputStream is = Tree2Action2TreeTest.class.getClassLoader().getResourceAsStream("/data/train/wsj_0076.mrg");
-//		PlainTextByTreeStream lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File("data\\train\\wsj_0076.mrg")), "utf8");
-//		String txt = lineStream.read();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is,"utf8"));
+		URL is = Tree2Action2TreeTest.class.getClassLoader().getResource("com/wxw/test/wsj_0076.mrg");
+		PlainTextByTreeStream lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(is.getFile())), "utf8");
+		String txt = lineStream.read();
+//		BufferedReader reader = new BufferedReader(new InputStreamReader(is,"utf8"));
 		// 一次读取n行,jie
-		String line = "";
-		String readContent = "";
-		int left = 0;
-		int right = 0;
-		while((line = reader.readLine()) != null){
-			if(line != "" && !line.equals("")){
-				line = line.replaceAll("\n","");
-				char[] c = line.trim().toCharArray();
-				readContent += line.trim();
-				for (int i = 0; i < c.length; i++) {
-					if(c[i] == '('){
-						left++;
-					}else if(c[i] == ')'){
-						right++;
-					}
-				}
-				if(left == right){
-					break;
-				}
-			}
-		}
+		
 		PhraseGenerateTree pgt = new PhraseGenerateTree();
-		TreeNode tree = pgt.generateTree(readContent);
+		TreeNode tree = pgt.generateTree(txt);
 
 		TreeToActions tta = new TreeToActions();
 		SyntacticAnalysisSample sample = tta.treeToAction(tree);

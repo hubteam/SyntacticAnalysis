@@ -63,7 +63,8 @@ public class TreePreTreatment{
 				String treeStr = format(tree);
 				TreeNode node = pgt.generateTreeForPreTreatment(tree);
 				//对树进行遍历
-				travelTree(node);				
+				travelTree(node);	
+//			    bw.write(""+i);
 				bw.write(node.toNewSample());
 //				System.out.println(node.toNewSample());
 				bw.newLine();
@@ -120,12 +121,28 @@ public class TreePreTreatment{
 				if(node.getParent().getChildren().size() > 1){
 					//将NONE和NONE的子节点标记位false
 					node.setFlag(false);
-					node.getChildren().get(0).setFlag(false);			
+					node.getChildren().get(0).setFlag(false);	
+					//(SBAR(-NONE- 0)(S(-NONE- *T*-1)))
+					if(node.getParent().getChildren().size() == 2){
+						if(node.getParent().getChildren().get(1).getChildren().size() == 1){
+							if(node.getParent().getChildren().get(1).getChildren().get(0).getNodeName().contains("NONE")){
+								node.getParent().setFlag(false);
+								node.getParent().getChildren().get(1).setFlag(false);
+								node.getParent().getChildren().get(1).getChildren().get(0).setFlag(false);
+								node.getParent().getChildren().get(1).getChildren().get(0).getChildren().get(0).setFlag(false);
+								
+							}
+						}
+					}
 				}else if(node.getParent().getChildren().size() == 1){
 					//将NONE和NONE的子节点和父节点标记位false
 					node.setFlag(false);
 					node.getChildren().get(0).setFlag(false);
 					node.getParent().setFlag(false);
+				}
+			}else if(node.getNodeName().contains("-")){
+				if(!node.getNodeName().equals("-LRB-") && !(node.getNodeName().equals("-RRB-"))){
+					node.setNewName(node.getNodeName().split("-")[0]);
 				}
 			}else if(isDigit(node.getNodeName().charAt(node.getNodeName().length()-1))){
 //				node.setNewName(node.getNodeName().substring(0, node.getNodeName().length()-2));

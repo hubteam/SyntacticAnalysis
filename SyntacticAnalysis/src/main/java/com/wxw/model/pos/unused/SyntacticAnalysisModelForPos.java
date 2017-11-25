@@ -1,4 +1,4 @@
-package com.wxw.model;
+package com.wxw.model.pos.unused;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import opennlp.tools.ml.model.SequenceClassificationModel;
 import opennlp.tools.util.model.BaseModel;
 
 /**
- * 词性标注模型信息类
+ * 自己写的英文词性标注模型信息类
  * @author 王馨苇
  *
  */

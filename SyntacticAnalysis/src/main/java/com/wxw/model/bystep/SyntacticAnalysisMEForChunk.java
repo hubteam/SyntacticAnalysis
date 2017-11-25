@@ -1,4 +1,4 @@
-package com.wxw.model;
+package com.wxw.model.bystep;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -15,16 +15,15 @@ import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.sequence.DefaultSyntacticAnalysisSequenceValidator;
 import com.wxw.sequence.SyntacticAnalysisBeamSearch;
 import com.wxw.sequence.SyntacticAnalysisSequenceClassificationModel;
+import com.wxw.sequence.SyntacticAnalysisSequenceForChunk;
 import com.wxw.sequence.SyntacticAnalysisSequenceValidator;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.SyntacticAnalysisSample;
-import com.wxw.stream.SyntacticAnalysisSampleEvent;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
 import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
 import com.wxw.tree.TreeToActions;
 
-import opennlp.tools.ml.BeamSearch;
 import opennlp.tools.ml.EventTrainer;
 import opennlp.tools.ml.TrainerFactory;
 import opennlp.tools.ml.TrainerFactory.TrainerType;
@@ -38,20 +37,19 @@ import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.PlainTextByLineStream;
 import opennlp.tools.util.Sequence;
 import opennlp.tools.util.TrainingParameters;
-
 /**
- * 训练模型
+ * 分步骤训练chunk模型
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisME {
+public class SyntacticAnalysisMEForChunk {
 
-	public static final int DEFAULT_BEAM_SIZE = 20;
+	public static final int DEFAULT_BEAM_SIZE = 10;
 	private SyntacticAnalysisContextGenerator contextGenerator;
 	private int size;
 	private Sequence bestSequence;
 	private SyntacticAnalysisSequenceClassificationModel model;
-	private SyntacticAnalysisModel modelPackage;
+	private SyntacticAnalysisModelForChunk modelPackage;
 
     private SyntacticAnalysisSequenceValidator sequenceValidator;
 	
@@ -60,7 +58,7 @@ public class SyntacticAnalysisME {
 	 * @param model 模型
 	 * @param contextGen 特征
 	 */
-	public SyntacticAnalysisME(SyntacticAnalysisModel model, SyntacticAnalysisContextGenerator contextGen) {
+	public SyntacticAnalysisMEForChunk(SyntacticAnalysisModelForChunk model, SyntacticAnalysisContextGenerator contextGen) {
 		init(model , contextGen);
 	}
     /**
@@ -68,10 +66,10 @@ public class SyntacticAnalysisME {
      * @param model 模型
      * @param contextGen 特征
      */
-	private void init(SyntacticAnalysisModel model, SyntacticAnalysisContextGenerator contextGen) {
-		int beamSize = SyntacticAnalysisME.DEFAULT_BEAM_SIZE;
+	private void init(SyntacticAnalysisModelForChunk model, SyntacticAnalysisContextGenerator contextGen) {
+		int beamSize = SyntacticAnalysisMEForChunk.DEFAULT_BEAM_SIZE;
 
-        String beamSizeString = model.getManifestProperty(BeamSearch.BEAM_SIZE_PARAMETER);
+        String beamSizeString = model.getManifestProperty(SyntacticAnalysisBeamSearch.BEAM_SIZE_PARAMETER);
 
         if (beamSizeString != null) {
             beamSize = Integer.parseInt(beamSizeString);
@@ -82,11 +80,11 @@ public class SyntacticAnalysisME {
         contextGenerator = contextGen;
         size = beamSize;
         sequenceValidator = new DefaultSyntacticAnalysisSequenceValidator();
-        if (model.getTreeSequenceModel() != null) {
-            this.model = model.getTreeSequenceModel();
+        if (model.getChunkTreeSequenceModel() != null) {
+            this.model = model.getChunkTreeSequenceModel();
         } else {
             this.model = new SyntacticAnalysisBeamSearch(beamSize,
-                    model.getTreeModel(), 0);
+                    model.getChunkTreeModel(), 0);
         }
 		
 	}
@@ -101,13 +99,13 @@ public class SyntacticAnalysisME {
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	public static SyntacticAnalysisModel train(File file, TrainingParameters params, SyntacticAnalysisContextGenerator contextGen,
+	public static SyntacticAnalysisModelForChunk train(File file, TrainingParameters params, SyntacticAnalysisContextGenerator contextGen,
 			String encoding){
-		SyntacticAnalysisModel model = null;
+		SyntacticAnalysisModelForChunk model = null;
 		try {
 			ObjectStream<String> lineStream = new PlainTextByLineStream(new FileInputStreamFactory(file), encoding);
 			ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
-			model = SyntacticAnalysisME.train("zh", sampleStream, params, contextGen);
+			model = SyntacticAnalysisMEForChunk.train("zh", sampleStream, params, contextGen);
 			return model;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -127,10 +125,10 @@ public class SyntacticAnalysisME {
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	public static SyntacticAnalysisModel train(String languageCode, ObjectStream<SyntacticAnalysisSample> sampleStream, TrainingParameters params,
+	public static SyntacticAnalysisModelForChunk train(String languageCode, ObjectStream<SyntacticAnalysisSample> sampleStream, TrainingParameters params,
 			SyntacticAnalysisContextGenerator contextGen) throws IOException {
-		String beamSizeString = params.getSettings().get(BeamSearch.BEAM_SIZE_PARAMETER);
-		int beamSize = SyntacticAnalysisME.DEFAULT_BEAM_SIZE;
+		String beamSizeString = params.getSettings().get(SyntacticAnalysisBeamSearch.BEAM_SIZE_PARAMETER);
+		int beamSize = SyntacticAnalysisMEForChunk.DEFAULT_BEAM_SIZE;
         if (beamSizeString != null) {
             beamSize = Integer.parseInt(beamSizeString);
         }
@@ -141,16 +139,16 @@ public class SyntacticAnalysisME {
         SequenceClassificationModel<String> seqPosModel = null;
         if (TrainerType.EVENT_MODEL_TRAINER.equals(trainerType)) {
         	//sampleStream为PhraseAnalysisSampleStream对象
-            ObjectStream<Event> es = new SyntacticAnalysisSampleEvent(sampleStream, contextGen);
+            ObjectStream<Event> es = new SyntacticAnalysisSampleEventForChunk(sampleStream, contextGen);
             EventTrainer trainer = TrainerFactory.getEventTrainer(params.getSettings(),
                     manifestInfoEntries);
             posModel = trainer.train(es);                       
         }
 
         if (posModel != null) {
-            return new SyntacticAnalysisModel(languageCode, posModel, beamSize, manifestInfoEntries);
+            return new SyntacticAnalysisModelForChunk(languageCode, posModel, beamSize, manifestInfoEntries);
         } else {
-            return new SyntacticAnalysisModel(languageCode, seqPosModel, manifestInfoEntries);
+            return new SyntacticAnalysisModelForChunk(languageCode, seqPosModel, manifestInfoEntries);
         }
 	}
 
@@ -164,20 +162,20 @@ public class SyntacticAnalysisME {
 	 * @param encoding 编码方式
 	 * @return
 	 */
-	public static SyntacticAnalysisModel train(File file, File modelbinaryFile, File modeltxtFile, TrainingParameters params,
+	public static SyntacticAnalysisModelForChunk train(File file, File modelbinaryFile, File modeltxtFile, TrainingParameters params,
 			SyntacticAnalysisContextGenerator contextGen, String encoding) {
 		OutputStream modelOut = null;
 		PlainTextGISModelWriter modelWriter = null;
-		SyntacticAnalysisModel model = null;
+		SyntacticAnalysisModelForChunk model = null;
 		try {
 			ObjectStream<String> lineStream = new PlainTextByLineStream(new FileInputStreamFactory(file), encoding);
 			ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
-			model = SyntacticAnalysisME.train("zh", sampleStream, params, contextGen);
+			model = SyntacticAnalysisMEForChunk.train("zh", sampleStream, params, contextGen);
 			 //模型的持久化，写出的为二进制文件
             modelOut = new BufferedOutputStream(new FileOutputStream(modelbinaryFile));           
             model.serialize(modelOut);
             //模型的写出，文本文件
-            modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getTreeModel(), modeltxtFile);
+            modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getChunkTreeModel(), modeltxtFile);
             modelWriter.persist();
             return model;
 		} catch (FileNotFoundException e) {
@@ -211,14 +209,14 @@ public class SyntacticAnalysisME {
 	 * @param encoding 编码方式
 	 * @return
 	 */
-	public static SyntacticAnalysisModel readModel(File modelFile, TrainingParameters params, SyntacticAnalysisContextGenerator contextGen,
+	public static SyntacticAnalysisModelForChunk readModel(File modelFile, TrainingParameters params, SyntacticAnalysisContextGenerator contextGen,
 			String encoding) {
 		PlainTextGISModelReader modelReader = null;
 		AbstractModel abModel = null;
-		SyntacticAnalysisModel model = null;
-		String beamSizeString = params.getSettings().get(BeamSearch.BEAM_SIZE_PARAMETER);
+		SyntacticAnalysisModelForChunk model = null;
+		String beamSizeString = params.getSettings().get(SyntacticAnalysisBeamSearch.BEAM_SIZE_PARAMETER);
 	      
-        int beamSize = SyntacticAnalysisME.DEFAULT_BEAM_SIZE;
+        int beamSize = SyntacticAnalysisMEForChunk.DEFAULT_BEAM_SIZE;
         if (beamSizeString != null) {
             beamSize = Integer.parseInt(beamSizeString);
         }
@@ -227,7 +225,7 @@ public class SyntacticAnalysisME {
 			Map<String, String> manifestInfoEntries = new HashMap<String, String>();
 			modelReader = new PlainTextGISModelReader(modelFile);			
 			abModel = modelReader.getModel();
-			model =  new SyntacticAnalysisModel(encoding, abModel, beamSize,manifestInfoEntries);
+			model =  new SyntacticAnalysisModelForChunk(encoding, abModel, beamSize,manifestInfoEntries);
 	
 			System.out.println("读取模型成功");
             return model;
@@ -276,4 +274,72 @@ public class SyntacticAnalysisME {
 		lineStream.close();
 		return dict;
 	}
+	
+	/**
+	 * 得到最好的K个chunk树
+	 * @param k 结果数目
+	 * @param posTree 词性标注树
+	 * @param ac
+	 * @return
+	 */
+	public List<List<TreeNode>> tagChunk(int k, List<List<TreeNode>> posTree, Object[] ac){
+		List<List<TreeNode>> chunkTree = new ArrayList<>();
+		SyntacticAnalysisSequenceForChunk[] sequences = this.model.bestSequencesForChunk(k, posTree, ac, contextGenerator, sequenceValidator);
+		for (int i = 0; i < sequences.length; i++) {
+			int label = sequences[i].getLabel();
+			List<TreeNode> tree = new ArrayList<>();
+			List<TreeNode> tempTree = posTree.get(label);
+			List<String> outcomes = sequences[i].getOutcomes();
+			for (int j = 0; j < outcomes.size(); j++) {
+				TreeNode outNode = new TreeNode(outcomes.get(j));
+				outNode.setFlag(true);
+				outNode.addChild(tempTree.get(j));
+				tempTree.get(j).setParent(outNode);
+				outNode.setHeadWords(tempTree.get(j).getHeadWords());
+				tree.add(outNode);
+			}
+			chunkTree.add(tree);
+		}
+		return chunkTree;
+	}
+	
+	/**
+	 * 得到最好的K个BuildAndCheck标记
+	 * @param k 结果数目
+	 * @param chunkTree chunk标记树
+	 * @param ac
+	 * @return
+	 */
+	public List<List<TreeNode>> tagBuildAndCheck(int k, List<List<TreeNode>> chunkTree, Object[] ac){
+		List<List<TreeNode>> buildAndCheckTree = new ArrayList<>();
+		SyntacticAnalysisSequenceForChunk[] sequences = this.model.bestSequencesForChunk(k, chunkTree, ac, contextGenerator, sequenceValidator);
+		for (int i = 0; i < sequences.length; i++) {
+			int label = sequences[i].getLabel();
+			List<TreeNode> tree = new ArrayList<>();
+			List<TreeNode> tempTree = chunkTree.get(label);
+			List<String> outcomes = sequences[i].getOutcomes();
+			for (int j = 0; j < outcomes.size(); j++) {
+				TreeNode outNode = new TreeNode(outcomes.get(j));
+				outNode.setFlag(true);
+				outNode.addChild(tempTree.get(j));
+				tempTree.get(j).setParent(outNode);
+				outNode.setHeadWords(tempTree.get(j).getHeadWords());
+				tree.add(outNode);
+			}
+			buildAndCheckTree.add(tree);
+		}
+		return buildAndCheckTree;
+	}
+	
+	/**
+	 * 得到最好的BuildAndCheck标记
+	 * @param chunkTree chunk标记树
+	 * @param ac
+	 * @return
+	 */
+	public List<TreeNode> tagBuildAndCheck(List<List<TreeNode>> chunkTree, Object[] ac){
+		List<List<TreeNode>> buildAndCheckTree = tagBuildAndCheck(1,chunkTree, ac);
+		return buildAndCheckTree.get(0);
+	}
 }
+

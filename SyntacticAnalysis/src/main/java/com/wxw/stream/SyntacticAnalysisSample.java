@@ -33,6 +33,11 @@ public class SyntacticAnalysisSample {
         this.buildAndCheckTree = Collections.unmodifiableList(buildAndCheckTree);
         this.actions = Collections.unmodifiableList(actions);
 
+//        for (int i = 0; i < actions.size(); i++) {
+//			System.out.print(actions.get(i)+" ");
+//		}
+//        System.out.println();
+        
         String[][] ac;
         if (additionalContext != null) {
             ac = new String[additionalContext.length][];
@@ -130,5 +135,28 @@ public class SyntacticAnalysisSample {
         }
 	}
 	
-	
+	/**
+	 * 将词性标注和词语转成树的形式
+	 * @param words k个最好的词语序列
+	 * @param poses k个最好的词性标注序列
+	 * @return
+	 */
+	public static List<List<TreeNode>> toPosTree(String[] words, String[][] poses){
+		List<List<TreeNode>> posTrees = new ArrayList<>();
+		for (int i = 0; i < poses.length; i++) {
+			List<TreeNode> posTree = new ArrayList<TreeNode>();
+			for (int j = 0; j < poses[i].length && j < words.length; j++) {
+				TreeNode pos = new TreeNode(poses[i][j]);
+				TreeNode word = new TreeNode(words[j]);
+				pos.addChild(word);
+				word.setParent(pos);
+				pos.setFlag(true);
+				word.setFlag(true);
+				pos.setHeadWords(words[j]);
+				posTree.add(pos);
+			}
+			posTrees.add(posTree);
+		}
+		return posTrees;
+	}
 }

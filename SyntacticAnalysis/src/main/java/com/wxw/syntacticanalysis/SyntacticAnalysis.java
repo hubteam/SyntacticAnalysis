@@ -1,4 +1,4 @@
-package com.wxw.model;
+package com.wxw.syntacticanalysis;
 
 public interface SyntacticAnalysis {
 

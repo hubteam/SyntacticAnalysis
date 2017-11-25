@@ -1,10 +1,11 @@
-package com.wxw.stream;
+package com.wxw.model.bystep;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
+import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.tree.TreeNode;
 
 import opennlp.tools.ml.model.Event;
@@ -12,11 +13,11 @@ import opennlp.tools.util.AbstractEventStream;
 import opennlp.tools.util.ObjectStream;
 
 /**
- * 生成事件
+ * 为build模型生成事件
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<SyntacticAnalysisSample>{
+public class SyntacticAnalysisSampleEventForBuild extends AbstractEventStream<SyntacticAnalysisSample>{
 
 	private SyntacticAnalysisContextGenerator generator;
 	
@@ -25,7 +26,7 @@ public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<Syntactic
 	 * @param samples 样本流
 	 * @param generator 上下文产生器
 	 */
-	public SyntacticAnalysisSampleEvent(ObjectStream<SyntacticAnalysisSample> samples,SyntacticAnalysisContextGenerator generator) {
+	public SyntacticAnalysisSampleEventForBuild(ObjectStream<SyntacticAnalysisSample> samples,SyntacticAnalysisContextGenerator generator) {
 		super(samples);
 		this.generator = generator;
 	}
@@ -42,7 +43,7 @@ public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<Syntactic
 		List<TreeNode> chunkTree = sample.getChunkTree();
 		List<List<TreeNode>> buildAndCheckTree = sample.getBuildAndCheckTree();
 		String[][] ac = sample.getAdditionalContext();
-		List<Event> events = generateEvents(words, poses, chunkTree, buildAndCheckTree,actions,ac);
+		List<Event> events = generateEvents(words, buildAndCheckTree,actions,ac);
         return events.iterator();
 	}
 
@@ -56,39 +57,31 @@ public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<Syntactic
 	 * @param ac
 	 * @return
 	 */
-	private List<Event> generateEvents( List<String> words, List<String> poses, List<TreeNode> chunkTree,
+	private List<Event> generateEvents( List<String> words, 
 			List<List<TreeNode>> buildAndCheckTree, List<String> actions, String[][] ac) {
-		List<Event> events = new ArrayList<Event>(actions.size());
-		
-		//chunk
-		for (int i = words.size(); i < 2*words.size(); i++) {		
-			String[] context = generator.getContextForChunk(i-words.size(),chunkTree, actions, ac);
-            events.add(new Event(actions.get(i), context));
-		}
+		List<Event> events = new ArrayList<Event>(actions.size());		
 		//buildAndCheck
 		//两个变量i j
 		//i控制第几个list
 		//j控制list中的第几个
 		int j = 0;
-		//计数变量
-		int count = 0;
 		for (int i = 2*words.size(); i < actions.size(); i=i+2) {
-			if(actions.get(i).startsWith("join")){
-				count++;
-			}else if(actions.get(i).startsWith("start")){
-				count = 0;
-			}
 			String[] buildContext = generator.getContextForBuild(j,buildAndCheckTree.get(i-2*words.size()), actions, ac);
             events.add(new Event(actions.get(i), buildContext));
-            
+      
             if(actions.get(i+1).equals("yes")){
-            	j = j-count;
-            	count = 0;
-            	String[] checkContext = generator.getContextForCheck(j,buildAndCheckTree.get(i+1-2*words.size()), actions, ac);
-                events.add(new Event(actions.get(i+1), checkContext));
+            	int record = j-1;
+		        for (int k = record; k >= 0; k--) {
+		        	if(buildAndCheckTree.get(i-2*words.size()).get(k).getNodeName().split("_")[0].equals("start")){
+		        		j = k;
+		        		break;
+		        	}
+				}
+//            	String[] checkContext = generator.getContextForCheck(j,buildAndCheckTree.get(i+1-2*words.size()), actions, ac);
+//                events.add(new Event(actions.get(i+1), checkContext));
             }else if(actions.get(i+1).equals("no")){            	
-            	String[] checkContext = generator.getContextForCheck(j,buildAndCheckTree.get(i+1-2*words.size()), actions, ac);
-                events.add(new Event(actions.get(i+1), checkContext));
+//            	String[] checkContext = generator.getContextForCheck(j,buildAndCheckTree.get(i+1-2*words.size()), actions, ac);
+//                events.add(new Event(actions.get(i+1), checkContext));
             	j++;
             }  
 		}

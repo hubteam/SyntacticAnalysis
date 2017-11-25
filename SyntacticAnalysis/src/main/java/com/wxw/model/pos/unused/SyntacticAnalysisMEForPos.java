@@ -1,4 +1,4 @@
-package com.wxw.model;
+package com.wxw.model.pos.unused;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -6,16 +6,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.wxw.feature.SyntacticAnalysisContextGenerator;
-import com.wxw.sequence.DefaultSyntacticAnalysisSequenceValidatorForPos;
+import com.wxw.feature.SyntacticAnalysisContextGeneratorForPos;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.SyntacticAnalysisSample;
-import com.wxw.stream.SyntacticAnalysisSampleEventForPos;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
 
 import opennlp.tools.ml.BeamSearch;
@@ -35,13 +32,13 @@ import opennlp.tools.util.SequenceValidator;
 import opennlp.tools.util.TrainingParameters;
 
 /**
- * 训练词性标注模型
+ * 训练英文词性标注模型
  * @author 王馨苇
  *
  */
 public class SyntacticAnalysisMEForPos {
 	public static final int DEFAULT_BEAM_SIZE = 20;
-	private SyntacticAnalysisContextGenerator contextGenerator;
+	private SyntacticAnalysisContextGeneratorForPos contextGenerator;
 	private int size;
 	private Sequence bestSequence;
 	private SequenceClassificationModel<String> model;
@@ -54,7 +51,7 @@ public class SyntacticAnalysisMEForPos {
 	 * @param model 模型
 	 * @param contextGen 特征
 	 */
-	public SyntacticAnalysisMEForPos(SyntacticAnalysisModelForPos model, SyntacticAnalysisContextGenerator contextGen) {
+	public SyntacticAnalysisMEForPos(SyntacticAnalysisModelForPos model, SyntacticAnalysisContextGeneratorForPos contextGen) {
 		init(model , contextGen);
 	}
     /**
@@ -62,7 +59,7 @@ public class SyntacticAnalysisMEForPos {
      * @param model 模型
      * @param contextGen 特征
      */
-	private void init(SyntacticAnalysisModelForPos model, SyntacticAnalysisContextGenerator contextGen) {
+	private void init(SyntacticAnalysisModelForPos model, SyntacticAnalysisContextGeneratorForPos contextGen) {
 		int beamSize = SyntacticAnalysisMEForPos.DEFAULT_BEAM_SIZE;
 
         String beamSizeString = model.getManifestProperty(BeamSearch.BEAM_SIZE_PARAMETER);
@@ -95,7 +92,7 @@ public class SyntacticAnalysisMEForPos {
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	public static SyntacticAnalysisModelForPos train(File file, TrainingParameters params, SyntacticAnalysisContextGenerator contextGen,
+	public static SyntacticAnalysisModelForPos train(File file, TrainingParameters params, SyntacticAnalysisContextGeneratorForPos contextGen,
 			String encoding){
 		SyntacticAnalysisModelForPos model = null;
 		try {
@@ -122,7 +119,7 @@ public class SyntacticAnalysisMEForPos {
 	 * @throws FileNotFoundException 
 	 */
 	public static SyntacticAnalysisModelForPos train(String languageCode, ObjectStream<SyntacticAnalysisSample> sampleStream, TrainingParameters params,
-			SyntacticAnalysisContextGenerator contextGen) throws IOException {
+			SyntacticAnalysisContextGeneratorForPos contextGen) throws IOException {
 		String beamSizeString = params.getSettings().get(BeamSearch.BEAM_SIZE_PARAMETER);
 		int beamSize = SyntacticAnalysisMEForPos.DEFAULT_BEAM_SIZE;
         if (beamSizeString != null) {
@@ -159,7 +156,7 @@ public class SyntacticAnalysisMEForPos {
 	 * @return
 	 */
 	public static SyntacticAnalysisModelForPos train(File file, File modelbinaryFile, File modeltxtFile, TrainingParameters params,
-			SyntacticAnalysisContextGenerator contextGen, String encoding) {
+			SyntacticAnalysisContextGeneratorForPos contextGen, String encoding) {
 		OutputStream modelOut = null;
 		PlainTextGISModelWriter modelWriter = null;
 		SyntacticAnalysisModelForPos model = null;
@@ -190,13 +187,29 @@ public class SyntacticAnalysisMEForPos {
 		return null;
 	}
 	
-//	public String[] tag(String[] characters, String[] tags, String[] words, Object[] additionaContext){
-//		bestSequence = model.bestSequence(characters, tags, words, additionaContext, contextGenerator,sequenceValidator);
-//      //  System.out.println(bestSequence);
-//		List<String> t = bestSequence.getOutcomes();
-//        
-//        return t.toArray(new String[t.size()]);
-//	}
+	public String[] tag(String[] sentence) {
+		return this.tag(sentence, (Object[]) null);
+	}
+
+	public String[] tag(String[] sentence, Object[] additionaContext) {
+		this.bestSequence = this.model.bestSequence(sentence, additionaContext, this.contextGenerator,
+				this.sequenceValidator);
+		List t = this.bestSequence.getOutcomes();
+		return (String[]) t.toArray(new String[t.size()]);
+	}
+
+	public String[][] tag(int numTaggings, String[] sentence) {
+		Sequence[] bestSequences = this.model.bestSequences(numTaggings, sentence, (Object[]) null, this.contextGenerator,
+				this.sequenceValidator);
+		String[][] tags = new String[bestSequences.length][];
+
+		for (int si = 0; si < tags.length; ++si) {
+			List t = bestSequences[si].getOutcomes();
+			tags[si] = (String[]) t.toArray(new String[t.size()]);
+		}
+
+		return tags;
+	}
 	/**
 	 * 根据训练得到的模型文件得到
 	 * @param modelFile 模型文件
@@ -205,7 +218,7 @@ public class SyntacticAnalysisMEForPos {
 	 * @param encoding 编码方式
 	 * @return
 	 */
-	public static SyntacticAnalysisModelForPos readModel(File modelFile, TrainingParameters params, SyntacticAnalysisContextGenerator contextGen,
+	public static SyntacticAnalysisModelForPos readModel(File modelFile, TrainingParameters params, SyntacticAnalysisContextGeneratorForPos contextGen,
 			String encoding) {
 		PlainTextGISModelReader modelReader = null;
 		AbstractModel abModel = null;

@@ -23,6 +23,7 @@ public class TreeToActions {
 	//第三部得到的列表
 	private List<List<TreeNode>> buildAndCheckTree = new ArrayList<List<TreeNode>>();
 		
+	
 	/**
 	 * 第一步POS
 	 * @param tree 一棵树
@@ -182,15 +183,20 @@ public class TreeToActions {
 				subTreeCopy = new ArrayList<TreeNode>(subTree);
 				buildAndCheckTree.add(subTreeCopy);				
 				actions.add("yes");
-				//合并
+				
+				//改动的地方【为yes的时候先不合并加入，用于yes的特征的生成】
+				subTreeCopy = new ArrayList<TreeNode>(subTree);
+				buildAndCheckTree.add(subTreeCopy);	
+				
+				//然后再去合并，但是不加入
 				TreeNode tempnode = new TreeNode(tree.getParent().getNodeName());
 				tempnode.setParent(tree.getParent().getParent());
 				tempnode.setHeadWords(tree.getParent().getHeadWords());
 				tempnode.addChild(tree.getParent().getChildren().get(0));
 				tree.getParent().getChildren().get(0).setParent(tempnode);
 				subTree.set(i, tree.getParent());
-				subTreeCopy = new ArrayList<TreeNode>(subTree);
-				buildAndCheckTree.add(subTreeCopy);				
+//				subTreeCopy = new ArrayList<TreeNode>(subTree);
+//				buildAndCheckTree.add(subTreeCopy);				
 				//合并之后，以合并后的节点的父节点继续递归
 				if(tree.getParent().getParent() == null){
 					return;
@@ -229,6 +235,10 @@ public class TreeToActions {
 					subTreeCopy = new ArrayList<TreeNode>(subTree);
 					buildAndCheckTree.add(subTreeCopy);					
 					actions.add("yes");
+					
+					subTreeCopy = new ArrayList<TreeNode>(subTree);
+					buildAndCheckTree.add(subTreeCopy);	
+					
 					//需要合并,node为合并后的父节点
 					TreeNode node = new TreeNode(tree.getParent().getNodeName());
 					node.setParent(tree.getParent().getParent());
@@ -249,8 +259,8 @@ public class TreeToActions {
 //					for (int j = index+1; j <= i; j++) {
 //						subTree.remove(j);
 //					}
-					subTreeCopy = new ArrayList<TreeNode>(subTree);
-					buildAndCheckTree.add(subTreeCopy);
+//					subTreeCopy = new ArrayList<TreeNode>(subTree);
+//					buildAndCheckTree.add(subTreeCopy);
 					//更改i为了下一次
 					i = index;
 					//合并之后，以合并后的节点的父节点继续递归，直到没有父节点，退出递归
@@ -299,9 +309,12 @@ public class TreeToActions {
 	 * @throws CloneNotSupportedException
 	 */
 	public SyntacticAnalysisSample treeToAction(TreeNode tree) throws CloneNotSupportedException{
+//		System.out.println(tree.toString());
 		getActionPOS(tree);		
 		getActionCHUNK(tree, posTree);
 		getActionBUILDandCHECK(tree, combine(chunkTree));
+		
+//		System.out.println();
 		return new SyntacticAnalysisSample(posTree,chunkTree,buildAndCheckTree,actions);
 	}
 	

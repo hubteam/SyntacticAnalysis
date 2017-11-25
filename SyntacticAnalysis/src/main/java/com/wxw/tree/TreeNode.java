@@ -112,11 +112,11 @@ public class TreeNode implements Cloneable{
 			return " "+this.nodename;
 		}else{
 			String treestr = "";
-			if(this.headwords != null){
-				treestr = "("+this.nodename+"{"+this.headwords+"}";
-			}else{
+//			if(this.headwords != null){
 				treestr = "("+this.nodename;
-			}
+//			}else{
+//				treestr = "("+this.nodename;
+//			}
 			
 			for (TreeNode node:this.children) {
 				treestr += node.toString();

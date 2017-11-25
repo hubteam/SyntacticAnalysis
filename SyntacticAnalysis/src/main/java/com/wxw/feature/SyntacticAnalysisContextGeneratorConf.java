@@ -17,7 +17,7 @@ import com.wxw.tree.TreeNode;
 public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisContextGenerator{
 
 	
-	//pos
+	/*//pos
 	private boolean w_2Set;
     private boolean w_1Set;
     private boolean w0Set;
@@ -35,7 +35,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
     private boolean suffix4Set;
     private boolean numberSet;
     private boolean uppercaseSet;
-    private boolean hypenSet;
+    private boolean hypenSet;*/
 	//chunk
 	private boolean chunkandpostag0Set;
     private boolean chunkandpostag_1Set;
@@ -150,7 +150,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @param properties
 	 */
 	private void init(Properties config) {
-		//pos
+		/*//pos
 		w0Set = (config.getProperty("pos.w0", "true").equals("true"));
 		w1Set = (config.getProperty("pos.w1", "true").equals("true"));
 		w2Set = (config.getProperty("pos.w2", "true").equals("true"));
@@ -168,7 +168,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 		suffix4Set = (config.getProperty("pos.suffix4", "true").equals("true"));
 		numberSet = (config.getProperty("pos.number", "true").equals("true"));
 		uppercaseSet = (config.getProperty("pos.uppercase", "true").equals("true"));
-		hypenSet = (config.getProperty("pos.hypen", "true").equals("true"));
+		hypenSet = (config.getProperty("pos.hypen", "true").equals("true"));*/
 		
 		//chunk
 		chunkandpostag0Set = (config.getProperty("tree.chunkandpostag0", "true").equals("true"));
@@ -264,7 +264,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @param words 词语
 	 * @param poses 词性
 	 * @return
-	 */
+	 *//*
 	public String[] getContextForPos(int index, List<String> words, List<String> poses) {
 		String w1, w2, w0, w_1, w_2;
         w1 = w2 = w0 = w_1 = w_2 = null;
@@ -374,7 +374,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
         }
         String[] contexts = features.toArray(new String[features.size()]);
         return contexts;
-	}
+	}*/
 
 	/**
 	 * chunk步的上下文特征
@@ -691,11 +691,17 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 				}
 			}
 		}
-        if(tree0.getChildren().get(0).getNodeName().equals(",")){
-			if(punctuationSet){
-				features.add("punctuation="+"comma");
+        
+        for (int i = index-1; i >= 0; i--) {
+			if(buildAndCheckTree.get(i).getChildren().get(0).getNodeName().equals(",")){
+				if(tree0.getChildren().get(0).getNodeName().equals(",")){
+					if(punctuationSet){
+						features.add("punctuation="+"comma");
+					}
+				}
 			}
 		}
+        
         if(tree0.getChildren().get(0).getNodeName().equals(".")){
 			if(punctuationSet){
 				features.add("punctuation="+"endofsentence");
@@ -715,69 +721,140 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 */
 	public String[] getContextForCheck(int index, List<TreeNode> buildAndCheckTree, List<String> actions) {
 		List<String> features = new ArrayList<String>();
-		TreeNode tree0 = null;
-		tree0 = buildAndCheckTree.get(index);
+		String rightRule = "";
+//		tree0 = buildAndCheckTree.get(index);
+		int record = -1;
+		for (int i = index; i >= 0; i--) {
+			if(buildAndCheckTree.get(i).getNodeName().split("_")[0].equals("start")){
+				record = i;
+			}
+		}
 		if(checkcons_beginSet){
-			features.add("checkcons_begin=");
+			features.add("checkcons_begin="+buildAndCheckTree.get(record).getNodeName()+"|"
+		+buildAndCheckTree.get(record).getChildren().get(0).getNodeName()+"|"
+					+buildAndCheckTree.get(record).getChildren().get(0).getHeadWords());
 		}
 		if(checkcons_beginASet){
-			features.add("checkcons_begin*=");
+			features.add("checkcons_begin*="+buildAndCheckTree.get(record).getNodeName()+"|"
+					+buildAndCheckTree.get(record).getChildren().get(0).getNodeName());
 		}
 		
 		if(checkcons_lastSet){
-			features.add("checkcons_last=");
+			features.add("checkcons_last="+buildAndCheckTree.get(index).getNodeName()+"|"
+		+buildAndCheckTree.get(index).getChildren().get(0).getNodeName()+"|"
+					+buildAndCheckTree.get(index).getChildren().get(0).getHeadWords());
 		}
 		if(checkcons_lastASet){
-			features.add("checkcons_last*=");
+			features.add("checkcons_last*="+buildAndCheckTree.get(index).getNodeName()+"|"
+					+buildAndCheckTree.get(index).getChildren().get(0).getNodeName());
 		}
 		
-		for (int i = index-1; i >= 0; i--) {
+		for (int i = record; i < index; i++) {
 			if(checkcons_ilastSet){
-				features.add("checkcons_"+i+"last=");
+				features.add("checkcons_"+i+"last="+buildAndCheckTree.get(i).getNodeName()+"|"
+			+buildAndCheckTree.get(i).getChildren().get(0).getNodeName()+"|"
+						+buildAndCheckTree.get(i).getChildren().get(0).getHeadWords()+";"
+			+buildAndCheckTree.get(index).getNodeName()+"|"
+			+buildAndCheckTree.get(index).getChildren().get(0).getNodeName()+"|"
+			+buildAndCheckTree.get(index).getChildren().get(0).getHeadWords());
 			}
 			if(checkcons_iAlastSet){
-				features.add("checkcons_"+i+"*last=");
+				features.add("checkcons_"+i+"*last="+buildAndCheckTree.get(i).getNodeName()+"|"
+			+buildAndCheckTree.get(i).getChildren().get(0).getNodeName()
+						+";"
+			+buildAndCheckTree.get(index).getNodeName()+"|"
+			+buildAndCheckTree.get(index).getChildren().get(0).getNodeName()+"|"
+			+buildAndCheckTree.get(index).getChildren().get(0).getHeadWords());
 			}
 			if(checkcons_ilastASet){
-				features.add("checkcons_"+i+"last*=");
+				features.add("checkcons_"+i+"last*="+buildAndCheckTree.get(i).getNodeName()+"|"
+			+buildAndCheckTree.get(i).getChildren().get(0).getNodeName()+"|"
+						+buildAndCheckTree.get(i).getChildren().get(0).getHeadWords()+";"
+			+buildAndCheckTree.get(index).getNodeName()+"|"
+			+buildAndCheckTree.get(index).getChildren().get(0).getNodeName());
 			}
 			if(checkcons_iAlastASet){
-				features.add("checkcons_"+i+"*last*=");
+				features.add("checkcons_"+i+"*last*="+buildAndCheckTree.get(i).getNodeName()+"|"
+			+buildAndCheckTree.get(i).getChildren().get(0).getNodeName()+";"
+			+buildAndCheckTree.get(index).getNodeName()+"|"
+			+buildAndCheckTree.get(index).getChildren().get(0).getNodeName());
 			}
 		}
 		
-		if(productionSet){
-			features.add("production=");
+		for (int i = record; i < index+1; i++) {
+			
+			if(i == index){
+				rightRule += buildAndCheckTree.get(i).getChildren().get(0).getNodeName();
+			}else{
+				rightRule += buildAndCheckTree.get(i).getChildren().get(0).getNodeName()+",";
+			}
+		}
+		if(buildAndCheckTree.get(index).getNodeName().contains("start") || buildAndCheckTree.get(index).getNodeName().contains("join")){			
+			if(productionSet){
+				features.add("production="+buildAndCheckTree.get(index).getNodeName().split("_")[1]+"→"+rightRule);
+			}
 		}
 		
-		if(surround1Set){
-			features.add("surround1=");
-		}
-		if(surround1ASet){
-			features.add("surround1*=");
-		}
-		if(surround2Set){
-			features.add("surround2=");
-		}
-		if(surround2ASet){
-			features.add("surround2*=");
-		}
+		List<TreeNode> leftposAndWordTree = getPosAndWordTree(buildAndCheckTree.get(record));
+		List<TreeNode> rightposAndWordTree = getPosAndWordTree(buildAndCheckTree.get(index));
 		
-		if(surround_1Set){
-			features.add("surround_1=");
+		if(leftposAndWordTree != null){
+			//左
+			if(surround_1Set){
+				features.add("surround_1="+leftposAndWordTree.get(0).getNodeName()+"|"+leftposAndWordTree.get(0).getChildren().get(0).getNodeName());
+			}
+			if(surround_1ASet){
+				features.add("surround_1*="+leftposAndWordTree.get(0).getNodeName());
+			}
+			if(leftposAndWordTree.size() > 1){
+	
+				if(surround_2Set){
+					features.add("surround_2="+leftposAndWordTree.get(1).getNodeName()+"|"+leftposAndWordTree.get(1).getChildren().get(0).getNodeName());
+				}
+				if(surround_2ASet){
+					features.add("surround_2*="+leftposAndWordTree.get(1).getNodeName());
+				}
+			}
 		}
-		if(surround_1ASet){
-			features.add("surround_1*=");
+
+		if(rightposAndWordTree != null){
+			//右
+			if(surround1Set){
+				features.add("surround1="+rightposAndWordTree.get(rightposAndWordTree.size()-1).getNodeName()+"|"+rightposAndWordTree.get(rightposAndWordTree.size()-1).getChildren().get(0).getNodeName());
+			}
+			if(surround1ASet){
+				features.add("surround1*="+rightposAndWordTree.get(rightposAndWordTree.size()-1).getNodeName());
+			}
+
+			if(rightposAndWordTree.size() > 1){
+				if(surround2Set){
+					features.add("surround2="+rightposAndWordTree.get(rightposAndWordTree.size()-2).getNodeName()+"|"+rightposAndWordTree.get(rightposAndWordTree.size()-2).getChildren().get(0).getNodeName());
+				}
+				if(surround2ASet){
+					features.add("surround2*="+rightposAndWordTree.get(rightposAndWordTree.size()-2).getNodeName());
+				}
+			}
 		}
-		if(surround_2Set){
-			features.add("surround_2=");
-		}
-		if(surround_2ASet){
-			features.add("surround_2*=");
-		}
-		
 		String[] contexts = features.toArray(new String[features.size()]);
         return contexts;
+	}
+	
+	/**
+	 * 得到一棵树中的所有词性标记和词语序列
+	 * @param tree 输入的一棵树
+	 * @return
+	 */
+	public List<TreeNode> getPosAndWordTree(TreeNode tree){
+		List<TreeNode> posAndWordTree = new ArrayList<>();
+		if(tree.getChildren().size() == 1 && tree.getChildren().get(0).getChildren().size() == 0){
+			posAndWordTree.add(tree);
+			return posAndWordTree;
+		}else{
+			for (TreeNode treeNode : tree.getChildren()) {
+				posAndWordTree.addAll(getPosAndWordTree(treeNode));
+			}
+			return posAndWordTree;
+		}
 	}
 
 	/**
@@ -787,12 +864,12 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @param poses 词性
 	 * @param ac 
 	 * @return
-	 */
+	 *//*
 	@Override
 	public String[] getContextForPos(int index, List<String> words, List<String> poses, Object[] ac) {
 
 		return getContextForPos(index,words,poses);
-	}
+	}*/
 
 	/**
 	 * chunk步的上下文特征
@@ -888,7 +965,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	/**
 	 * 用于训练词性标记模型的特征
 	 * @return
-	 */
+	 *//*
 	public String toPosString() {
 		return "SyntacticAnalysisContextGeneratorConf{" + "w_2Set=" + w_2Set + ", w_1Set=" + w_1Set + 
                 ", w0Set=" + w0Set + ", w1Set=" + w1Set + ", w2Set=" + w2Set + 
@@ -899,5 +976,540 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
                 ", suffix3Set=" + suffix3Set + ", suffix4Set=" + suffix4Set + 
                 ", numberSet=" + numberSet + ", uppercaseSet=" + uppercaseSet +  ", hypenSet=" + hypenSet + 
                 '}';
+	}*/
+
+	/**
+	 * 为测试语料的chunk步骤生成上下文特征
+	 * @param index 索引位置
+	 * @param posTree 词性标注的子树，【区别于训练语料中的chunkTree，这里chunkTree还包含了动作序列作为根节点】
+	 * @param actions 动作序列
+	 * @param ac
+	 * @return
+	 */
+	@Override
+	public String[] getContextForChunkForTest(int index, List<TreeNode> posTree, List<String> actions, Object[] ac) {
+		
+		return getContextForChunkForTest(index,posTree,actions);
+	}
+
+	/**
+	 * 为测试语料的chunk步骤生成上下文特征
+	 * @param index 索引位置
+	 * @param posTree 词性标注的子树，【区别于训练语料中的chunkTree，这里chunkTree还包含了动作序列作为根节点】
+	 * @param actions 动作序列
+	 * @return
+	 */
+	private String[] getContextForChunkForTest(int index, List<TreeNode> posTree, List<String> actions) {
+		List<String> features = new ArrayList<String>();
+		TreeNode tree0,tree1,tree2,tree_1,tree_2;
+		tree0 = tree1 = tree2 = tree_1 = tree_2 = null;
+		String action_1, action_2;
+		action_1 = action_2 = null;
+		tree0 = posTree.get(index);
+		if (posTree.size() > index + 1) {
+            tree1 = posTree.get(index+1);
+            if (posTree.size() > index + 2) {
+                tree2 = posTree.get(index+2);
+            }
+        }
+
+        if (index - 1 >= 0) {
+            tree_1 = posTree.get(index-1);
+            action_1 = actions.get(index-1);
+            if (index - 2 >= 0) {
+                tree_2 = posTree.get(index-2);
+                action_2 = actions.get(index-2);
+            }
+        }
+		//这里的特征是word pos chunk组成的
+		//当前位置的时候是没有chunk标记的
+        if(tree0 != null){
+			if(chunkandpostag0Set){
+				features.add("chunkandpostag0="+tree0.getNodeName()+"|"+tree0.getChildren().get(0).getNodeName());
+			}
+			if(chunkandpostag0ASet){
+				features.add("chunkandpostag0*="+tree0.getNodeName());
+			}
+		}
+        //当前位置之前的时候有chunk标记
+        if(tree_1 != null){
+			if(chunkandpostag_1Set){
+				features.add("chunkandpostag_1="+action_1+"|"
+			+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName());
+			}
+			if(chunkandpostag_1ASet){
+				features.add("chunkandpostag_1*="+action_1+"|"+tree_1.getNodeName());
+			}
+		}
+        if(tree_2 != null){
+			if(chunkandpostag_2Set){
+				features.add("chunkandpostag_2="+action_2+"|"
+			+tree_2.getNodeName()+"|"+tree_2.getChildren().get(0).getNodeName());
+			}
+			if(chunkandpostag_2ASet){
+				features.add("chunkandpostag_2*="+action_2+"|"+tree_2.getNodeName());
+			}
+		}
+        //当前位置之后的也没有chunk标记
+        if(tree1 != null){
+			if(chunkandpostag1Set){
+				features.add("chunkandpostag1="+tree1.getNodeName()+"|"+tree1.getChildren().get(0).getNodeName());
+			}
+			if(chunkandpostag1ASet){
+				features.add("chunkandpostag1*="+tree1.getNodeName());
+			}
+		}
+        if(tree2 != null){
+			if(chunkandpostag2Set){
+				features.add("chunkandpostag2="+tree2.getNodeName()+"|"+tree2.getChildren().get(0).getNodeName());
+			}
+			if(chunkandpostag2ASet){
+				features.add("chunkandpostag2*="+tree2.getNodeName());
+			}
+		}
+        
+        if(tree_1 != null && tree0 != null){
+        	if(chunkandpostag_10Set){
+        		features.add("chunkandpostag_10="+action_1+"|"+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()
+        				+";"+tree0.getNodeName()+"|"+tree0.getChildren().get(0).getNodeName());
+        	}
+        	if(chunkandpostag_10ASet){
+        		features.add("chunkandpostag_10*="+action_1+"|"+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()
+        				+";"+tree0.getNodeName());
+        	}
+        	if(chunkandpostag_1A0Set){
+        		features.add("chunkandpostag_1*0="+action_1+"|"+tree_1.getNodeName()
+        				+";"+tree0.getNodeName()+"|"+tree0.getChildren().get(0).getNodeName());
+        	}
+        	if(chunkandpostag_1A0ASet){
+        		features.add("chunkandpostag_1*0*="+action_1+"|"+tree_1.getNodeName()
+        				+";"+tree0.getNodeName());
+        	}
+        }
+        
+        if(tree0 != null && tree1 != null){
+        	if(chunkandpostag01Set){
+        		features.add("chunkandpostag01="+tree0.getNodeName()+"|"+tree0.getChildren().get(0).getNodeName()
+        				+";"+tree1.getNodeName()+"|"+tree1.getChildren().get(0).getNodeName());
+        	}
+        	if(chunkandpostag01ASet){
+        		features.add("chunkandpostag01*="+tree0.getNodeName()+"|"+tree0.getChildren().get(0).getNodeName()
+        				+";"+tree1.getNodeName());
+        	}
+        	if(chunkandpostag0A1Set){
+        		features.add("chunkandpostag0*1="+tree0.getNodeName()
+        				+";"+tree1.getNodeName()+"|"+tree1.getChildren().get(0).getNodeName());
+        	}
+        	if(chunkandpostag0A1ASet){
+        		features.add("chunkandpostag0*1*="+tree0.getNodeName()
+        				+";"+tree1.getNodeName());
+        	}
+        }
+		String[] contexts = features.toArray(new String[features.size()]);
+        return contexts;
+	}
+
+	/**
+	 * 为测试语料的build步的上下文特征
+	 * @param index 当前位置
+	 * @param chunkTree 子树序列
+	 * @param actions 动作序列
+	 * @param ac 
+	 * @return
+	 */
+	@Override
+	public String[] getContextForBuildForTest(int index, List<TreeNode> chunkTree, List<String> actions, Object[] ac) {
+		
+		return getContextForBuildForTest(index,chunkTree,actions);
+	}
+
+	/**
+	 * 为测试语料的build步的上下文特征
+	 * @param index 当前位置
+	 * @param chunkTree 子树序列
+	 * @param actions 动作序列
+	 * @return
+	 */
+	private String[] getContextForBuildForTest(int index, List<TreeNode> chunkTree, List<String> actions) {
+		List<String> features = new ArrayList<String>();
+		TreeNode tree0,tree1,tree2,tree_1,tree_2;
+		tree0 = tree1 = tree2 = tree_1 = tree_2 = null;
+		tree0 = chunkTree.get(index);
+		if (chunkTree.size() > index + 1) {
+            tree1 = chunkTree.get(index+1);
+            if (chunkTree.size() > index + 2) {
+                tree2 = chunkTree.get(index+2);
+            }
+        }
+
+        if (index - 1 >= 0) {
+            tree_1 = chunkTree.get(index-1);
+            if (index - 2 >= 0) {
+                tree_2 = chunkTree.get(index-2);
+            }
+        }
+        //这里的标记由head words , constituent, build
+		//当前位置没有build标记
+        if(tree0 != null){
+			if(cons0Set){
+				features.add("cons0="+tree0.getNodeName()+"|"+tree0.getHeadWords());
+			}
+			if(cons0ASet){
+				features.add("cons0*="+tree0.getNodeName());
+			}
+		}
+        //当前位置之前的有build标记
+        if(tree_1 != null){
+			if(cons_1Set){
+				features.add("cons_1="+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()+"|"+tree_1.getChildren().get(0).getHeadWords());
+			}
+			if(cons_1ASet){
+				features.add("cons_1*="+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName());
+			}
+		}
+        if(tree_2 != null){
+			if(cons_2Set){
+				features.add("cons_2="+tree_2.getNodeName()+"|"+tree_2.getChildren().get(0).getNodeName()+"|"+tree_2.getChildren().get(0).getHeadWords());
+			}
+			if(cons_2ASet){
+				features.add("cons_2*="+tree_2.getNodeName()+"|"+tree_2.getChildren().get(0).getNodeName());
+			}
+		}
+        //当前位置之后的也没有build标记
+        if(tree1 != null){
+			if(cons1Set){
+				features.add("cons1="+tree1.getNodeName()+"|"+tree1.getHeadWords());
+			}
+			if(cons1ASet){
+				features.add("cons1*="+tree1.getNodeName());
+			}
+		}
+        if(tree2 != null){
+			if(cons2Set){
+				features.add("cons2="+tree2.getNodeName()+"|"+tree2.getHeadWords());
+			}
+			if(cons2ASet){
+				features.add("cons2*="+tree2.getNodeName());
+			}
+		}
+        
+        if(tree_1 != null && tree0 != null){
+        	if(cons_10Set){
+        		features.add("cons_10="+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()+"|"+tree_1.getChildren().get(0).getHeadWords()
+        				+";"+tree0.getNodeName()+"|"+tree0.getHeadWords());
+        	}
+        	if(cons_10ASet){
+        		features.add("cons_10*="+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()+"|"+tree_1.getChildren().get(0).getHeadWords()
+        				+";"+tree0.getNodeName());
+        	}
+        	if(cons_1A0Set){
+        		features.add("cons_1*0="+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()
+        				+";"+tree0.getNodeName()+"|"+tree0.getHeadWords());
+        	}
+        	if(cons_1A0ASet){
+        		features.add("cons_1*0*="+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()
+        				+";"+tree0.getNodeName());
+        	}
+        }
+        
+        if(tree0 != null && tree1 != null){
+        	if(cons01Set){
+        		features.add("cons01="+tree0.getNodeName()+"|"+tree0.getHeadWords()
+        				+";"+tree1.getNodeName()+"|"+tree1.getHeadWords());
+        	}
+        	if(cons01ASet){
+        		features.add("cons01*="+tree0.getNodeName()+"|"+tree0.getHeadWords()
+        				+";"+tree1.getNodeName());
+        	}
+        	if(cons0A1Set){
+        		features.add("cons0*1="+tree0.getNodeName()
+        				+";"+tree1.getNodeName()+"|"+tree1.getHeadWords());
+        	}
+        	if(cons0A1ASet){
+        		features.add("cons0*1*="+tree0.getNodeName()
+        				+";"+tree1.getNodeName());
+        	}
+        }
+        
+        if(tree_2 != null && tree_1 != null && tree0 != null){
+        	if(cons_2_10Set){
+        		features.add("cons_2_10="+tree_2.getNodeName()+"|"+tree_2.getChildren().get(0).getNodeName()+"|"+tree_2.getChildren().get(0).getHeadWords()
+        				+";"+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()+"|"+tree_1.getChildren().get(0).getHeadWords()
+        				+";"+tree0.getNodeName()+"|"+tree0.getHeadWords());
+        	}
+        	if(cons_2A_1A0Set){
+        		features.add("cons_2*_1*0="+tree_2.getNodeName()+"|"+tree_2.getChildren().get(0).getNodeName()
+        				+";"+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()
+        				+";"+tree0.getNodeName()+"|"+tree0.getHeadWords());
+        	}
+        	if(cons_2A_10Set){
+        		features.add("cons_2*_10="+tree_2.getNodeName()+"|"+tree_2.getChildren().get(0).getNodeName()
+        				+";"+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()+"|"+tree_1.getChildren().get(0).getHeadWords()
+        				+";"+tree0.getNodeName()+"|"+tree0.getHeadWords());
+        	}
+        	if(cons_2_1A0Set){
+        		features.add("cons_2_1*0="+tree_2.getNodeName()+"|"+tree_2.getChildren().get(0).getNodeName()+"|"+tree_2.getChildren().get(0).getHeadWords()
+        				+";"+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()
+        				+";"+tree0.getNodeName()+"|"+tree0.getHeadWords());
+        	}
+        	if(cons_2A_1A0ASet){
+        		features.add("cons_2*_1*0*="+tree_2.getNodeName()+"|"+tree_2.getChildren().get(0).getNodeName()
+        				+";"+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()
+        				+";"+tree0.getNodeName());
+        	}
+        }     
+
+        if(tree0 != null && tree1 != null && tree2 != null){
+        	if(cons012Set){
+        		features.add("cons012="+tree0.getNodeName()+"|"+tree0.getHeadWords()
+        				+";"+tree1.getNodeName()+"|"+tree1.getHeadWords()
+        				+";"+tree2.getNodeName()+"|"+tree2.getHeadWords());
+        	}
+        	if(cons01A2ASet){
+        		features.add("cons01*2*="+tree0.getNodeName()+"|"+tree0.getHeadWords()
+        				+";"+tree1.getNodeName()
+        				+";"+tree2.getNodeName());
+        	}
+        	if(cons01A2Set){
+        		features.add("cons01*2="+tree0.getNodeName()+"|"+tree0.getHeadWords()
+        				+";"+tree1.getNodeName()
+        				+";"+tree2.getNodeName()+"|"+tree2.getHeadWords());
+        	}
+        	if(cons012ASet){
+        		features.add("cons012*="+tree0.getNodeName()+"|"+tree0.getHeadWords()
+        				+";"+tree1.getNodeName()+"|"+tree1.getHeadWords()
+        				+";"+tree2.getNodeName());
+        	}
+        	if(cons0A1A2ASet){
+        		features.add("cons0*1*2*="+tree0.getNodeName()
+        				+";"+tree1.getNodeName()
+        				+";"+tree2.getNodeName());
+        	}
+        }
+
+        if(tree_1 != null && tree0 != null && tree1 != null){
+        	if(cons_101Set){
+        		features.add("cons_101="+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()+"|"+tree_1.getChildren().get(0).getHeadWords()
+        				+";"+tree0.getNodeName()+"|"+tree0.getHeadWords()
+        				+";"+tree1.getNodeName()+"|"+tree1.getHeadWords());
+        	}
+        	if(cons_1A01ASet){
+        		features.add("cons_1*01*="+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()
+        				+";"+tree0.getNodeName()+"|"+tree0.getHeadWords()
+        				+";"+tree1.getNodeName());
+        	}
+        	if(cons_1A01Set){
+        		features.add("cons_1*01="+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()
+        				+";"+tree0.getNodeName()+"|"+tree0.getHeadWords()
+        				+";"+tree1.getNodeName()+"|"+tree1.getHeadWords());
+        	}
+        	if(cons_101ASet){
+        		features.add("cons_101*="+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()+"|"+tree_1.getChildren().get(0).getHeadWords()
+        				+";"+tree0.getNodeName()+"|"+tree0.getHeadWords()
+        				+";"+tree1.getNodeName());
+        	}
+        	if(cons_1A0A1ASet){
+        		features.add("cons_1*0*1*="+tree_1.getNodeName()+"|"+tree_1.getChildren().get(0).getNodeName()
+        				+";"+tree0.getNodeName()
+        				+";"+tree1.getNodeName());
+        	}
+        }
+        
+        //标点符号
+        for (int i = index-1; i >= 0; i--) {
+			if(chunkTree.get(i).getChildren().get(0).getNodeName().equals("[")){
+				if(tree0.getNodeName().equals("]")){
+					if(punctuationSet){
+						features.add("punctuation="+"bracketsmatch");
+					}
+				}
+			}
+		}
+        
+        for (int i = index-1; i >= 0; i--) {
+			if(chunkTree.get(i).getChildren().get(0).getNodeName().equals(",")){
+				if(tree0.getNodeName().equals(",")){
+					if(punctuationSet){
+						features.add("punctuation="+"comma");
+					}
+				}
+			}
+		}
+        
+        if(tree0.getNodeName().equals(".")){
+			if(punctuationSet){
+				features.add("punctuation="+"endofsentence");
+			}
+		}
+        
+		String[] contexts = features.toArray(new String[features.size()]);
+        return contexts;
+	}
+
+	/**
+	 * 为测试语料的check步的上下文特征
+	 * @param index 当前位置
+	 * @param chunkTree 子树序列
+	 * @param actions 动作序列
+	 * @param out 当前的动作序列
+	 * @param ac 
+	 * @return
+	 */
+	@Override
+	public String[] getContextForCheckForTest(int index, List<TreeNode> chunkTree, List<String> actions, String out, Object[] ac) {
+		
+		return getContextForCheckForTest(index,chunkTree,actions,out);
+	}
+
+	/**
+	 * 为测试语料的check步的上下文特征
+	 * @param index 当前位置
+	 * @param buildAndCheckTree 子树序列
+	 * @param actions 动作序列
+	 * @param out 当前的动作序列
+	 * @return
+	 */
+	private String[] getContextForCheckForTest(int index, List<TreeNode> buildAndCheckTree, List<String> actions,String out) {
+		List<String> features = new ArrayList<String>();
+		String rightRule = "";
+//		tree0 = buildAndCheckTree.get(index);
+		
+		int record = -1;
+		if(out.split("_")[0].equals("start")){
+			record = index;
+		}else{
+			for (int i = index-1; i >= 0; i--) {
+				if(buildAndCheckTree.get(i).getNodeName().split("_")[0].equals("start")){
+					record = i;
+				}
+			}
+		}
+		
+		if(record == index){
+			if(checkcons_beginSet){
+				features.add("checkcons_begin="+out+"|"
+			+buildAndCheckTree.get(record).getNodeName()+"|"
+						+buildAndCheckTree.get(record).getHeadWords());
+			}
+			if(checkcons_beginASet){
+				features.add("checkcons_begin*="+out+"|"
+						+buildAndCheckTree.get(record).getNodeName());
+			}
+		}else{
+			if(checkcons_beginSet){
+				features.add("checkcons_begin="+buildAndCheckTree.get(record).getNodeName()+"|"
+			+buildAndCheckTree.get(record).getChildren().get(0).getNodeName()+"|"
+						+buildAndCheckTree.get(record).getChildren().get(0).getHeadWords());
+			}
+			if(checkcons_beginASet){
+				features.add("checkcons_begin*="+buildAndCheckTree.get(record).getNodeName()+"|"
+						+buildAndCheckTree.get(record).getChildren().get(0).getNodeName());
+			}
+		}
+		
+		
+		if(checkcons_lastSet){
+			features.add("checkcons_last="+out+"|"
+		+buildAndCheckTree.get(index).getNodeName()+"|"
+					+buildAndCheckTree.get(index).getHeadWords());
+		}
+		if(checkcons_lastASet){
+			features.add("checkcons_last*="+out+"|"
+					+buildAndCheckTree.get(index).getNodeName());
+		}
+		
+		for (int i = record; i < index; i++) {
+			if(checkcons_ilastSet){
+				features.add("checkcons_"+i+"last="+buildAndCheckTree.get(i).getNodeName()+"|"
+			+buildAndCheckTree.get(i).getChildren().get(0).getNodeName()+"|"
+						+buildAndCheckTree.get(i).getChildren().get(0).getHeadWords()+";"
+			+out+"|"
+			+buildAndCheckTree.get(index).getNodeName()+"|"
+			+buildAndCheckTree.get(index).getHeadWords());
+			}
+			if(checkcons_iAlastSet){
+				features.add("checkcons_"+i+"*last="+buildAndCheckTree.get(i).getNodeName()+"|"
+			+buildAndCheckTree.get(i).getChildren().get(0).getNodeName()
+						+";"
+			+out+"|"
+			+buildAndCheckTree.get(index).getNodeName()+"|"
+			+buildAndCheckTree.get(index).getHeadWords());
+			}
+			if(checkcons_ilastASet){
+				features.add("checkcons_"+i+"last*="+buildAndCheckTree.get(i).getNodeName()+"|"
+			+buildAndCheckTree.get(i).getChildren().get(0).getNodeName()+"|"
+						+buildAndCheckTree.get(i).getChildren().get(0).getHeadWords()+";"
+			+out+"|"
+			+buildAndCheckTree.get(index).getNodeName());
+			}
+			if(checkcons_iAlastASet){
+				features.add("checkcons_"+i+"*last*="+buildAndCheckTree.get(i).getNodeName()+"|"
+			+buildAndCheckTree.get(i).getChildren().get(0).getNodeName()+";"
+			+out+"|"
+			+buildAndCheckTree.get(index).getNodeName());
+			}
+		}
+		if(record == index){
+			rightRule = buildAndCheckTree.get(index).getNodeName();
+			
+		}else{
+			for (int i = record; i < index+1; i++) {
+				
+				if(i == index){
+					rightRule += buildAndCheckTree.get(i).getNodeName();
+				}else{
+					rightRule += buildAndCheckTree.get(i).getChildren().get(0).getNodeName()+",";
+				}
+			}
+		}
+		
+		if(out.contains("start") || out.contains("join")){			
+			if(productionSet){
+				features.add("production="+out.split("_")[1]+"→"+rightRule);
+			}
+		}
+		
+		List<TreeNode> leftposAndWordTree = getPosAndWordTree(buildAndCheckTree.get(record));
+		List<TreeNode> rightposAndWordTree = getPosAndWordTree(buildAndCheckTree.get(index));
+		
+		if(leftposAndWordTree != null){
+			//左
+			if(surround_1Set){
+				features.add("surround_1="+leftposAndWordTree.get(0).getNodeName()+"|"+leftposAndWordTree.get(0).getChildren().get(0).getNodeName());
+			}
+			if(surround_1ASet){
+				features.add("surround_1*="+leftposAndWordTree.get(0).getNodeName());
+			}
+			if(leftposAndWordTree.size() > 1){
+	
+				if(surround_2Set){
+					features.add("surround_2="+leftposAndWordTree.get(1).getNodeName()+"|"+leftposAndWordTree.get(1).getChildren().get(0).getNodeName());
+				}
+				if(surround_2ASet){
+					features.add("surround_2*="+leftposAndWordTree.get(1).getNodeName());
+				}
+			}
+		}
+
+		if(rightposAndWordTree != null){
+			//右
+			if(surround1Set){
+				features.add("surround1="+rightposAndWordTree.get(rightposAndWordTree.size()-1).getNodeName()+"|"+rightposAndWordTree.get(rightposAndWordTree.size()-1).getChildren().get(0).getNodeName());
+			}
+			if(surround1ASet){
+				features.add("surround1*="+rightposAndWordTree.get(rightposAndWordTree.size()-1).getNodeName());
+			}
+
+			if(leftposAndWordTree.size() > 1){
+				if(surround2Set){
+					features.add("surround2="+rightposAndWordTree.get(rightposAndWordTree.size()-2).getNodeName()+"|"+rightposAndWordTree.get(rightposAndWordTree.size()-2).getChildren().get(0).getNodeName());
+				}
+				if(surround2ASet){
+					features.add("surround2*="+rightposAndWordTree.get(rightposAndWordTree.size()-2).getNodeName());
+				}
+			}
+		}
+		String[] contexts = features.toArray(new String[features.size()]);
+        return contexts;
 	}	
 }

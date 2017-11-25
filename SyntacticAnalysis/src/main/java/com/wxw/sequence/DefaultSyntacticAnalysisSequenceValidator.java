@@ -12,27 +12,78 @@ import com.wxw.tree.TreeNode;
 public class DefaultSyntacticAnalysisSequenceValidator implements SyntacticAnalysisSequenceValidator{
 
 	/**
-	 * 
+	 * 检测chunk步骤的标记是否正确【chunk的标记有start join other】
 	 * @param i 当前位置
-	 * @param character 字序列
-	 * @param tags 字的标记序列
-	 * @param words 词语序列
-	 * @param chunkTree chunk步得到的树
-	 * @param buildAndCheckTree buildAndCheck步得到的树
+	 * @param posTree pos步得到的树
+	 * @param outcomes 当前位置之前的结果序列
 	 * @param out 当前位置的结果
 	 * @return
 	 */
 	@Override
-	public boolean validSequence(int i, List<String> words, List<String> poses, List<String> tags,
-			List<TreeNode> chunkTree, List<List<TreeNode>> buildAndCheckTree, String out) {
-		if(i < words.size()){//词性标记的验证
-			
-		}else if(i < 2*words.size()){//chunk步验证
-			
-		}else{//buildAndCheck步验证
-			
+	public boolean validSequenceForChunk(int i, List<TreeNode> posTree, List<String> outcomes, String out) {
+		
+		if(i == 0){
+			if(out.equals("other")){
+				return true;
+			}else if(out.split("_")[0].equals("start")){
+				return true;
+			}
+		}else if(i == posTree.size() -1){
+			if(out.equals("other") || out.split("_")[0].equals("start")){
+				if(outcomes.get(i-1).split("_")[0].equals("join") || outcomes.get(i-1).equals("other") || outcomes.get(i-1).split("_")[0].equals("start")){
+					return true;
+				}
+			}else if(out.split("_")[0].equals("join")){
+				if(outcomes.get(i-1).split("_")[0].equals("start") || outcomes.get(i-1).split("_")[0].equals("join")){
+					if(outcomes.get(i-1).split("_")[1].equals(out.split("_")[1])){					
+						return true;
+					}
+				}										
+			}
+		}else{
+			if(out.equals("other") || out.split("_")[0].equals("start")){
+				if(outcomes.get(i-1).split("_")[0].equals("join") || outcomes.get(i-1).equals("other") || outcomes.get(i-1).split("_")[0].equals("start")){
+					return true;
+				}
+			}else if(out.split("_")[0].equals("join")){
+				if(outcomes.get(i-1).split("_")[0].equals("start") || outcomes.get(i-1).split("_")[0].equals("join")){
+					if(outcomes.get(i-1).split("_")[1].equals(out.split("_")[1])){					
+						return true;
+					}
+				}
+			}
 		}
 		return false;
 	}
 
+	/**
+	 * 检验build和check步骤的标记是否正确【这里只检测build步骤的，check的有yes或者no两种，选大的概率的那个】
+	 * @param i 当前位置
+	 * @param combineChunkTree 合并后chunk步的结果
+	 * @param outcomes 当前位置之前的结果序列
+	 * @param outcomeslabel 当前位置之前的yes or no结果序列
+	 * @param out 当前位置的结果
+	 * @return
+	 */
+	@Override
+	public boolean validSequenceForBuildAndCheck(int i, List<TreeNode> combineChunkTree, List<String> outcomes,List<String> outcomeslabel,
+			String out) {
+		if(i == 0){
+			if(out.split("_")[0].equals("start")){
+				return true;
+			}
+		}else{
+			if(out.split("_")[0].equals("start")){
+				
+				return true;
+			}else if(out.split("_")[0].equals("join")){
+				if(combineChunkTree.get(i-1).getNodeName().split("_")[0].equals("start") || combineChunkTree.get(i-1).getNodeName().split("_")[0].equals("join")){
+					if(combineChunkTree.get(i-1).getNodeName().split("_")[1].equals(out.split("_")[1])){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 }

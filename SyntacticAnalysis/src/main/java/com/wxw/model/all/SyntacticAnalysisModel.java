@@ -1,4 +1,4 @@
-package com.wxw.model;
+package com.wxw.model.all;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +12,11 @@ import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.ml.model.SequenceClassificationModel;
 import opennlp.tools.util.model.BaseModel;
 
+/**
+ * 一步训练得到的树模型
+ * @author 王馨苇
+ *
+ */
 public class SyntacticAnalysisModel extends BaseModel{
 
 	private static final String COMPONENT_NAME = "SyntacticAnalysisME";
@@ -35,10 +40,10 @@ public class SyntacticAnalysisModel extends BaseModel{
 	 * @param beamSize 大小
 	 * @param manifestInfoEntries 配置的信息
 	 */
-	public SyntacticAnalysisModel(String languageCode, MaxentModel posModel, int beamSize,
+	public SyntacticAnalysisModel(String languageCode, MaxentModel model, int beamSize,
 			Map<String, String> manifestInfoEntries) {
 		super(COMPONENT_NAME, languageCode, manifestInfoEntries, null);
-		if (posModel == null) {
+		if (model == null) {
             throw new IllegalArgumentException("The maxentPosModel param must not be null!");
         }
 
@@ -46,19 +51,19 @@ public class SyntacticAnalysisModel extends BaseModel{
         manifest.setProperty(SyntacticAnalysisBeamSearch.BEAM_SIZE_PARAMETER, Integer.toString(beamSize));
 
         //放入新训练出来的模型
-        artifactMap.put(TREE_MODEL_ENTRY_NAME, posModel);
+        artifactMap.put(TREE_MODEL_ENTRY_NAME, model);
         checkArtifactMap();
 	}
 	
 
-	public SyntacticAnalysisModel(String languageCode, SequenceClassificationModel<String> seqPosModel,
+	public SyntacticAnalysisModel(String languageCode, SequenceClassificationModel<String> seqModel,
 			Map<String, String> manifestInfoEntries) {
 		super(COMPONENT_NAME, languageCode, manifestInfoEntries, null);
-		if (seqPosModel == null) {
+		if (seqModel == null) {
             throw new IllegalArgumentException("The maxent wordsegModel param must not be null!");
         }
 
-        artifactMap.put(TREE_MODEL_ENTRY_NAME, seqPosModel);
+        artifactMap.put(TREE_MODEL_ENTRY_NAME, seqModel);
 		
 	}
 

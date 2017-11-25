@@ -20,8 +20,7 @@ import opennlp.tools.util.ObjectStream;
  */
 public class SyntacticAnalysisSampleStream extends FilterObjectStream<String,SyntacticAnalysisSample>{
 
-	private PhraseGenerateTree pgt = new PhraseGenerateTree();
-	private TreeToActions tta = new TreeToActions();
+	
 	private Logger logger = Logger.getLogger(SyntacticAnalysisSampleStream.class.getName());
 	/**
 	 * 构造
@@ -39,6 +38,8 @@ public class SyntacticAnalysisSampleStream extends FilterObjectStream<String,Syn
 	public SyntacticAnalysisSample read() throws IOException {
 		String sentence = samples.read();	
 		SyntacticAnalysisSample sample = null;
+		PhraseGenerateTree pgt = new PhraseGenerateTree();
+		TreeToActions tta = new TreeToActions();
 		if(sentence != null){
 			if(sentence.compareTo("") != 0){
 				try{
@@ -47,10 +48,9 @@ public class SyntacticAnalysisSampleStream extends FilterObjectStream<String,Syn
 				}catch(Exception e){
 					if (logger.isLoggable(Level.WARNING)) {						
 	                    logger.warning("Error during parsing, ignoring sentence: " + sentence);
-	                }					
+	                }	
+					sample = new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 				}
-
-				sample = new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 				return sample;
 			}else {
 				sample = new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());

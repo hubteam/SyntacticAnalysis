@@ -9,23 +9,20 @@ import java.util.HashMap;
 import java.util.Properties;
 
 import com.wxw.evaluate.SyntacticAnalysisErrorPrinter;
-import com.wxw.evaluate.SyntacticAnalysisEvaluatorForChina;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
 import com.wxw.feature.FeatureForPosTools;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
-import com.wxw.model.all.SyntacticAnalysisEvaluatorForAll;
 import com.wxw.model.all.SyntacticAnalysisME;
-import com.wxw.model.all.SyntacticAnalysisModel;
+import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForStep;
+import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;
+import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
+import com.wxw.model.bystep.SyntacticAnalysisModelForBuildAndCheck;
+import com.wxw.model.bystep.SyntacticAnalysisModelForChunk;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
 import com.wxw.tree.TreePreTreatment;
-import com.wxw.wordsegandpos.feature.WordSegAndPosContextGenerator;
-import com.wxw.wordsegandpos.feature.WordSegAndPosContextGeneratorConfExtend;
-import com.wxw.wordsegandpos.model.WordSegAndPosME;
-import com.wxw.wordsegandpos.model.WordSegAndPosModel;
-import com.wxw.wordsegandpos.model.WordSegAndPosModelLoader;
 
 import opennlp.tools.cmdline.postag.POSModelLoader;
 import opennlp.tools.postag.POSModel;
@@ -33,13 +30,12 @@ import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.PlainTextByLineStream;
 import opennlp.tools.util.TrainingParameters;
-
 /**
- * 中文句法分析运行类
+ * 分步骤训练模型的运行类
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisRunForChina {
+public class SyntacticAnalysisRunByStep {
 
 	private static String flag = "train";
 
@@ -49,12 +45,13 @@ public class SyntacticAnalysisRunForChina {
 		public String encoding;
 		public String trainFile;
 		public String testFile;
-		public String posmodelbinaryFile;
-		public String posmodeltxtFile;
 		public String posenglish;
-		public String poschina;
-		public String treemodelbinaryFile;
-		public String treemodeltxtFile;
+		public String chunkmodelbinaryFile;
+		public String chunkmodeltxtFile;
+		public String buildmodelbinaryFile;
+		public String buildmodeltxtFile;
+		public String checkmodelbinaryFile;
+		public String checkmodeltxtFile;
 		public String errorFile;
 	}
 	
@@ -87,24 +84,26 @@ public class SyntacticAnalysisRunForChina {
 			String encoding = config.getProperty(name + "." + "corpus.encoding");
 			String trainFile = config.getProperty(name + "." + "corpus.train.file");
 			String testFile = config.getProperty(name+"."+"corpus.test.file");
-			String posmodelbinaryFile = config.getProperty(name + "." + "corpus.posmodelbinary.file");
-			String posmodeltxtFile = config.getProperty(name + "." + "corpus.posmodeltxt.file");
 			String posenglish = config.getProperty(name + "." + "corpus.posenglish.file");
-			String poschina = config.getProperty(name + "." + "corpus.poschina.file");
-			String treemodelbinaryFile = config.getProperty(name + "." + "corpus.treemodelbinary.file");
-			String treemodeltxtFile = config.getProperty(name + "." + "corpus.treemodeltxt.file");
+			String chunkmodelbinaryFile = config.getProperty(name + "." + "corpus.chunkmodelbinary.file");
+			String chunkmodeltxtFile = config.getProperty(name + "." + "corpus.chunkmodeltxt.file");
+			String buildmodelbinaryFile = config.getProperty(name + "." + "corpus.buildmodelbinary.file");
+			String buildmodeltxtFile = config.getProperty(name + "." + "corpus.buildmodeltxt.file");
+			String checkmodelbinaryFile = config.getProperty(name + "." + "corpus.checkmodelbinary.file");
+			String checkmodeltxtFile = config.getProperty(name + "." + "corpus.checkmodeltxt.file");
 			String errorFile = config.getProperty(name + "." + "corpus.error.file");
 			Corpus corpus = new Corpus();
 			corpus.name = name;
 			corpus.encoding = encoding;
 			corpus.trainFile = trainFile;
 			corpus.testFile = testFile;
-			corpus.posmodeltxtFile = posmodeltxtFile;
-			corpus.posmodelbinaryFile = posmodelbinaryFile;
+			corpus.chunkmodeltxtFile = chunkmodeltxtFile;
+			corpus.chunkmodelbinaryFile = chunkmodelbinaryFile;
 			corpus.posenglish = posenglish;
-			corpus.poschina = poschina;
-			corpus.treemodeltxtFile = treemodeltxtFile;
-			corpus.treemodelbinaryFile = treemodelbinaryFile;
+			corpus.buildmodeltxtFile = buildmodeltxtFile;
+			corpus.buildmodelbinaryFile = buildmodelbinaryFile;
+			corpus.checkmodeltxtFile = checkmodeltxtFile;
+			corpus.checkmodelbinaryFile = checkmodelbinaryFile;
 			corpus.errorFile = errorFile;
 			corpuses[i] = corpus;			
 		}
@@ -208,22 +207,24 @@ public class SyntacticAnalysisRunForChina {
 	private static void evaluateOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
 			TrainingParameters params) throws IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);
-		WordSegAndPosModel posmodel = new WordSegAndPosModelLoader().load(new File(corpus.poschina));
-		WordSegAndPosContextGenerator generator = new WordSegAndPosContextGeneratorConfExtend();
-		WordSegAndPosME postagger = new WordSegAndPosME(posmodel, generator);
+		POSModel posmodel = new POSModelLoader().load(new File(corpus.posenglish));
+		POSTaggerME postagger = new POSTaggerME(posmodel);
 		
-        SyntacticAnalysisModel treemodel = SyntacticAnalysisME.readModel(new File(corpus.treemodeltxtFile), params, contextGen, corpus.encoding);	
-        SyntacticAnalysisME treetagger = new SyntacticAnalysisME(treemodel,contextGen);
+        SyntacticAnalysisModelForChunk chunkmodel = SyntacticAnalysisMEForChunk.readModel(new File(corpus.chunkmodeltxtFile), params, contextGen, corpus.encoding);	
+        SyntacticAnalysisMEForChunk chunktagger = new SyntacticAnalysisMEForChunk(chunkmodel,contextGen);
+      
+        SyntacticAnalysisModelForBuildAndCheck buildandcheckmodel = SyntacticAnalysisMEForBuildAndCheck.readModel(new File(corpus.buildmodeltxtFile), new File(corpus.checkmodeltxtFile),params, contextGen, corpus.encoding);	
+        SyntacticAnalysisMEForBuildAndCheck buildandchecktagger = new SyntacticAnalysisMEForBuildAndCheck(buildandcheckmodel,contextGen);
         
         SyntacticAnalysisMeasure measure = new SyntacticAnalysisMeasure();
-        SyntacticAnalysisEvaluatorForChina evaluator = null;
+        SyntacticAnalysisEvaluatorForStep evaluator = null;
         SyntacticAnalysisErrorPrinter printer = null;
         if(corpus.errorFile != null){
         	System.out.println("Print error to file " + corpus.errorFile);
         	printer = new SyntacticAnalysisErrorPrinter(new FileOutputStream(corpus.errorFile));    	
-        	evaluator = new SyntacticAnalysisEvaluatorForChina(postagger,treetagger,printer);
+        	evaluator = new SyntacticAnalysisEvaluatorForStep(postagger,chunktagger,buildandchecktagger,printer);
         }else{
-        	evaluator = new SyntacticAnalysisEvaluatorForChina(postagger,treetagger);
+        	evaluator = new SyntacticAnalysisEvaluatorForStep(postagger,chunktagger,buildandchecktagger);
         }
         evaluator.setMeasure(measure);
         //读测试语料之前也要预处理
@@ -256,11 +257,13 @@ public class SyntacticAnalysisRunForChina {
 		 //第一步预处理训练语料，得到处理之后的一个完整的训练语料
 		TreePreTreatment.pretreatment("train");
 		//根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数
-		HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(corpus.trainFile), "utf-8");
-		FeatureForPosTools tools = new FeatureForPosTools(dict);
+//		HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(corpus.trainFile), "utf-8");
+//		FeatureForPosTools tools = new FeatureForPosTools(dict);
 		//训练模型
 		//训练句法分析模型
-		SyntacticAnalysisME.train(new File(corpus.trainFile), new File(corpus.treemodelbinaryFile),new File(corpus.treemodeltxtFile),params, contextGen, corpus.encoding);
+		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile), new File(corpus.chunkmodelbinaryFile),new File(corpus.chunkmodeltxtFile),params, contextGen, corpus.encoding);
+		SyntacticAnalysisMEForBuildAndCheck.train(new File(corpus.trainFile), new File(corpus.buildmodeltxtFile),new File(corpus.checkmodeltxtFile),params, contextGen, corpus.encoding);
+
 	}
 
 	/**
@@ -279,10 +282,11 @@ public class SyntacticAnalysisRunForChina {
 		 //第一步预处理训练语料，得到处理之后的一个完整的训练语料
 		TreePreTreatment.pretreatment("train");
 		//根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数
-		HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(corpus.trainFile), "utf-8");
-		FeatureForPosTools tools = new FeatureForPosTools(dict);
+//		HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(corpus.trainFile), "utf-8");
+//		FeatureForPosTools tools = new FeatureForPosTools(dict);
 		//训练模型
 		//训练句法分析模型
-		SyntacticAnalysisME.train(new File(corpus.trainFile), params, contextGen, corpus.encoding);
+		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile), params, contextGen, corpus.encoding);
+		SyntacticAnalysisMEForBuildAndCheck.train(new File(corpus.trainFile), params, contextGen, corpus.encoding);
 	}
 }

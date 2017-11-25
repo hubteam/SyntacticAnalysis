@@ -1,30 +1,32 @@
-package com.wxw.stream;
+package com.wxw.model.pos.unused;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
+import com.wxw.feature.SyntacticAnalysisContextGeneratorForPos;
+import com.wxw.stream.SyntacticAnalysisSample;
 
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.util.AbstractEventStream;
 import opennlp.tools.util.ObjectStream;
 
 /**
- * 为词性标注生成事件
+ * 为英文词性标注生成事件
  * @author 王馨苇
  *
  */
 public class SyntacticAnalysisSampleEventForPos extends AbstractEventStream<SyntacticAnalysisSample>{
 
-	private SyntacticAnalysisContextGenerator generator;
+	private SyntacticAnalysisContextGeneratorForPos generator;
 	
 	/**
 	 * 构造
 	 * @param samples 样本流
 	 * @param generator 上下文产生器
 	 */
-	public SyntacticAnalysisSampleEventForPos(ObjectStream<SyntacticAnalysisSample> samples,SyntacticAnalysisContextGenerator generator) {
+	public SyntacticAnalysisSampleEventForPos(ObjectStream<SyntacticAnalysisSample> samples,SyntacticAnalysisContextGeneratorForPos generator) {
 		super(samples);
 		this.generator = generator;
 	}
@@ -53,8 +55,10 @@ public class SyntacticAnalysisSampleEventForPos extends AbstractEventStream<Synt
 	 */
 	private List<Event> generateEvents( List<String> words, List<String> poses, String[][] ac) {
 		List<Event> events = new ArrayList<Event>(words.size());
+		String[] word = words.toArray(new String[words.size()]);
+		String[] pos = poses.toArray(new String[poses.size()]);
 		for (int i = 0; i < words.size(); i++) {
-			String[] context = generator.getContextForPos(i,words, poses, ac);
+			String[] context = generator.getContext(i,word, pos, ac);
 			events.add(new Event(poses.get(i), context));
 		}
 		return events;

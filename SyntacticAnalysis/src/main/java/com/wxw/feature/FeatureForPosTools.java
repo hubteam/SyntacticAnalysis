@@ -31,11 +31,16 @@ public class FeatureForPosTools {
 	}
 	
 	public static boolean overFive(String w){
-		if(dict.get(w) >= 5 ){
-			return true;
+		if(dict.get(w) != null){
+			if(dict.get(w) >= 5 ){
+				return true;
+			}else{
+				return false;
+			}
 		}else{
 			return false;
 		}
+		
 	}
 	
 	public static boolean isAlbDigit(char c){

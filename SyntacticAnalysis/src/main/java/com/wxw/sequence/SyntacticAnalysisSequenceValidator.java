@@ -12,15 +12,23 @@ import com.wxw.tree.TreeNode;
 public interface SyntacticAnalysisSequenceValidator {
 
 	/**
-	 * 
+	 * 检验chunk步的标记是否正确
 	 * @param i 当前位置
-	 * @param character 字序列
-	 * @param tags 字的标记序列
-	 * @param words 词语序列
-	 * @param chunkTree chunk步得到的树
-	 * @param buildAndCheckTree buildAndCheck步得到的树
+	 * @param posTree pos步得到的树
+	 * @param outcomes 当前位置之前的结果序列
 	 * @param out 当前位置的结果
 	 * @return
 	 */
-	boolean validSequence(int i, List<String> words, List<String> poses, List<String> tags, List<TreeNode> chunkTree,List<List<TreeNode>> buildAndCheckTree,String out);
+	boolean validSequenceForChunk(int i, List<TreeNode> posTree,List<String> outcomes, String out);
+	
+	/**
+	 * 检验build和check步骤的标记是否正确
+	 * @param i 当前位置
+	 * @param combineChunkTree 合并后chunk步的结果
+	 * @param outcomes 当前位置之前的结果序列
+	 * @param outcomeslabel 当前位置之前的yes or no结果序列
+	 * @param out 当前位置的结果
+	 * @return
+	 */
+	boolean validSequenceForBuildAndCheck(int i, List<TreeNode> combineChunkTree,List<String> outcomes, List<String> outcomeslabel, String out );
 }

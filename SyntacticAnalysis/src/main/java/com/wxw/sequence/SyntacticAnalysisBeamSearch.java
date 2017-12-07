@@ -262,6 +262,10 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 					double temScore = top.getScore();
 					numSeq = top.getBegin();//要处理的树的编号
 					String[] contextsForBuild = generator.getContextForBuildForTest(numSeq, top.getTree(), tmpOutcomes, ac);
+//					for (int j = 0; j < contextsForBuild.length; j++) {
+//						System.out.println(contextsForBuild[j]);
+//					}
+					
 					double[] scoresForBuild;
 					//得到每个类别的分数
 					if (this.contextsCache != null) {
@@ -297,8 +301,10 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 								System.out.println(seqIndex+":"+topSequences);
 								System.out.println(out);
 								String[] contextsForCheck = generator.getContextForCheckForTest(numSeq, top.getTree(), tmpOutcomes, out, ac);
+//								for (int j = 0; j < contextsForCheck.length; j++) {
+//									System.out.println(contextsForCheck[j]);
+//								}
 								double[] scoresForCheck = this.checkmodel.eval(contextsForCheck);
-//								String bestout = this.model.getBestOutcome(scoresForCheck);
 								//排序
 								double[] temp_scoresForCheck = new double[scoresForCheck.length];
 								System.arraycopy(scoresForCheck, 0, temp_scoresForCheck, 0, scoresForCheck.length);//数组的复制

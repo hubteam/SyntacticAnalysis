@@ -44,18 +44,16 @@ public class TestBeamSearch extends TestCase{
 		POSModel model = new POSModelLoader().load(new File(prop.getProperty("tree.corpus.posenglish.file")));
 		POSTaggerME postagger = new POSTaggerME(model);
 		SyntacticAnalysisContextGeneratorForPos contextGenpos = new SyntacticAnalysisContextGeneratorConfForPos();
-//		SyntacticAnalysisModelForPos posmodel = SyntacticAnalysisMEForPos.readModel(new File("data\\model\\trainpos\\posmodeltxt.txt"), params, contextGenpos, "utf8");
-//		SyntacticAnalysisMEForPos pp = new SyntacticAnalysisMEForPos(posmodel,contextGenpos);
+		
 		String[] words = {"I","saw","the","man","with","the","telescope","."};
-		HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(prop.getProperty("tree.corpus.train.file")), "utf-8");
-		@SuppressWarnings("unused")
-		FeatureForPosTools tools = new FeatureForPosTools(dict);
-//		String[][] selfpos = pp.tag(5, words);
+//		String[] words = {"Mr.","Vinken","is","chairman","of","Elsevier","N.V.",",","the","Dutch","publishing","group","."};
+//		String[] words = {"It","has","no","bearing","on","our","work","force","today","."};
+
 		String[][] poses = postagger.tag(5, words);
 		
 		List<List<TreeNode>> posTree = SyntacticAnalysisSample.toPosTree(words, poses);
 		
-		List<List<TreeNode>> chunkTree = chunktagger.tagChunk(20, posTree, null);
+		List<List<TreeNode>> chunkTree = chunktagger.tagChunk(10, posTree, null);
 		TreeToActions tta = new TreeToActions();
 		List<List<TreeNode>> combineChunk = new ArrayList<List<TreeNode>>();
 		
@@ -66,7 +64,7 @@ public class TestBeamSearch extends TestCase{
 		SyntacticAnalysisModelForBuildAndCheck buildandcheckmodel = SyntacticAnalysisMEForBuildAndCheck.readModel(new File(prop.getProperty("tree.corpus.buildmodeltxt.file")), 
 				new File(prop.getProperty("tree.corpus.checkmodeltxt.file")), params, contextGen, "utf8");	
         SyntacticAnalysisMEForBuildAndCheck buildandchecktagger = new SyntacticAnalysisMEForBuildAndCheck(buildandcheckmodel,contextGen);
-		List<List<TreeNode>> buildAndCheckTree = buildandchecktagger.tagBuildAndCheck(20, combineChunk, null);
+		List<List<TreeNode>> buildAndCheckTree = buildandchecktagger.tagBuildAndCheck(5, combineChunk, null);
 		TreeNode tree = buildAndCheckTree.get(0).get(0);
 		System.out.println(tree.toString());
 	}

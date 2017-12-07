@@ -53,7 +53,6 @@ public class PhraseGenerateTree {
 					node.setHeadWords(GenerateHeadWords.getHeadWords(node));
 				}
 				tree.push(node);
-//				System.out.println(tree.toString());
 			}
 		}
         TreeNode treeStruct = tree.pop();
@@ -93,7 +92,6 @@ public class PhraseGenerateTree {
 			}
 		}
         TreeNode treeStruct = tree.pop();
-//        System.out.println(treeStruct.toNewSample());
         return treeStruct;
 	}
 	

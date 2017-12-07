@@ -61,5 +61,4 @@ public class SyntacticAnalysisSampleStream extends FilterObjectStream<String,Syn
 			return null;
 		}
 	}
-
 }

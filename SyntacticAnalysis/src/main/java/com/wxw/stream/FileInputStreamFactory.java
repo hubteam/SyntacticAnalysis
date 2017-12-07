@@ -18,7 +18,7 @@ public class FileInputStreamFactory implements InputStreamFactory{
 	File file;
 	/**
 	 * 获取样本流
-	 * @return 样本流
+	 * @param 样本流
 	 * @throws FileNotFoundException 
 	 */
 	public FileInputStreamFactory(File file) throws FileNotFoundException{

@@ -21,10 +21,10 @@ import com.wxw.model.all.SyntacticAnalysisModel;
 import com.wxw.model.pos.unused.SyntacticAnalysisEvaluatorContainPos;
 import com.wxw.model.pos.unused.SyntacticAnalysisMEForPos;
 import com.wxw.model.pos.unused.SyntacticAnalysisModelForPos;
+import com.wxw.pretreattools.TreePreTreatment;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
-import com.wxw.tree.TreePreTreatment;
 
 import opennlp.tools.cmdline.postag.POSModelLoader;
 import opennlp.tools.postag.POSModel;

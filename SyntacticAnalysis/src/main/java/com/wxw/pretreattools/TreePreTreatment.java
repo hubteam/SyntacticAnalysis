@@ -1,4 +1,4 @@
-package com.wxw.tree;
+package com.wxw.pretreattools;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,6 +15,8 @@ import org.junit.Test;
 
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
+import com.wxw.tree.PhraseGenerateTree;
+import com.wxw.tree.TreeNode;
 
 /**
  * 训练语料中树的初始化处理
@@ -61,12 +63,12 @@ public class TreePreTreatment{
 			String tree = "";
 			while((tree = lineStream.read()) != ""){
 				String treeStr = format(tree);
-				TreeNode node = pgt.generateTreeForPreTreatment(tree);
+				TreeNode node = pgt.generateTreeForPreTreatment(treeStr);
 				//对树进行遍历
 				travelTree(node);	
-//			    bw.write(""+i);
-				bw.write(node.toNewSample());
-//				System.out.println(node.toNewSample());
+				String newTreeStr = node.toNewSample();
+				TreeNode newTree = pgt.generateTreeForPreTreatment(newTreeStr);
+				bw.write("("+TreeNode.printTree(newTree, 1)+")");
 				bw.newLine();
 			}
 		}
@@ -124,13 +126,16 @@ public class TreePreTreatment{
 					node.getChildren().get(0).setFlag(false);	
 					//(SBAR(-NONE- 0)(S(-NONE- *T*-1)))
 					if(node.getParent().getChildren().size() == 2){
+						node.getParent().setFlag(false);
 						if(node.getParent().getChildren().get(1).getChildren().size() == 1){
 							if(node.getParent().getChildren().get(1).getChildren().get(0).getNodeName().contains("NONE")){
-								node.getParent().setFlag(false);
 								node.getParent().getChildren().get(1).setFlag(false);
 								node.getParent().getChildren().get(1).getChildren().get(0).setFlag(false);
 								node.getParent().getChildren().get(1).getChildren().get(0).getChildren().get(0).setFlag(false);
-								
+								//(VP (VBD reported) (SBAR (-NONE- 0) (S (-NONE- *T*-1) )))变为(VBD reported)
+								if(node.getParent().getParent().getChildren().size() == 2){
+									node.getParent().getParent().setFlag(false);
+								}
 							}
 						}
 					}
@@ -139,13 +144,16 @@ public class TreePreTreatment{
 					node.setFlag(false);
 					node.getChildren().get(0).setFlag(false);
 					node.getParent().setFlag(false);
+					//(S(NP(-NONE- *-1))(VP(To to)(VP ....)))
+					if(node.getParent().getParent().getChildren().size() == 2){
+						node.getParent().getParent().setFlag(false);
+					}
 				}
 			}else if(node.getNodeName().contains("-")){
 				if(!node.getNodeName().equals("-LRB-") && !(node.getNodeName().equals("-RRB-"))){
 					node.setNewName(node.getNodeName().split("-")[0]);
 				}
 			}else if(isDigit(node.getNodeName().charAt(node.getNodeName().length()-1))){
-//				node.setNewName(node.getNodeName().substring(0, node.getNodeName().length()-2));
 				if(isDigit(node.getNodeName().charAt(node.getNodeName().length()-2))){
 					node.setNewName(node.getNodeName().substring(0, node.getNodeName().length()-3));
 				}else{

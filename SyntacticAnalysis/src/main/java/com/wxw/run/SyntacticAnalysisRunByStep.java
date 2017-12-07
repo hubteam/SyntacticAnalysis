@@ -19,10 +19,10 @@ import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
 import com.wxw.model.bystep.SyntacticAnalysisModelForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisModelForChunk;
+import com.wxw.pretreattools.TreePreTreatment;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
-import com.wxw.tree.TreePreTreatment;
 
 import opennlp.tools.cmdline.postag.POSModelLoader;
 import opennlp.tools.postag.POSModel;
@@ -156,7 +156,7 @@ public class SyntacticAnalysisRunByStep {
 	 */
 	private static void runFeature() throws IOException, UnsupportedOperationException, CloneNotSupportedException {
 		TrainingParameters params = TrainingParameters.defaultParams();
-		params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(3));
+		params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(1));
 	
 		//加载语料文件
         Properties config = new Properties();

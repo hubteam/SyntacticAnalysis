@@ -104,5 +104,4 @@ public class PlainTextByTreeStream  implements ObjectStream<String>{
 			this.in = new BufferedReader(Channels.newReader(this.channel, this.encoding));
 		}
 	}
-
 }

@@ -1,52 +1,67 @@
 package com.wxw.tree;
 
-import java.io.BufferedReader;
+import static org.junit.Assert.*;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
-
-import junit.framework.TestCase;
 
 /**
  * 测试树到动作再到树是否合法
  * @author 王馨苇
  *
  */
-public class Tree2Action2TreeTest extends TestCase{
+public class Tree2Action2TreeTest{
 
+	private URL is;
+	private PlainTextByTreeStream lineStream ;
+	private String txt ;
+	private PhraseGenerateTree pgt ;
+	private TreeNode tree ;
+
+	private TreeToActions tta ;
+	private SyntacticAnalysisSample sample ;
+	private List<String> words ;
+	private List<String> actions ;
+
+	private ActionsToTree att ;
+	private TreeNode newTree ;
+	
+	@Before
+	public void setUP() throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException{
+		is = Tree2Action2TreeTest.class.getClassLoader().getResource("com/wxw/test/wsj_0076.mrg");
+		lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(is.getFile())), "utf8");
+		txt = lineStream.read();
+		pgt = new PhraseGenerateTree();
+		tree = pgt.generateTree(txt);
+
+		tta = new TreeToActions();
+		sample = tta.treeToAction(tree);
+		words = sample.getWords();
+		actions = sample.getActions();
+
+		att = new ActionsToTree();
+		newTree = att.actionsToTree(words, actions);
+	}
+	
 	/**
 	 * 测试由句法树到动作序列，再从动作序列到句法树的过程
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 * @throws CloneNotSupportedException
 	 */
+	@Test
 	public void testLoadTree() throws FileNotFoundException, IOException, CloneNotSupportedException{
-		URL is = Tree2Action2TreeTest.class.getClassLoader().getResource("com/wxw/test/wsj_0076.mrg");
-		PlainTextByTreeStream lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(is.getFile())), "utf8");
-		String txt = lineStream.read();
-//		BufferedReader reader = new BufferedReader(new InputStreamReader(is,"utf8"));
-		// 一次读取n行,jie
 		
-		PhraseGenerateTree pgt = new PhraseGenerateTree();
-		TreeNode tree = pgt.generateTree(txt);
-
-		TreeToActions tta = new TreeToActions();
-		SyntacticAnalysisSample sample = tta.treeToAction(tree);
-		List<String> words = sample.getWords();
-		List<String> actions = sample.getActions();
-
-		ActionsToTree att = new ActionsToTree();
-		TreeNode newTree = att.actionsToTree(words, actions);
-		System.out.println(newTree.toString());
 		assertEquals(tree, newTree);
 	}	
 	

@@ -41,7 +41,7 @@ import opennlp.tools.util.TrainingParameters;
  *
  */
 public class SyntacticAnalysisMEForBuildAndCheck {
-	public static final int DEFAULT_BEAM_SIZE = 10;
+	public static final int DEFAULT_BEAM_SIZE = 1;
 	private SyntacticAnalysisContextGenerator contextGenerator;
 	private int size;
 	private Sequence bestSequence;

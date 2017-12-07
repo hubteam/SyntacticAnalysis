@@ -123,26 +123,27 @@ public class GenerateHeadWords {
 	 * @return
 	 */
 	public static String getHeadWordsByRules(TreeNode node,List<String> list, String direction){
-		if(direction.equals("left")){
-			//用第一个子节点和所有的规则匹配，匹配到就返回，匹配不到就拿第二个子节点和所有的规则匹配，以此类推
-			for (int i = 0; i < node.getChildren().size(); i++) {
-				if(list.contains(node.getChildren().get(i).getNodeName().split("-")[0])){
-					return node.getChildren().get(i).getHeadWords();
-				}
-			}
-			//如果所有的规则都没有匹配，返回最左边的第一个
-			return node.getChildren().get(0).getHeadWords();
-		}else if(direction.equals("right")){
-			for (int i = node.getChildren().size() - 1; i >= 0; i--) {
-				if(list.contains(node.getChildren().get(i).getNodeName().split("-")[0])){
-					return node.getChildren().get(i).getHeadWords();
-				}
-			}
-			//如果所有的规则都没有匹配，返回最左边的第一个
-			return node.getChildren().get(0).getHeadWords();
-		}
 		
-		return null;
+		if(direction.equals("left")){
+			//用所有的子节点从左向右匹配规则中每一个
+			for (int i = 0; i < list.size(); i++) {
+				for (int j = 0; j < node.getChildren().size(); j++) {
+					if(node.getChildren().get(j).getNodeName().equals(list.get(i))){
+						return node.getChildren().get(j).getHeadWords();
+					}
+				}
+			}
+		}else if(direction.equals("right")){
+			for (int i = list.size() -1 ; i >= 0; i--) {
+				for (int j = 0; j < node.getChildren().size(); j++) {
+					if(node.getChildren().get(j).getNodeName().equals(list.get(i))){
+						return node.getChildren().get(j).getHeadWords();
+					}
+				}
+			}
+		}
+		//如果所有的规则都没有匹配，返回最左边的第一个
+		return node.getChildren().get(0).getHeadWords();
 	}
 	
 	/**

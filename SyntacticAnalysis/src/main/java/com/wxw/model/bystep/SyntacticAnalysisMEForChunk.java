@@ -18,6 +18,7 @@ import com.wxw.sequence.SyntacticAnalysisSequenceClassificationModel;
 import com.wxw.sequence.SyntacticAnalysisSequenceForChunk;
 import com.wxw.sequence.SyntacticAnalysisSequenceValidator;
 import com.wxw.stream.FileInputStreamFactory;
+import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
 import com.wxw.tree.PhraseGenerateTree;
@@ -34,7 +35,6 @@ import opennlp.tools.ml.model.Event;
 import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.ml.model.SequenceClassificationModel;
 import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.PlainTextByLineStream;
 import opennlp.tools.util.Sequence;
 import opennlp.tools.util.TrainingParameters;
 /**
@@ -103,7 +103,7 @@ public class SyntacticAnalysisMEForChunk {
 			String encoding){
 		SyntacticAnalysisModelForChunk model = null;
 		try {
-			ObjectStream<String> lineStream = new PlainTextByLineStream(new FileInputStreamFactory(file), encoding);
+			ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(file), encoding);
 			ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
 			model = SyntacticAnalysisMEForChunk.train("zh", sampleStream, params, contextGen);
 			return model;
@@ -168,7 +168,7 @@ public class SyntacticAnalysisMEForChunk {
 		PlainTextGISModelWriter modelWriter = null;
 		SyntacticAnalysisModelForChunk model = null;
 		try {
-			ObjectStream<String> lineStream = new PlainTextByLineStream(new FileInputStreamFactory(file), encoding);
+			ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(file), encoding);
 			ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
 			model = SyntacticAnalysisMEForChunk.train("zh", sampleStream, params, contextGen);
 			 //模型的持久化，写出的为二进制文件
@@ -253,7 +253,7 @@ public class SyntacticAnalysisMEForChunk {
 	 */
 	public static HashMap<String,Integer> buildDictionary(File file, String encoding) throws IOException, CloneNotSupportedException{
 		HashMap<String,Integer> dict = new HashMap<String,Integer>();
-		PlainTextByLineStream lineStream = new PlainTextByLineStream(new FileInputStreamFactory(file), "utf8");
+		PlainTextByTreeStream lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(file), "utf8");
 		PhraseGenerateTree pgt = new PhraseGenerateTree();
 		TreeToActions tta = new TreeToActions();
 		String txt = "";

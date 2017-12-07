@@ -254,11 +254,6 @@ public class SyntacticAnalysisRunByStep {
 	private static void modelOutOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
-		 //第一步预处理训练语料，得到处理之后的一个完整的训练语料
-		TreePreTreatment.pretreatment("train");
-		//根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数
-//		HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(corpus.trainFile), "utf-8");
-//		FeatureForPosTools tools = new FeatureForPosTools(dict);
 		//训练模型
 		//训练句法分析模型
 		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile), new File(corpus.chunkmodelbinaryFile),new File(corpus.chunkmodeltxtFile),params, contextGen, corpus.encoding);
@@ -279,11 +274,6 @@ public class SyntacticAnalysisRunByStep {
 	private static void trainOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
-		 //第一步预处理训练语料，得到处理之后的一个完整的训练语料
-		TreePreTreatment.pretreatment("train");
-		//根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数
-//		HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(corpus.trainFile), "utf-8");
-//		FeatureForPosTools tools = new FeatureForPosTools(dict);
 		//训练模型
 		//训练句法分析模型
 		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile), params, contextGen, corpus.encoding);

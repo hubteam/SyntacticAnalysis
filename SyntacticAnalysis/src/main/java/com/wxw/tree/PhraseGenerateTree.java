@@ -19,6 +19,7 @@ public class PhraseGenerateTree {
 	 * @return
 	 */
 	public TreeNode generateTree(String treeStr){
+		treeStr = format(treeStr);
 		int indexTree;//记录当前是第几颗子树
 		List<String> parts = stringToList(treeStr);
         Stack<TreeNode> tree = new Stack<TreeNode>();
@@ -117,5 +118,26 @@ public class PhraseGenerateTree {
             }
         }
         return parts;
+	}
+	
+	/**
+	 * 格式化为形如：(A(B1(C1 d1)(C2 d2))(B2 d3)) 的括号表达式。叶子及其父节点用一个空格分割，其他字符紧密相连。
+	 * @param tree 从训练语料拼接出的一棵树
+	 */
+	public static String format(String tree){
+		//去除最外围的括号
+        tree = tree.substring(1, tree.length() - 1).trim();
+        //所有空白符替换成一位空格
+        tree = tree.replaceAll("\\s+", " ");
+        //去掉 ( 和 ) 前的空格
+        String newTree = "";
+        for (int c = 0; c < tree.length(); ++c) {
+            if (tree.charAt(c) == ' ' && (tree.charAt(c + 1) == '(' || tree.charAt(c + 1) == ')')) {
+                continue;
+            } else {
+                newTree = newTree + (tree.charAt(c));
+            }
+        }
+        return newTree;
 	}
 }

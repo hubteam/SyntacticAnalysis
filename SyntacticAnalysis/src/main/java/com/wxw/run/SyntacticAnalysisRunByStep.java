@@ -17,18 +17,18 @@ import com.wxw.model.all.SyntacticAnalysisME;
 import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForStep;
 import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
+import com.wxw.model.bystep.SyntacticAnalysisMEForPos;
 import com.wxw.model.bystep.SyntacticAnalysisModelForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisModelForChunk;
 import com.wxw.pretreattools.TreePreTreatment;
 import com.wxw.stream.FileInputStreamFactory;
+import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
 
 import opennlp.tools.cmdline.postag.POSModelLoader;
 import opennlp.tools.postag.POSModel;
-import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.PlainTextByLineStream;
 import opennlp.tools.util.TrainingParameters;
 /**
  * 分步骤训练模型的运行类
@@ -160,7 +160,7 @@ public class SyntacticAnalysisRunByStep {
 	
 		//加载语料文件
         Properties config = new Properties();
-        InputStream configStream = SyntacticAnalysisRunForEng.class.getClassLoader().getResourceAsStream("com/wxw/run/corpus.properties");
+        InputStream configStream = SyntacticAnalysisRunForOneStep.class.getClassLoader().getResourceAsStream("com/wxw/run/corpus.properties");
         config.load(configStream);
         Corpus[] corpora = getCorporaFromConf(config);//获取语料
 
@@ -208,7 +208,7 @@ public class SyntacticAnalysisRunByStep {
 			TrainingParameters params) throws IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);
 		POSModel posmodel = new POSModelLoader().load(new File(corpus.posenglish));
-		POSTaggerME postagger = new POSTaggerME(posmodel);
+		SyntacticAnalysisMEForPos postagger = new SyntacticAnalysisMEForPos(posmodel);
 		
         SyntacticAnalysisModelForChunk chunkmodel = SyntacticAnalysisMEForChunk.readModel(new File(corpus.chunkmodeltxtFile), params, contextGen, corpus.encoding);	
         SyntacticAnalysisMEForChunk chunktagger = new SyntacticAnalysisMEForChunk(chunkmodel,contextGen);
@@ -227,13 +227,7 @@ public class SyntacticAnalysisRunByStep {
         	evaluator = new SyntacticAnalysisEvaluatorForStep(postagger,chunktagger,buildandchecktagger);
         }
         evaluator.setMeasure(measure);
-        //读测试语料之前也要预处理
-        //第一步预处理训练语料，得到处理之后的一个完整的训练语料
-        TreePreTreatment.pretreatment("test");
-        //根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数
-        HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(corpus.testFile), "utf-8");
-        FeatureForPosTools tools = new FeatureForPosTools(dict);
-        ObjectStream<String> linesStream = new PlainTextByLineStream(new FileInputStreamFactory(new File(corpus.testFile)), corpus.encoding);
+        ObjectStream<String> linesStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.testFile)), corpus.encoding);
         ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(linesStream);
         evaluator.evaluate(sampleStream);
         SyntacticAnalysisMeasure measureRes = evaluator.getMeasure();
@@ -254,11 +248,9 @@ public class SyntacticAnalysisRunByStep {
 	private static void modelOutOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
-		//训练模型
 		//训练句法分析模型
 		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile), new File(corpus.chunkmodelbinaryFile),new File(corpus.chunkmodeltxtFile),params, contextGen, corpus.encoding);
 		SyntacticAnalysisMEForBuildAndCheck.train(new File(corpus.trainFile), new File(corpus.buildmodeltxtFile),new File(corpus.checkmodeltxtFile),params, contextGen, corpus.encoding);
-
 	}
 
 	/**
@@ -274,7 +266,6 @@ public class SyntacticAnalysisRunByStep {
 	private static void trainOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
-		//训练模型
 		//训练句法分析模型
 		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile), params, contextGen, corpus.encoding);
 		SyntacticAnalysisMEForBuildAndCheck.train(new File(corpus.trainFile), params, contextGen, corpus.encoding);

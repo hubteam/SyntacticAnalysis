@@ -9,8 +9,6 @@ import com.wxw.tree.TreeNode;
 public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<SyntacticAnalysisSequenceForBuildAndCheck> {
 	private double score;
 	private double scorecheck;
-	private List<String> outcomes;
-	private List<String> outcomescheck;
 	private List<Double> probs;
 	private List<Double> probscheck;
 	private List<TreeNode> tree;
@@ -19,8 +17,6 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 	private static final Double ONE = Double.valueOf(1.0D);
 
 	public SyntacticAnalysisSequenceForBuildAndCheck() {
-		this.outcomes = new ArrayList<>(1);
-		this.outcomescheck = new ArrayList<>(1);
 		this.probs = new ArrayList<>(1);
 		this.probscheck = new ArrayList<>(1);
 		this.tree = new ArrayList<>(1);
@@ -31,8 +27,6 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 	}
 
 	public SyntacticAnalysisSequenceForBuildAndCheck(List<TreeNode> tree){
-		this.outcomes = new ArrayList<>(1);
-		this.outcomescheck = new ArrayList<>(1);
 		this.probs = new ArrayList<>(1);
 		this.probscheck = new ArrayList<>(1);
 		this.tree = tree;
@@ -43,10 +37,6 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 	}
 	
 	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s) {
-		this.outcomes = new ArrayList<>(s.outcomes.size() + 1);
-		this.outcomes.addAll(s.outcomes);
-		this.outcomescheck = new ArrayList<>(s.outcomescheck.size() + 1);
-		this.outcomescheck.addAll(s.outcomescheck);
 		this.probs = new ArrayList<>(s.probs.size() + 1);
 		this.probs.addAll(s.probs);
 		this.probscheck = new ArrayList<>(s.probscheck.size() + 1);
@@ -58,13 +48,7 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		this.begin = s.begin;
 	}
 
-	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s, String outcome,String checkoutcome, double p,double checkp, int lable) {
-		this.outcomes = new ArrayList<>(s.outcomes.size() + 1);
-		this.outcomes.addAll(s.outcomes);
-		this.outcomes.add(outcome);
-		this.outcomescheck = new ArrayList<>(s.outcomescheck.size() + 1);
-		this.outcomescheck.addAll(s.outcomescheck);
-		this.outcomescheck.add(checkoutcome);
+	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s,double p,double checkp, int lable) {
 		this.probs = new ArrayList<>(s.probs.size() + 1);
 		this.probs.addAll(s.probs);
 		this.probs.add(Double.valueOf(p));
@@ -77,19 +61,15 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		this.begin = s.begin;
 	}
 
-	public SyntacticAnalysisSequenceForBuildAndCheck(List<TreeNode> tree, List<String> outcomes,List<String> outcomescheck, int begin, int lable) {
-		this.tree = tree;
-		this.outcomes = outcomes;
-		this.outcomescheck = outcomescheck;
-		this.probs = Collections.nCopies(outcomes.size(), ONE);
-		this.probscheck = Collections.nCopies(outcomescheck.size(), ONE);
-		this.begin = begin;
-		this.lable = lable;
-	}
+//	public SyntacticAnalysisSequenceForBuildAndCheck(List<TreeNode> tree, int begin, int lable) {
+//		this.tree = tree;
+//		this.probs = Collections.nCopies(outcomes.size(), ONE);
+//		this.probscheck = Collections.nCopies(outcomescheck.size(), ONE);
+//		this.begin = begin;
+//		this.lable = lable;
+//	}
 
-	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s,List<TreeNode> tree,List<String> outcomes,List<String> outcomescheck, double p, double pcheck, int begin, int lable) {
-		this.outcomes = outcomes;
-		this.outcomescheck = outcomescheck;
+	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s,List<TreeNode> tree,double p, double pcheck, int begin, int lable) {
 		this.tree = tree;
 		this.probs = new ArrayList<>(s.probs.size() + 1);
 		this.probs.addAll(s.probs);
@@ -112,20 +92,10 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		return this.score < s.score ? 1 : (this.score > s.score ? -1 : 0);
 	}
 
-	public void add(String outcome, String outcomecheck, double p, double pcheck) {
-		this.outcomes.add(outcome);
-		this.outcomescheck.add(outcomecheck);
+	public void add(double p, double pcheck) {
 		this.probs.add(Double.valueOf(p));
 		this.probscheck.add(Double.valueOf(pcheck));
 		this.score += Math.log(p) + Math.log(pcheck);
-	}
-
-	public List<String> getOutcomes() {
-		return this.outcomes;
-	}
-
-	public List<String> getOutcomesCheck(){
-		return this.outcomescheck;
 	}
 	
 	public double[] getProbs() {

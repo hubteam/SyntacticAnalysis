@@ -55,20 +55,18 @@ public interface SyntacticAnalysisContextGenerator {
 	 * 为测试语料的build步的上下文特征
 	 * @param index 当前位置
 	 * @param chunkTree 子树序列
-	 * @param actions 动作序列
 	 * @param ac 
 	 * @return
 	 */
-	public String[] getContextForBuildForTest(int index,List<TreeNode> chunkTree, List<String> actions, Object[] ac);
+	public String[] getContextForBuildForTest(int index,List<TreeNode> chunkTree, Object[] ac);
 	
 	/**
 	 * 为测试语料的check步的上下文特征
 	 * @param index 当前位置
 	 * @param chunkTree 子树序列
-	 * @param actions 动作序列
 	 * @param out 当前输出的动作序列
 	 * @param ac 
 	 * @return
 	 */
-	public String[] getContextForCheckForTest(int index,List<TreeNode> chunkTree, List<String> actions, String out, Object[] ac);	
+	public String[] getContextForCheckForTest(int index,List<TreeNode> chunkTree, String out, Object[] ac);	
 }

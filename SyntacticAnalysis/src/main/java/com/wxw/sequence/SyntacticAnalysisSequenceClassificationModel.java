@@ -81,10 +81,4 @@ public interface SyntacticAnalysisSequenceClassificationModel {
 	 */
 	SyntacticAnalysisSequenceForBuildAndCheck[] bestSequencesForBuildAndCheck(int num, List<List<TreeNode>> comnineChunkTree, Object[] ac, SyntacticAnalysisContextGenerator generator,
 			SyntacticAnalysisSequenceValidator validator);
-	
-	/**
-	 * 得到最好的结果
-	 * @return
-	 */
-	String[] getOutcomes();
 }

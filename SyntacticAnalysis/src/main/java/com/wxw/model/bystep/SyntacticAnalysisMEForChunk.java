@@ -21,6 +21,7 @@ import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
+import com.wxw.syntacticanalysis.SyntacticAnalysisForChunk;
 import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
 import com.wxw.tree.TreeToActions;
@@ -34,6 +35,7 @@ import opennlp.tools.ml.model.AbstractModel;
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.ml.model.SequenceClassificationModel;
+import opennlp.tools.tokenize.WhitespaceTokenizer;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.Sequence;
 import opennlp.tools.util.TrainingParameters;
@@ -42,7 +44,7 @@ import opennlp.tools.util.TrainingParameters;
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisMEForChunk {
+public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk{
 
 	public static final int DEFAULT_BEAM_SIZE = 10;
 	private SyntacticAnalysisContextGenerator contextGenerator;
@@ -282,8 +284,10 @@ public class SyntacticAnalysisMEForChunk {
 	 * @param ac
 	 * @return
 	 */
-	public List<List<TreeNode>> tagChunk(int k, List<List<TreeNode>> posTree, Object[] ac){
+	public List<List<TreeNode>> tagKChunk(int k, List<List<TreeNode>> posTree, Object[] ac){
 		List<List<TreeNode>> chunkTree = new ArrayList<>();
+		TreeToActions tta = new TreeToActions();
+		List<List<TreeNode>> combineChunkTree = new ArrayList<>();
 		SyntacticAnalysisSequenceForChunk[] sequences = this.model.bestSequencesForChunk(k, posTree, ac, contextGenerator, sequenceValidator);
 		for (int i = 0; i < sequences.length; i++) {
 			int label = sequences[i].getLabel();
@@ -300,46 +304,182 @@ public class SyntacticAnalysisMEForChunk {
 			}
 			chunkTree.add(tree);
 		}
-		return chunkTree;
-	}
-	
-	/**
-	 * 得到最好的K个BuildAndCheck标记
-	 * @param k 结果数目
-	 * @param chunkTree chunk标记树
-	 * @param ac
-	 * @return
-	 */
-	public List<List<TreeNode>> tagBuildAndCheck(int k, List<List<TreeNode>> chunkTree, Object[] ac){
-		List<List<TreeNode>> buildAndCheckTree = new ArrayList<>();
-		SyntacticAnalysisSequenceForChunk[] sequences = this.model.bestSequencesForChunk(k, chunkTree, ac, contextGenerator, sequenceValidator);
-		for (int i = 0; i < sequences.length; i++) {
-			int label = sequences[i].getLabel();
-			List<TreeNode> tree = new ArrayList<>();
-			List<TreeNode> tempTree = chunkTree.get(label);
-			List<String> outcomes = sequences[i].getOutcomes();
-			for (int j = 0; j < outcomes.size(); j++) {
-				TreeNode outNode = new TreeNode(outcomes.get(j));
-				outNode.setFlag(true);
-				outNode.addChild(tempTree.get(j));
-				tempTree.get(j).setParent(outNode);
-				outNode.setHeadWords(tempTree.get(j).getHeadWords());
-				tree.add(outNode);
-			}
-			buildAndCheckTree.add(tree);
+		for (int i = 0; i < chunkTree.size(); i++) {
+			combineChunkTree.add(tta.combine(chunkTree.get(i)));
 		}
-		return buildAndCheckTree;
+		return combineChunkTree;
 	}
 	
 	/**
-	 * 得到最好的BuildAndCheck标记
-	 * @param chunkTree chunk标记树
+	 * 得到最好的K个chunk树
+	 * @param k 结果数目
+	 * @param posTree 词性标注树
 	 * @param ac
 	 * @return
 	 */
-	public List<TreeNode> tagBuildAndCheck(List<List<TreeNode>> chunkTree, Object[] ac){
-		List<List<TreeNode>> buildAndCheckTree = tagBuildAndCheck(1,chunkTree, ac);
-		return buildAndCheckTree.get(0);
+	public List<TreeNode> tagChunk(List<List<TreeNode>> posTree, Object[] ac){
+		List<List<TreeNode>> chunkTree = tagKChunk(1,posTree,null);
+		return chunkTree.get(0);
+	}
+	/**
+	 * 得到chunk子树
+	 * @param words 词语
+	 * @param poses 词性
+	 * @return
+	 */
+	@Override
+	public List<TreeNode> chunkTree(String[] words, String[] poses) {
+		
+		List<TreeNode> posTree = new ArrayList<>();
+		for (int i = 0; i < poses.length && i < words.length; i++) {
+			TreeNode pos = new TreeNode(poses[i]);
+			pos.addChild(new TreeNode(words[i]));
+			posTree.add(pos);
+		}
+		
+		return chunkTree(posTree);
+	}
+	/**
+	 * 得到chunk子树
+	 * @param wordsandposes 词语+词性组成的数组
+	 * @return
+	 */
+	@Override
+	public List<TreeNode> chunkTree(String[] wordsandposes) {
+		String[] words = null;
+		String[] poses = null;
+		for (int i = 0; i < wordsandposes.length; i++) {
+			words[i] = wordsandposes[i].split("/")[0];
+			poses[i] = wordsandposes[i].split("/")[1];
+		}
+		return chunkTree(words,poses);
+	}
+	/**
+	 * 得到chunk子树
+	 * @param wordsandposes 词语+词性组成的句子
+	 * @return
+	 */
+	@Override
+	public List<TreeNode> chunkTree(String wordsandposes) {
+		String[] wordandpos = WhitespaceTokenizer.INSTANCE.tokenize(wordsandposes);
+		return chunkTree(wordandpos);
+	}
+	/**
+	 * 得到chunk子树
+	 * @param posTree pos子树
+	 * @return
+	 */
+	@Override
+	public List<TreeNode> chunkTree(List<TreeNode> posTree) {
+		List<List<TreeNode>> allposTree = new ArrayList<>();
+		allposTree.add(posTree);
+		TreeToActions tta = new TreeToActions();
+		return tta.combine(tagChunk(allposTree,null));
+	}
+	/**
+	 * 得到chunk结果
+	 * @param words 词语
+	 * @param poses 词性
+	 * @return
+	 */
+	@Override
+	public String[] chunk(String[] words, String[] poses) {
+		List<TreeNode> posTree = new ArrayList<>();
+		for (int i = 0; i < poses.length && i < words.length; i++) {
+			TreeNode pos = new TreeNode(poses[i]);
+			pos.addChild(new TreeNode(words[i]));
+			posTree.add(pos);
+		}
+		
+		return chunk(posTree);
+	}
+	/**
+	 * 得到chunk结果
+	 * @param wordsandposes 词语+词性组成数组
+	 * @return
+	 */
+	@Override
+	public String[] chunk(String[] wordsandposes) {
+		String[] words = null;
+		String[] poses = null;
+		for (int i = 0; i < wordsandposes.length; i++) {
+			words[i] = wordsandposes[i].split("/")[0];
+			poses[i] = wordsandposes[i].split("/")[1];
+		}
+		return chunk(words,poses);
+	}
+	/**
+	 * 得到chunk结果
+	 * @param wordsandposes 词语+词性组成的句子
+	 * @return
+	 */
+	@Override
+	public String[] chunk(String wordsandposes) {
+		String[] wordandpos = WhitespaceTokenizer.INSTANCE.tokenize(wordsandposes);
+		return chunk(wordandpos);
+	}
+	/**
+	 * 得到chunk结果
+	 * @param posTree pos子树
+	 * @return
+	 */
+	@Override
+	public String[] chunk(List<TreeNode> posTree) {
+		List<List<TreeNode>> allposTree = new ArrayList<>();
+		allposTree.add(posTree);
+		TreeToActions tta = new TreeToActions();
+		List<TreeNode> chunkTree = tagChunk(allposTree,null);
+		String[] wordandpos = null;
+		String[] chunkTag = null;
+		String[] output = null;
+		int k = 0;
+		int index = -1;
+		for (int i = 0; i < chunkTree.size(); i++) {
+			if(chunkTree.get(i).getNodeName().contains("start")){
+				chunkTag[k] = chunkTree.get(i).getNodeName().split("_")[1];
+				wordandpos[k] += getWordAndPos(chunkTree.get(i).getChildren().get(0));
+				for (int j = i+1; j < chunkTag.length; j++) {
+					if(chunkTree.get(j).getNodeName().contains("start")){
+						break;
+					}else if(chunkTree.get(j).getNodeName().contains("join")){
+						wordandpos[k] += getWordAndPos(chunkTree.get(j).getChildren().get(0));
+						index = j;
+					}
+				}
+				i = index;
+				output[k] = "["+wordandpos[k]+"]"+chunkTag[k]+" ";
+				k++;
+			}else if(chunkTree.get(i).getNodeName().contains("other")){
+				chunkTag[k] = "o";
+				wordandpos[k] += getWordAndPos(chunkTree.get(i).getChildren().get(0));
+				for (int j = i+1; j < chunkTag.length; j++) {
+					if(chunkTree.get(j).getNodeName().contains("start")){
+						break;
+					}else if(chunkTree.get(j).getNodeName().contains("join")){
+						wordandpos[k] += getWordAndPos(chunkTree.get(j).getChildren().get(0));
+						index = j;
+					}
+				}
+				i = index;
+				output[k] = wordandpos[k]+" ";
+				k++;
+			}
+		}
+		return output;
+	}
+	
+	public String getWordAndPos(TreeNode tree){
+		String wordandpos = "";
+		for (int i = 0; i < tree.getChildren().size(); i++) {
+			if(i == tree.getChildren().size()-1){
+				wordandpos += tree.getChildren().get(i).getChildren().get(0).getNodeName()+"/"+
+						tree.getChildren().get(i).getNodeName();
+			}else{
+				wordandpos += tree.getChildren().get(i).getChildren().get(0).getNodeName()+"/"+
+						tree.getChildren().get(i).getNodeName()+" ";
+			}
+		}
+		return wordandpos;
 	}
 }
 

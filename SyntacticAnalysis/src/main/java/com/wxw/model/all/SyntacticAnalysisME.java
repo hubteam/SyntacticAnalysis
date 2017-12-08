@@ -316,19 +316,8 @@ public class SyntacticAnalysisME {
 		List<List<TreeNode>> buildAndCheckTree = new ArrayList<>();
 		SyntacticAnalysisSequenceForBuildAndCheck[] sequences = this.model.bestSequencesForBuildAndCheck(k, chunkTree, ac, contextGenerator, sequenceValidator);
 		for (int i = 0; i < sequences.length; i++) {
-			int label = sequences[i].getLabel();
-			List<TreeNode> tree = new ArrayList<>();
-			List<TreeNode> tempTree = chunkTree.get(label);
-			List<String> outcomes = sequences[i].getOutcomes();
-			for (int j = 0; j < outcomes.size(); j++) {
-				TreeNode outNode = new TreeNode(outcomes.get(j));
-				outNode.setFlag(true);
-				outNode.addChild(tempTree.get(j));
-				tempTree.get(j).setParent(outNode);
-				outNode.setHeadWords(tempTree.get(j).getHeadWords());
-				tree.add(outNode);
-			}
-			buildAndCheckTree.add(tree);
+			
+			buildAndCheckTree.add(sequences[i].getTree());
 		}
 		return buildAndCheckTree;
 	}

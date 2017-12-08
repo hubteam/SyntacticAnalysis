@@ -19,6 +19,9 @@ import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
+import com.wxw.syntacticanalysis.SyntacticAnalysis;
+import com.wxw.syntacticanalysis.SyntacticAnalysisForChunk;
+import com.wxw.tree.GenerateHeadWords;
 import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
 import com.wxw.tree.TreeToActions;
@@ -40,7 +43,7 @@ import opennlp.tools.util.TrainingParameters;
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisMEForBuildAndCheck {
+public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	public static final int DEFAULT_BEAM_SIZE = 1;
 	private SyntacticAnalysisContextGenerator contextGenerator;
 	private int size;
@@ -80,8 +83,6 @@ public class SyntacticAnalysisMEForBuildAndCheck {
      
         this.model = new SyntacticAnalysisBeamSearch(beamSize,model.getBuildTreeModel(),
                     model.getCheckTreeModel(), 0);
-        
-		
 	}
 	
 	/**
@@ -265,70 +266,242 @@ public class SyntacticAnalysisMEForBuildAndCheck {
 	}
 	
 	/**
-	 * 得到最好的K个chunk树
-	 * @param k 结果数目
-	 * @param posTree 词性标注树
-	 * @param ac
-	 * @return
-	 */
-	public List<List<TreeNode>> tagChunk(int k, List<List<TreeNode>> posTree, Object[] ac){
-		List<List<TreeNode>> chunkTree = new ArrayList<>();
-		SyntacticAnalysisSequenceForChunk[] sequences = this.model.bestSequencesForChunk(k, posTree, ac, contextGenerator, sequenceValidator);
-		for (int i = 0; i < sequences.length; i++) {
-			int label = sequences[i].getLabel();
-			List<TreeNode> tree = new ArrayList<>();
-			List<TreeNode> tempTree = posTree.get(label);
-			List<String> outcomes = sequences[i].getOutcomes();
-			for (int j = 0; j < outcomes.size(); j++) {
-				TreeNode outNode = new TreeNode(outcomes.get(j));
-				outNode.setFlag(true);
-				outNode.addChild(tempTree.get(j));
-				tempTree.get(j).setParent(outNode);
-				outNode.setHeadWords(tempTree.get(j).getHeadWords());
-				tree.add(outNode);
-			}
-			chunkTree.add(tree);
-		}
-		return chunkTree;
-	}
-	
-	/**
-	 * 得到最好的K个BuildAndCheck标记
+	 * 得到最好的K个最好结果的树,List中每一个值都是一颗完整的树
 	 * @param k 结果数目
 	 * @param chunkTree chunk标记树
 	 * @param ac
 	 * @return
 	 */
-	public List<List<TreeNode>> tagBuildAndCheck(int k, List<List<TreeNode>> chunkTree, Object[] ac){
-		List<List<TreeNode>> buildAndCheckTree = new ArrayList<>();
+	public List<TreeNode> tagBuildAndCheck(int k, List<List<TreeNode>> chunkTree, Object[] ac){
+		List<TreeNode> buildAndCheckTree = new ArrayList<>();
 		SyntacticAnalysisSequenceForBuildAndCheck[] sequences = this.model.bestSequencesForBuildAndCheck(k, chunkTree, ac, contextGenerator, sequenceValidator);
 		for (int i = 0; i < sequences.length; i++) {
-			int label = sequences[i].getLabel();
-			List<TreeNode> tree = new ArrayList<>();
-			List<TreeNode> tempTree = chunkTree.get(label);
-			List<String> outcomes = sequences[i].getOutcomes();
-			for (int j = 0; j < outcomes.size(); j++) {
-				TreeNode outNode = new TreeNode(outcomes.get(j));
-				outNode.setFlag(true);
-				outNode.addChild(tempTree.get(j));
-				tempTree.get(j).setParent(outNode);
-				outNode.setHeadWords(tempTree.get(j).getHeadWords());
-				tree.add(outNode);
-			}
-			buildAndCheckTree.add(tree);
+			buildAndCheckTree.add(sequences[i].getTree().get(0));
 		}
 		return buildAndCheckTree;
 	}
 	
 	/**
-	 * 得到最好的BuildAndCheck标记
+	 * 得到最好的K个完整的动作序列
+	 * @param k 结果数
+	 * @param chunkTree k个chunk子树序列
+	 * @param ac
+	 * @return
+	 * @throws CloneNotSupportedException 
+	 */
+	public List<List<String>> tagKactions(int k, List<List<TreeNode>> chunkTree, Object[] ac) throws CloneNotSupportedException{
+		List<List<String>> kActions = new ArrayList<>();
+		List<TreeNode> alltree= tagBuildAndCheck(k,chunkTree,null);
+		for (int i = 0; i < alltree.size(); i++) {
+			TreeToActions tta = new TreeToActions();
+			SyntacticAnalysisSample sample = tta.treeToAction(alltree.get(i));
+			kActions.add(sample.getActions());	
+		}
+		return kActions;
+	}
+	
+	/**
+	 * 得到最好的K个完整的动作序列
+	 * @param k 结果数
+	 * @param chunkTree k个chunk子树序列
+	 * @param ac
+	 * @return
+	 * @throws CloneNotSupportedException 
+	 */
+	public List<String> tagActions(int k, List<List<TreeNode>> chunkTree, Object[] ac) throws CloneNotSupportedException{
+		List<List<String>> kActions = tagKactions(1,chunkTree,null);
+		return kActions.get(0);
+	}
+	
+	/**
+	 * 得到最好的树
 	 * @param chunkTree chunk标记树
 	 * @param ac
 	 * @return
 	 */
-	public List<TreeNode> tagBuildAndCheck(List<List<TreeNode>> chunkTree, Object[] ac){
-		List<List<TreeNode>> buildAndCheckTree = tagBuildAndCheck(1,chunkTree, ac);
+	public TreeNode tagBuildAndCheck(List<List<TreeNode>> chunkTree, Object[] ac){
+		List<TreeNode> buildAndCheckTree = tagBuildAndCheck(1,chunkTree, ac);
 		return buildAndCheckTree.get(0);
+	}
+	/**
+	 * 得到句法树
+	 * @param chunkTree chunk子树序列
+	 * @return
+	 */
+	@Override
+	public TreeNode syntacticTree(List<TreeNode> chunkTree) {
+		List<List<TreeNode>> allTree = new ArrayList<>();
+		allTree.add(chunkTree);
+		return tagBuildAndCheck(allTree,null);
+	}
+	/**
+	 * 得到句法树
+	 * @param words 词语
+	 * @param poses 词性标记
+	 * @param chunkTag chunk标记
+	 * @return
+	 */
+	@Override
+	public TreeNode syntacticTree(String[] words, String[] poses, String[] chunkTag) {
+		List<TreeNode> chunkTree = toChunkTreeList(words,poses,chunkTag);
+		return syntacticTree(chunkTree);
+	}
+	
+	public List<TreeNode> toChunkTreeList(String[] words, String[] poses, String[] chunkTag){
+		List<TreeNode> chunkTree = new ArrayList<>();
+		for (int i = 0; i < chunkTag.length; i++) {
+			if(chunkTag[i].equals("O")){
+				TreeNode pos = new TreeNode(poses[i]);
+				pos.addChild(new TreeNode(words[i]));
+				pos.setHeadWords(words[i]);
+				chunkTree.add(pos);
+			}else if(chunkTag[i].endsWith("B")){
+				TreeNode node = new TreeNode(chunkTag[i].split("_")[0]);
+				int j ;
+				for (j = i; j < chunkTag.length; j++) {
+					TreeNode pos = new TreeNode(poses[j]);
+					pos.addChild(new TreeNode(words[j]));
+					pos.setHeadWords(words[j]);
+					node.addChild(pos);
+					if(chunkTag[j].endsWith("E")){
+						break;
+					}
+				}
+				node.setHeadWords(GenerateHeadWords.getHeadWords(node));
+				chunkTree.add(node);
+				i = j;
+			}
+		}
+		return chunkTree;
+	}
+	
+	/**
+	 * 得到句法树
+	 * @param sentence 由词语词性标记和chunk标记组成的句子,输入的格式[wods/pos word/pos...]tag
+	 * @return
+	 */
+	@Override
+	public TreeNode syntacticTree(String sentence) {
+		List<String> chunkTags = new ArrayList<>();
+		List<String> words = new ArrayList<>();
+		List<String> poses = new ArrayList<>();
+		
+		boolean isInChunk = false;							//当前词是否在组块中
+		List<String> wordTagsInChunk = new ArrayList<>();	//临时存储在组块中的词与词性
+		String[] wordTag = null;							//词与词性标注
+		String chunk = null;								//组块的标签
+		String[] content = sentence.split("\\s+");
+		for(String string : content) {
+			if(isInChunk) {	//当前词在组块中
+				if(string.contains("]")) {//当前词是组块的结束
+					String[] strings = string.split("]");
+					wordTagsInChunk.add(strings[0]);
+					chunk = strings[1];
+					isInChunk = false;
+				}else {
+					wordTagsInChunk.add(string);
+				}
+			}else {//当前词不在组块中
+				if(wordTagsInChunk != null && chunk != null) {//上一个组块中的词未处理，先处理上一个组块中的词	
+					wordTag = wordTagsInChunk.get(0).split("/");
+					words.add(wordTag[0]);
+					poses.add(wordTag[1]);
+					chunkTags.add(chunk + "_B");
+					
+					if(wordTagsInChunk.size() > 2) {
+						for(int i = 1; i < wordTagsInChunk.size() - 1; i++) {
+							wordTag = wordTagsInChunk.get(i).split("/");
+							words.add(wordTag[0]);
+							poses.add(wordTag[1]);
+							chunkTags.add(chunk + "_I");
+						}
+					}
+					wordTag = wordTagsInChunk.get(wordTagsInChunk.size() - 1).split("/");
+					words.add(wordTag[0]);
+					poses.add(wordTag[1]);
+					chunkTags.add(chunk + "_E");
+					
+					wordTagsInChunk = new ArrayList<>();
+					chunk = null;
+					
+					if(string.startsWith("[")) {
+						wordTagsInChunk.add(string.replace("[", ""));
+						isInChunk = true;
+					}else {
+						wordTag = string.split("/");
+						words.add(wordTag[0]);
+						poses.add(wordTag[1]);
+						chunkTags.add("_O");
+					}
+					
+				}else {
+					if(string.startsWith("[")) {
+						wordTagsInChunk.add(string.replace("[", ""));
+						isInChunk = true;
+					}else {
+						wordTag = string.split("/");
+						words.add(wordTag[0]);
+						poses.add(wordTag[1]);
+						chunkTags.add("_O");
+					}
+				}
+			}
+		}
+		
+		//句子结尾是组块，进行解析
+		if(wordTagsInChunk != null && chunk != null) {
+			wordTag = wordTagsInChunk.get(0).split("/");
+			words.add(wordTag[0]);
+			poses.add(wordTag[1]);
+			chunkTags.add(chunk + "_B");
+			
+			if(wordTagsInChunk.size() > 2) {
+				for(int i = 1; i < wordTagsInChunk.size() - 1; i++) {
+					wordTag = wordTagsInChunk.get(i).split("/");
+					words.add(wordTag[0]);
+					poses.add(wordTag[1]);
+					chunkTags.add(chunk + "_I");
+				}
+			}
+			wordTag = wordTagsInChunk.get(wordTagsInChunk.size() - 1).split("/");
+			words.add(wordTag[0]);
+			poses.add(wordTag[1]);
+			chunkTags.add(chunk + "_E");
+		}
+		return syntacticTree(words.toArray(new String[words.size()]),poses.toArray(new String[poses.size()]),
+				chunkTags.toArray(new String[chunkTags.size()]));
+	}
+	/**
+	 * 得到句法树的括号表达式
+	 * @param chunkTree chunk子树序列
+	 * @return
+	 */
+	@Override
+	public String syntacticBracket(List<TreeNode> chunkTree) {
+		TreeNode node = syntacticTree(chunkTree);
+		return TreeNode.printTree(node, 1);
+	}
+	/**
+	 * 得到句法树的括号表达式
+	 * @param words 词语
+	 * @param poses 词性标记
+	 * @param chunkTag chunk标记
+	 * @return
+	 */
+	@Override
+	public String syntacticBracket(String[] words,String[] poses, String[] chunkTag) {
+		TreeNode node = syntacticTree(words,poses,chunkTag);
+		return TreeNode.printTree(node, 1);
+	}
+	/**
+	 * 得到句法树的括号表达式
+	 * @param sentence 由词语词性标记和chunk标记组成的句子
+	 * @return
+	 */
+	@Override
+	public String syntacticBracket(String sentence) {
+		TreeNode node = syntacticTree(sentence);
+		return TreeNode.printTree(node, 1);
 	}
 }
 

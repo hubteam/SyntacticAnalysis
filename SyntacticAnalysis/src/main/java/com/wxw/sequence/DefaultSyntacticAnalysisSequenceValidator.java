@@ -60,14 +60,11 @@ public class DefaultSyntacticAnalysisSequenceValidator implements SyntacticAnaly
 	 * 检验build和check步骤的标记是否正确【这里只检测build步骤的，check的有yes或者no两种，选大的概率的那个】
 	 * @param i 当前位置
 	 * @param combineChunkTree 合并后chunk步的结果
-	 * @param outcomes 当前位置之前的结果序列
-	 * @param outcomeslabel 当前位置之前的yes or no结果序列
 	 * @param out 当前位置的结果
 	 * @return
 	 */
 	@Override
-	public boolean validSequenceForBuildAndCheck(int i, List<TreeNode> combineChunkTree, List<String> outcomes,List<String> outcomeslabel,
-			String out) {
+	public boolean validSequenceForBuildAndCheck(int i, List<TreeNode> combineChunkTree, String out) {
 		if(i == 0){
 			if(out.split("_")[0].equals("start")){
 				return true;

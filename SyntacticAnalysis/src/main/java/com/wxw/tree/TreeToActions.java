@@ -1,7 +1,6 @@
 package com.wxw.tree;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.wxw.stream.SyntacticAnalysisSample;
@@ -138,12 +137,13 @@ public class TreeToActions {
 					//判断start后是否有join如果有，就和之前的start合并
 					if(subTree.get(j).getNodeName().split("_")[0].equals("join")){
 						node.addChild(subTree.get(j).getChildren().get(0));
-						node.setHeadWords(subTree.get(j).getHeadWords());
+//						node.setHeadWords(subTree.get(j).getHeadWords());
 						subTree.get(j).getChildren().get(0).setParent(node);
 					}else if(subTree.get(j).getNodeName().split("_")[0].equals("start") ||
 							subTree.get(j).getNodeName().split("_")[0].equals("other")){
 						break;
 					}
+					node.setHeadWords(GenerateHeadWords.getHeadWords(node));
 				}
 				//将一颗合并过的完整子树加入列表
 				combineChunk.add(node);
@@ -194,9 +194,7 @@ public class TreeToActions {
 				tempnode.setHeadWords(tree.getParent().getHeadWords());
 				tempnode.addChild(tree.getParent().getChildren().get(0));
 				tree.getParent().getChildren().get(0).setParent(tempnode);
-				subTree.set(i, tree.getParent());
-//				subTreeCopy = new ArrayList<TreeNode>(subTree);
-//				buildAndCheckTree.add(subTreeCopy);				
+				subTree.set(i, tree.getParent());			
 				//合并之后，以合并后的节点的父节点继续递归
 				if(tree.getParent().getParent() == null){
 					return;
@@ -223,9 +221,7 @@ public class TreeToActions {
 					if(i >= subTree.size()){
 						return;
 					}
-				//}else if(tree.getParent().getChildren().get(tree.getParent().getChildren().size()-1).equals(tree)){
 				}else if(tree.getIndex() == tree.getParent().getChildren().size()-1){
-//					System.out.println(tree.getParent().getChildren().size());
 					actions.add("join_"+tree.getParent().getNodeName());
 					TreeNode tempnode = new TreeNode("join_"+tree.getParent().getNodeName());
 					tempnode.addChild(subTree.get(i));
@@ -247,7 +243,6 @@ public class TreeToActions {
 						node.addChild(tree.getParent().getChildren().get(j));
 						tree.getParent().getChildren().get(j).setParent(node);						
 					}
-//					System.out.println(tree.getParent().getChildren().size());
 					//对subTreeCopy更改
 					//要更改的位置
 					int index = i - tree.getParent().getChildren().size() + 1;
@@ -256,11 +251,6 @@ public class TreeToActions {
 					for (int k = i; k >= index+1; k--) {
 						subTree.remove(index+1);
 					}
-//					for (int j = index+1; j <= i; j++) {
-//						subTree.remove(j);
-//					}
-//					subTreeCopy = new ArrayList<TreeNode>(subTree);
-//					buildAndCheckTree.add(subTreeCopy);
 					//更改i为了下一次
 					i = index;
 					//合并之后，以合并后的节点的父节点继续递归，直到没有父节点，退出递归
@@ -294,13 +284,6 @@ public class TreeToActions {
 				getActionBUILDandCHECK(node,subTree);
 			}
 		}
-//		for (List<TreeNode> treeNode : buildAndCheckTree) {
-//			for (TreeNode treeNode2 : treeNode) {
-//				System.out.println(treeNode2);
-//		
-//			}		
-//			System.out.println();
-//		}
 	}
 	
 	/**
@@ -309,39 +292,9 @@ public class TreeToActions {
 	 * @throws CloneNotSupportedException
 	 */
 	public SyntacticAnalysisSample treeToAction(TreeNode tree) throws CloneNotSupportedException{
-//		System.out.println(tree.toString());
 		getActionPOS(tree);		
 		getActionCHUNK(tree, posTree);
 		getActionBUILDandCHECK(tree, combine(chunkTree));
-		
-//		System.out.println();
 		return new SyntacticAnalysisSample(posTree,chunkTree,buildAndCheckTree,actions);
 	}
-	
-//	@org.junit.Test
-//	public void test() throws CloneNotSupportedException{
-//		String treeStr = "(S(NP(PRP I))(VP(VP(VBD saw)(NP(DT the)(NN man)))(PP(IN with)(NP(DT the)(NN telescope)))))";
-//		PhraseGenerateTree gst = new PhraseGenerateTree();
-//	    TreeNode tree = gst.generateTree(treeStr);
-//	    System.out.println(tree.toString().equals(treeStr));
-//	    getActionPOS(tree);
-//	    
-//	    getActionCHUNK(tree,pos);
-//
-//	    List<TreeNode> chunkCombine = combine(chunk);
-//
-//	    getActionBUILDandCHECK(tree,chunkCombine);
-//	    
-//	    ActionsToTree a2t = new ActionsToTree();
-//	    String[] words = {"Mr.","Vinken","is","chairman","of","Elsevier","N.V.",",","the","Dutch","publishing","group"};
-//
-//	    TreeNode completeTree = a2t.actionsToTree(Arrays.asList(words), actions);
-//	      
-//	    for (List<TreeNode> node : buildAndCheckTree) {
-//			for (TreeNode treeNode : node) {
-//				System.out.println(treeNode.toString());
-//			}
-//			System.out.println();
-//		}
-//	}
 }

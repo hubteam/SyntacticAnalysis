@@ -3,7 +3,6 @@ package com.wxw.feature;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -16,26 +15,6 @@ import com.wxw.tree.TreeNode;
  */
 public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisContextGenerator{
 
-	
-	/*//pos
-	private boolean w_2Set;
-    private boolean w_1Set;
-    private boolean w0Set;
-    private boolean w1Set;
-    private boolean w2Set;
-    private boolean t_1Set;
-    private boolean t_2t_1Set;
-    private boolean prefix1Set;
-    private boolean prefix2Set;
-    private boolean prefix3Set;
-    private boolean prefix4Set;
-    private boolean suffix1Set;
-    private boolean suffix2Set;
-    private boolean suffix3Set;
-    private boolean suffix4Set;
-    private boolean numberSet;
-    private boolean uppercaseSet;
-    private boolean hypenSet;*/
 	//chunk
 	private boolean chunkandpostag0Set;
     private boolean chunkandpostag_1Set;
@@ -150,25 +129,6 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @param properties
 	 */
 	private void init(Properties config) {
-		/*//pos
-		w0Set = (config.getProperty("pos.w0", "true").equals("true"));
-		w1Set = (config.getProperty("pos.w1", "true").equals("true"));
-		w2Set = (config.getProperty("pos.w2", "true").equals("true"));
-		w_1Set = (config.getProperty("pos.w_1", "true").equals("true"));
-		w_2Set = (config.getProperty("pos.w_2", "true").equals("true"));
-		t_1Set = (config.getProperty("pos.t_1", "true").equals("true"));
-		t_2t_1Set = (config.getProperty("pos.t_2t_1", "true").equals("true"));
-		prefix1Set = (config.getProperty("pos.prefix1", "true").equals("true"));
-		prefix2Set = (config.getProperty("pos.prefix2", "true").equals("true"));
-		prefix3Set = (config.getProperty("pos.prefix3", "true").equals("true"));
-		prefix4Set = (config.getProperty("pos.prefix4", "true").equals("true"));
-		suffix1Set = (config.getProperty("pos.suffix1", "true").equals("true"));
-		suffix2Set = (config.getProperty("pos.suffix2", "true").equals("true"));
-		suffix3Set = (config.getProperty("pos.suffix3", "true").equals("true"));
-		suffix4Set = (config.getProperty("pos.suffix4", "true").equals("true"));
-		numberSet = (config.getProperty("pos.number", "true").equals("true"));
-		uppercaseSet = (config.getProperty("pos.uppercase", "true").equals("true"));
-		hypenSet = (config.getProperty("pos.hypen", "true").equals("true"));*/
 		
 		//chunk
 		chunkandpostag0Set = (config.getProperty("tree.chunkandpostag0", "true").equals("true"));
@@ -604,7 +564,6 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	public String[] getContextForCheck(int index, List<TreeNode> buildAndCheckTree, List<String> actions) {
 		List<String> features = new ArrayList<String>();
 		String rightRule = "";
-//		tree0 = buildAndCheckTree.get(index);
 		int record = -1;
 		for (int i = index; i >= 0; i--) {
 			if(buildAndCheckTree.get(i).getNodeName().split("_")[0].equals("start")){
@@ -910,7 +869,6 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * 为测试语料的chunk步骤生成上下文特征
 	 * @param index 索引位置
 	 * @param posTree 词性标注的子树，【区别于训练语料中的chunkTree，这里chunkTree还包含了动作序列作为根节点】
-	 * @param actions 动作序列
 	 * @return
 	 */
 	private String[] getContextForChunkForTest(int index, List<TreeNode> posTree, List<String> actions) {
@@ -1027,24 +985,22 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * 为测试语料的build步的上下文特征
 	 * @param index 当前位置
 	 * @param chunkTree 子树序列
-	 * @param actions 动作序列
 	 * @param ac 
 	 * @return
 	 */
 	@Override
-	public String[] getContextForBuildForTest(int index, List<TreeNode> chunkTree, List<String> actions, Object[] ac) {
+	public String[] getContextForBuildForTest(int index, List<TreeNode> chunkTree, Object[] ac) {
 		
-		return getContextForBuildForTest(index,chunkTree,actions);
+		return getContextForBuildForTest(index,chunkTree);
 	}
 
 	/**
 	 * 为测试语料的build步的上下文特征
 	 * @param index 当前位置
 	 * @param chunkTree 子树序列
-	 * @param actions 动作序列
 	 * @return
 	 */
-	private String[] getContextForBuildForTest(int index, List<TreeNode> chunkTree, List<String> actions) {
+	private String[] getContextForBuildForTest(int index, List<TreeNode> chunkTree) {
 		List<String> features = new ArrayList<String>();
 		TreeNode tree0,tree1,tree2,tree_1,tree_2;
 		tree0 = tree1 = tree2 = tree_1 = tree_2 = null;
@@ -1264,26 +1220,24 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * 为测试语料的check步的上下文特征
 	 * @param index 当前位置
 	 * @param chunkTree 子树序列
-	 * @param actions 动作序列
 	 * @param out 当前的动作序列
 	 * @param ac 
 	 * @return
 	 */
 	@Override
-	public String[] getContextForCheckForTest(int index, List<TreeNode> chunkTree, List<String> actions, String out, Object[] ac) {
+	public String[] getContextForCheckForTest(int index, List<TreeNode> chunkTree, String out, Object[] ac) {
 		
-		return getContextForCheckForTest(index,chunkTree,actions,out);
+		return getContextForCheckForTest(index,chunkTree,out);
 	}
 
 	/**
 	 * 为测试语料的check步的上下文特征
 	 * @param index 当前位置
 	 * @param buildAndCheckTree 子树序列
-	 * @param actions 动作序列
 	 * @param out 当前的动作序列
 	 * @return
 	 */
-	private String[] getContextForCheckForTest(int index, List<TreeNode> buildAndCheckTree, List<String> actions,String out) {
+	private String[] getContextForCheckForTest(int index, List<TreeNode> buildAndCheckTree, String out) {
 		List<String> features = new ArrayList<String>();
 		String rightRule = "";
 		

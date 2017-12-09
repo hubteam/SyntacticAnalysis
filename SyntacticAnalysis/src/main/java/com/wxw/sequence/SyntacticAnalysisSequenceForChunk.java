@@ -11,11 +11,11 @@ public class SyntacticAnalysisSequenceForChunk implements Comparable<SyntacticAn
 	private int lable;//标记是输入K个结果中的第几个
 	private static final Double ONE = Double.valueOf(1.0D);
 
-	public SyntacticAnalysisSequenceForChunk() {
+	public SyntacticAnalysisSequenceForChunk(int lable) {
 		this.outcomes = new ArrayList<>(1);
 		this.probs = new ArrayList<>(1);
 		this.score = 0.0D;
-		this.lable = -1;
+		this.lable = lable;
 	}
 
 	public SyntacticAnalysisSequenceForChunk(SyntacticAnalysisSequenceForChunk s) {

@@ -22,7 +22,6 @@ import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
 import com.wxw.syntacticanalysis.SyntacticAnalysisForChunk;
-import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
 import com.wxw.tree.TreeToActions;
 
@@ -195,14 +194,6 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk{
         }	
 		return null;
 	}
-	
-//	public String[] tag(String[] characters, String[] tags, String[] words, Object[] additionaContext){
-//		bestSequence = model.bestSequence(characters, tags, words, additionaContext, contextGenerator,sequenceValidator);
-//      //  System.out.println(bestSequence);
-//		List<String> t = bestSequence.getOutcomes();
-//        
-//        return t.toArray(new String[t.size()]);
-//	}
 	/**
 	 * 根据训练得到的模型文件得到
 	 * @param modelFile 模型文件
@@ -244,39 +235,6 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk{
 		return null;
 	}
 	
-	
-	/**
-	 * 统计词语出现的个数
-	 * @param file 训练语料
-	 * @param encoding 编码
-	 * @return
-	 * @throws IOException
-	 * @throws CloneNotSupportedException 
-	 */
-	public static HashMap<String,Integer> buildDictionary(File file, String encoding) throws IOException, CloneNotSupportedException{
-		HashMap<String,Integer> dict = new HashMap<String,Integer>();
-		PlainTextByTreeStream lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(file), "utf8");
-		PhraseGenerateTree pgt = new PhraseGenerateTree();
-		TreeToActions tta = new TreeToActions();
-		String txt = "";
-		while((txt = lineStream.read())!= null){
-			TreeNode tree = pgt.generateTree(txt);
-			SyntacticAnalysisSample sample = tta.treeToAction(tree);
-			List<String> words = sample.getWords();
-			for (int i = 0; i < words.size(); i++) {
-				if(dict.containsKey(words.get(i))){
-					Integer count = dict.get(words.get(i));
-					count++;
-					dict.put(words.get(i), count);
-				}else{
-					dict.put(words.get(i), 1);
-				}
-			}
-		}
-		lineStream.close();
-		return dict;
-	}
-	
 	/**
 	 * 得到最好的K个chunk树
 	 * @param k 结果数目
@@ -285,9 +243,9 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk{
 	 * @return
 	 */
 	public List<List<TreeNode>> tagKChunk(int k, List<List<TreeNode>> posTree, Object[] ac){
-		List<List<TreeNode>> chunkTree = new ArrayList<>();
-		TreeToActions tta = new TreeToActions();
-		List<List<TreeNode>> combineChunkTree = new ArrayList<>();
+		List<List<TreeNode>> chunkTree = new ArrayList<List<TreeNode>>();
+		
+		List<List<TreeNode>> combineChunkTree = new ArrayList<List<TreeNode>>();
 		SyntacticAnalysisSequenceForChunk[] sequences = this.model.bestSequencesForChunk(k, posTree, ac, contextGenerator, sequenceValidator);
 		for (int i = 0; i < sequences.length; i++) {
 			int label = sequences[i].getLabel();
@@ -296,16 +254,18 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk{
 			List<String> outcomes = sequences[i].getOutcomes();
 			for (int j = 0; j < outcomes.size(); j++) {
 				TreeNode outNode = new TreeNode(outcomes.get(j));
-				outNode.setFlag(true);
+//				outNode.setFlag(true);
 				outNode.addChild(tempTree.get(j));
-				tempTree.get(j).setParent(outNode);
-				outNode.setHeadWords(tempTree.get(j).getHeadWords());
+//				tempTree.get(j).setParent(outNode);
+//				outNode.setHeadWords(tempTree.get(j).getHeadWords());
 				tree.add(outNode);
 			}
 			chunkTree.add(tree);
 		}
 		for (int i = 0; i < chunkTree.size(); i++) {
-			combineChunkTree.add(tta.combine(chunkTree.get(i)));
+			TreeToActions tta = new TreeToActions();
+			List<TreeNode> node = tta.combine(chunkTree.get(i));
+			combineChunkTree.add(node);
 		}
 		return combineChunkTree;
 	}

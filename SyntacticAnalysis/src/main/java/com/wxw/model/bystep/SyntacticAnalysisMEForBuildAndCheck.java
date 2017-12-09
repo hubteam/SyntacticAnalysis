@@ -13,14 +13,12 @@ import com.wxw.sequence.DefaultSyntacticAnalysisSequenceValidator;
 import com.wxw.sequence.SyntacticAnalysisBeamSearch;
 import com.wxw.sequence.SyntacticAnalysisSequenceClassificationModel;
 import com.wxw.sequence.SyntacticAnalysisSequenceForBuildAndCheck;
-import com.wxw.sequence.SyntacticAnalysisSequenceForChunk;
 import com.wxw.sequence.SyntacticAnalysisSequenceValidator;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
 import com.wxw.syntacticanalysis.SyntacticAnalysis;
-import com.wxw.syntacticanalysis.SyntacticAnalysisForChunk;
 import com.wxw.tree.GenerateHeadWords;
 import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
@@ -232,39 +230,6 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 		return null;
 	}
 	
-	
-	/**
-	 * 统计词语出现的个数
-	 * @param file 训练语料
-	 * @param encoding 编码
-	 * @return
-	 * @throws IOException
-	 * @throws CloneNotSupportedException 
-	 */
-	public static HashMap<String,Integer> buildDictionary(File file, String encoding) throws IOException, CloneNotSupportedException{
-		HashMap<String,Integer> dict = new HashMap<String,Integer>();
-		PlainTextByTreeStream lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(file), "utf8");
-		PhraseGenerateTree pgt = new PhraseGenerateTree();
-		TreeToActions tta = new TreeToActions();
-		String txt = "";
-		while((txt = lineStream.read())!= null){
-			TreeNode tree = pgt.generateTree(txt);
-			SyntacticAnalysisSample sample = tta.treeToAction(tree);
-			List<String> words = sample.getWords();
-			for (int i = 0; i < words.size(); i++) {
-				if(dict.containsKey(words.get(i))){
-					Integer count = dict.get(words.get(i));
-					count++;
-					dict.put(words.get(i), count);
-				}else{
-					dict.put(words.get(i), 1);
-				}
-			}
-		}
-		lineStream.close();
-		return dict;
-	}
-	
 	/**
 	 * 得到最好的K个最好结果的树,List中每一个值都是一颗完整的树
 	 * @param k 结果数目
@@ -275,10 +240,14 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	public List<TreeNode> tagBuildAndCheck(int k, List<List<TreeNode>> chunkTree, Object[] ac){
 		List<TreeNode> buildAndCheckTree = new ArrayList<>();
 		SyntacticAnalysisSequenceForBuildAndCheck[] sequences = this.model.bestSequencesForBuildAndCheck(k, chunkTree, ac, contextGenerator, sequenceValidator);
-		for (int i = 0; i < sequences.length; i++) {
-			buildAndCheckTree.add(sequences[i].getTree().get(0));
+		if(sequences == null){
+			return null;
+		}else{
+			for (int i = 0; i < sequences.length; i++) {
+				buildAndCheckTree.add(sequences[i].getTree().get(0));
+			}
+			return buildAndCheckTree;
 		}
-		return buildAndCheckTree;
 	}
 	
 	/**
@@ -292,12 +261,18 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	public List<List<String>> tagKactions(int k, List<List<TreeNode>> chunkTree, Object[] ac) throws CloneNotSupportedException{
 		List<List<String>> kActions = new ArrayList<>();
 		List<TreeNode> alltree= tagBuildAndCheck(k,chunkTree,null);
-		for (int i = 0; i < alltree.size(); i++) {
-			TreeToActions tta = new TreeToActions();
-			SyntacticAnalysisSample sample = tta.treeToAction(alltree.get(i));
-			kActions.add(sample.getActions());	
+		if(alltree == null){
+			return null;
+		}else{
+			for (int i = 0; i < alltree.size(); i++) {
+				TreeToActions tta = new TreeToActions();
+				PhraseGenerateTree pgt = new PhraseGenerateTree();
+				TreeNode node = pgt.generateTree("("+alltree.get(i).toBracket()+")");
+				SyntacticAnalysisSample sample = tta.treeToAction(node);
+				kActions.add(sample.getActions());	
+			}
+			return kActions;
 		}
-		return kActions;
 	}
 	
 	/**
@@ -310,6 +285,7 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	 */
 	public List<String> tagActions(int k, List<List<TreeNode>> chunkTree, Object[] ac) throws CloneNotSupportedException{
 		List<List<String>> kActions = tagKactions(1,chunkTree,null);
+		
 		return kActions.get(0);
 	}
 	
@@ -321,7 +297,11 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	 */
 	public TreeNode tagBuildAndCheck(List<List<TreeNode>> chunkTree, Object[] ac){
 		List<TreeNode> buildAndCheckTree = tagBuildAndCheck(1,chunkTree, ac);
-		return buildAndCheckTree.get(0);
+		if(buildAndCheckTree == null){
+			return null;
+		}else{
+			return buildAndCheckTree.get(0);
+		}
 	}
 	/**
 	 * 得到句法树

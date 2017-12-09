@@ -8,21 +8,22 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Properties;
 
+import com.wxw.cross.SyntacticAnalysisCrossValidationForOneStep;
 import com.wxw.evaluate.SyntacticAnalysisErrorPrinter;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
-import com.wxw.feature.FeatureForPosTools;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
-import com.wxw.feature.SyntacticAnalysisContextGeneratorConfForPos;
-import com.wxw.feature.SyntacticAnalysisContextGeneratorForPos;
-import com.wxw.model.all.SyntacticAnalysisEvaluatorForAll;
+import com.wxw.model.all.SyntacticAnalysisEvaluatorForOneStep;
 import com.wxw.model.all.SyntacticAnalysisME;
 import com.wxw.model.all.SyntacticAnalysisModel;
-import com.wxw.model.pos.unused.SyntacticAnalysisEvaluatorContainPos;
-import com.wxw.model.pos.unused.SyntacticAnalysisMEForPos;
-import com.wxw.model.pos.unused.SyntacticAnalysisModelForPos;
-import com.wxw.pretreattools.TreePreTreatment;
+import com.wxw.model.pos.unused.FeatureContainsPosTools;
+import com.wxw.model.pos.unused.SyntacticAnalysisContextGeneratorConfContainsPos;
+import com.wxw.model.pos.unused.SyntacticAnalysisContextGeneratorContainsPos;
+import com.wxw.model.pos.unused.SyntacticAnalysisEvaluatorContainsPos;
+import com.wxw.model.pos.unused.SyntacticAnalysisMEContainsPos;
+import com.wxw.model.pos.unused.SyntacticAnalysisModelContainsPos;
 import com.wxw.stream.FileInputStreamFactory;
+import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
 
@@ -30,7 +31,6 @@ import opennlp.tools.cmdline.postag.POSModelLoader;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.PlainTextByLineStream;
 import opennlp.tools.util.TrainingParameters;
 
 /**
@@ -146,19 +146,79 @@ public class SyntacticAnalysisRunForOneStep {
 			runFeature();
 		}else if(cmd.equals("-cross")){
 			String corpus = args[1];
-//			crossValidation(corpus);
+			crossValidation(corpus);
 		}else if(cmd.equals("-trainpt")){//同时训练词性标注模型和句法分析模型
 			flag = "trainpt";
 			runFeatureForPosAndTree();
 		}else if(cmd.equals("-modelpt")){//同时输出词性标注模型和句法分析模型
 			flag = "modelpt";
 			runFeatureForPosAndTree();
-		}else if(cmd.equals("-evaluatept")){//用自己训练的词性标注模型
+		}else if(cmd.equals("-evaluatept")){//用自己训练的词性标注模型和句法分析模型
 			flag = "evaluatept";
 			runFeatureForPosAndTree();
+		}else if(cmd.equals("-crosspt")){//用自己训练的词性标注模型和句法分析模型
+			String corpus = args[1];
+			crossValidationForPosAndTree(corpus);
 		}
 	}
 
+	/**
+	 * 交叉验证[用最大熵模型的词性标注器]
+	 * @param corpus 语料的名称
+	 * @throws IOException 
+	 */
+	private static void crossValidation(String corpusName) throws IOException {
+		Properties config = new Properties();
+		InputStream configStream = SyntacticAnalysisRunByStep.class.getClassLoader().getResourceAsStream("com/wxw/run/corpus.properties");
+		config.load(configStream);
+		Corpus[] corpora = getCorporaFromConf(config);
+        //定位到某一语料
+        Corpus corpus = getCorpus(corpora, corpusName);
+        SyntacticAnalysisContextGenerator contextGen = getContextGenerator(config);
+        ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.trainFile)), corpus.encoding);
+        
+        ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
+
+        //默认参数
+        TrainingParameters params = TrainingParameters.defaultParams();
+        params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(3));
+
+        //把刚才属性信息封装
+        SyntacticAnalysisCrossValidationForOneStep crossValidator = new SyntacticAnalysisCrossValidationForOneStep("zh", params);
+
+        System.out.println(contextGen);
+        crossValidator.evaluate(new File(corpus.posenglish),sampleStream, 10, contextGen);
+	}
+	
+	/**
+	 * 交叉验证【用自己训练的词性标注器】
+	 * @param corpus 语料的名称
+	 * @throws IOException 
+	 */
+	private static void crossValidationForPosAndTree(String corpusName) throws IOException {
+		Properties config = new Properties();
+		InputStream configStream = SyntacticAnalysisRunByStep.class.getClassLoader().getResourceAsStream("com/wxw/run/corpus.properties");
+		config.load(configStream);
+		Corpus[] corpora = getCorporaFromConf(config);
+        //定位到某一语料
+        Corpus corpus = getCorpus(corpora, corpusName);
+        SyntacticAnalysisContextGenerator contextGen = getContextGenerator(config);
+        ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.trainFile)), corpus.encoding);
+        
+        ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
+
+        //默认参数
+        TrainingParameters params = TrainingParameters.defaultParams();
+        params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(3));
+
+        //把刚才属性信息封装
+        SyntacticAnalysisCrossValidationForOneStep crossValidator = new SyntacticAnalysisCrossValidationForOneStep("zh", params);
+
+        SyntacticAnalysisContextGeneratorContainsPos contextGenForPos = new SyntacticAnalysisContextGeneratorConfContainsPos();
+        System.out.println(contextGen);
+        crossValidator.evaluateContainsPos(sampleStream, 10, contextGen,contextGenForPos);
+	}
+	
 	/**
 	 * 根据配置文件获取特征处理类
 	 * @throws IOException
@@ -176,7 +236,7 @@ public class SyntacticAnalysisRunForOneStep {
         Corpus[] corpora = getCorporaFromConf(config);//获取语料
 
         SyntacticAnalysisContextGenerator contextGen = getContextGenerator(config);
-        SyntacticAnalysisContextGeneratorForPos contextGenForPos = new SyntacticAnalysisContextGeneratorConfForPos();
+        SyntacticAnalysisContextGeneratorContainsPos contextGenForPos = new SyntacticAnalysisContextGeneratorConfContainsPos();
         runFeatureOnCorpora(contextGen, contextGenForPos,corpora, params);
 	}
 
@@ -192,7 +252,7 @@ public class SyntacticAnalysisRunForOneStep {
 	 * @throws UnsupportedOperationException 
 	 */
 	private static void runFeatureOnCorpora(SyntacticAnalysisContextGenerator contextGen,
-			SyntacticAnalysisContextGeneratorForPos contextGenForPos, Corpus[] corpora, TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
+			SyntacticAnalysisContextGeneratorContainsPos contextGenForPos, Corpus[] corpora, TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		if(flag == "trainpt" || flag.equals("trainpt")){
 			for (int i = 0; i < corpora.length; i++) {
 				trainOnCorpusContainPos(contextGen,contextGenForPos,corpora[i],params);
@@ -219,35 +279,31 @@ public class SyntacticAnalysisRunForOneStep {
 	 * @throws CloneNotSupportedException
 	 */
 	private static void evaluateOnCorpusContainPos(SyntacticAnalysisContextGenerator contextGen,
-			SyntacticAnalysisContextGeneratorForPos contextGenForPos, Corpus corpus, TrainingParameters params) throws IOException, CloneNotSupportedException {
+			SyntacticAnalysisContextGeneratorContainsPos contextGenForPos, Corpus corpus, TrainingParameters params) throws IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);
 
-      SyntacticAnalysisModelForPos posmodel = SyntacticAnalysisMEForPos.readModel(new File(corpus.posmodeltxtFile), params, contextGenForPos, corpus.encoding);	
+      SyntacticAnalysisModelContainsPos posmodel = SyntacticAnalysisMEContainsPos.readModel(new File(corpus.posmodeltxtFile), params, contextGenForPos, corpus.encoding);	
       SyntacticAnalysisModel treemodel = SyntacticAnalysisME.readModel(new File(corpus.treemodeltxtFile), params, contextGen, corpus.encoding);	
-      SyntacticAnalysisMEForPos postagger = new SyntacticAnalysisMEForPos(posmodel, contextGenForPos);
+      SyntacticAnalysisMEContainsPos postagger = new SyntacticAnalysisMEContainsPos(posmodel, contextGenForPos);
       SyntacticAnalysisME treetagger = new SyntacticAnalysisME(treemodel,contextGen);
       
       SyntacticAnalysisMeasure measure = new SyntacticAnalysisMeasure();
-      SyntacticAnalysisEvaluatorContainPos evaluator = null;
+      SyntacticAnalysisEvaluatorContainsPos evaluator = null;
       SyntacticAnalysisErrorPrinter printer = null;
       if(corpus.errorFile != null){
       	System.out.println("Print error to file " + corpus.errorFile);
       	printer = new SyntacticAnalysisErrorPrinter(new FileOutputStream(corpus.errorFile));    	
-      	evaluator = new SyntacticAnalysisEvaluatorContainPos(postagger,treetagger,printer);
+      	evaluator = new SyntacticAnalysisEvaluatorContainsPos(postagger,treetagger,printer);
       }else{
-      	evaluator = new SyntacticAnalysisEvaluatorContainPos(postagger,treetagger);
+      	evaluator = new SyntacticAnalysisEvaluatorContainsPos(postagger,treetagger);
       }
       evaluator.setMeasure(measure);
-      //根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数
-      HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(corpus.testFile), "utf-8");
-      FeatureForPosTools tools = new FeatureForPosTools(dict);
-      ObjectStream<String> linesStream = new PlainTextByLineStream(new FileInputStreamFactory(new File(corpus.testFile)), corpus.encoding);
+      ObjectStream<String> linesStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.testFile)), corpus.encoding);
       ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(linesStream);
       evaluator.evaluate(sampleStream);
       SyntacticAnalysisMeasure measureRes = evaluator.getMeasure();
       System.out.println("--------结果--------");
-      System.out.println(measureRes);
-		
+      System.out.println(measureRes);		
 	}
 
 	/**
@@ -262,14 +318,14 @@ public class SyntacticAnalysisRunForOneStep {
 	 * @throws CloneNotSupportedException
 	 */
 	private static void modelOutOnCorpusContainPos(SyntacticAnalysisContextGenerator contextGen,
-			SyntacticAnalysisContextGeneratorForPos contextGenForPos, Corpus corpus, TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
+			SyntacticAnalysisContextGeneratorContainsPos contextGenForPos, Corpus corpus, TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
 		//根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数【为训练词性标注的模型准备】
-		HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(corpus.trainFile), "utf-8");
-		FeatureForPosTools tools = new FeatureForPosTools(dict);
+		HashMap<String,Integer> dict = SyntacticAnalysisMEContainsPos.buildDictionary(new File(corpus.trainFile), "utf-8");
+		FeatureContainsPosTools tools = new FeatureContainsPosTools(dict);
 		//训练模型
 		//(1)训练词性标记模型
-		SyntacticAnalysisMEForPos.train(new File(corpus.trainFile), new File(corpus.posmodelbinaryFile),new File(corpus.posmodeltxtFile),params, contextGenForPos, corpus.encoding);
+		SyntacticAnalysisMEContainsPos.train(new File(corpus.trainFile), new File(corpus.posmodelbinaryFile),new File(corpus.posmodeltxtFile),params, contextGenForPos, corpus.encoding);
 		//（2）训练句法分析模型
 		SyntacticAnalysisME.train(new File(corpus.trainFile), new File(corpus.treemodelbinaryFile),new File(corpus.treemodeltxtFile),params, contextGen, corpus.encoding);
 		
@@ -285,14 +341,14 @@ public class SyntacticAnalysisRunForOneStep {
 	 * @throws CloneNotSupportedException
 	 */
 	private static void trainOnCorpusContainPos(SyntacticAnalysisContextGenerator contextGen,
-			SyntacticAnalysisContextGeneratorForPos contextGenForPos, Corpus corpus, TrainingParameters params) throws IOException, CloneNotSupportedException {
+			SyntacticAnalysisContextGeneratorContainsPos contextGenForPos, Corpus corpus, TrainingParameters params) throws IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
 		//根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数【为训练词性标注的模型准备】
-		HashMap<String,Integer> dict = SyntacticAnalysisME.buildDictionary(new File(corpus.trainFile), "utf-8");
-		FeatureForPosTools tools = new FeatureForPosTools(dict);
+		HashMap<String,Integer> dict = SyntacticAnalysisMEContainsPos.buildDictionary(new File(corpus.trainFile), "utf-8");
+		FeatureContainsPosTools tools = new FeatureContainsPosTools(dict);
 		//训练模型
 		//(1)训练词性标记模型
-		SyntacticAnalysisMEForPos.train(new File(corpus.trainFile), params, contextGenForPos, corpus.encoding);
+		SyntacticAnalysisMEContainsPos.train(new File(corpus.trainFile), params, contextGenForPos, corpus.encoding);
 		//（2）训练句法分析模型
 		SyntacticAnalysisME.train(new File(corpus.trainFile), params, contextGen, corpus.encoding);
 		
@@ -364,17 +420,17 @@ public class SyntacticAnalysisRunForOneStep {
 		POSTaggerME postagger = new POSTaggerME(model);
         
         SyntacticAnalysisMeasure measure = new SyntacticAnalysisMeasure();
-        SyntacticAnalysisEvaluatorForAll evaluator = null;
+        SyntacticAnalysisEvaluatorForOneStep evaluator = null;
         SyntacticAnalysisErrorPrinter printer = null;
         if(corpus.errorFile != null){
         	System.out.println("Print error to file " + corpus.errorFile);
         	printer = new SyntacticAnalysisErrorPrinter(new FileOutputStream(corpus.errorFile));    	
-        	evaluator = new SyntacticAnalysisEvaluatorForAll(postagger,treetagger,printer);
+        	evaluator = new SyntacticAnalysisEvaluatorForOneStep(postagger,treetagger,printer);
         }else{
-        	evaluator = new SyntacticAnalysisEvaluatorForAll(postagger,treetagger);
+        	evaluator = new SyntacticAnalysisEvaluatorForOneStep(postagger,treetagger);
         }
         evaluator.setMeasure(measure);
-        ObjectStream<String> linesStream = new PlainTextByLineStream(new FileInputStreamFactory(new File(corpus.testFile)), corpus.encoding);
+        ObjectStream<String> linesStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.testFile)), corpus.encoding);
         ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(linesStream);
         evaluator.evaluate(sampleStream);
         SyntacticAnalysisMeasure measureRes = evaluator.getMeasure();

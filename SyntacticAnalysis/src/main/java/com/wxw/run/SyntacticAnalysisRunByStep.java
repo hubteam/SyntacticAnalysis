@@ -5,22 +5,19 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Properties;
 
+import com.wxw.cross.SyntacticAnalysisCrossValidationForByStep;
 import com.wxw.evaluate.SyntacticAnalysisErrorPrinter;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
-import com.wxw.feature.FeatureForPosTools;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
-import com.wxw.model.all.SyntacticAnalysisME;
-import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForStep;
+import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForByStep;
 import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
 import com.wxw.model.bystep.SyntacticAnalysisMEForPos;
 import com.wxw.model.bystep.SyntacticAnalysisModelForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisModelForChunk;
-import com.wxw.pretreattools.TreePreTreatment;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
@@ -144,10 +141,38 @@ public class SyntacticAnalysisRunByStep {
 			runFeature();
 		}else if(cmd.equals("-cross")){
 			String corpus = args[1];
-//			crossValidation(corpus);
+			crossValidation(corpus);
 		}
 	}
 
+	/**
+	 * 交叉验证
+	 * @param corpus 语料的名称
+	 * @throws IOException 
+	 */
+	private static void crossValidation(String corpusName) throws IOException {
+		Properties config = new Properties();
+		InputStream configStream = SyntacticAnalysisRunByStep.class.getClassLoader().getResourceAsStream("com/wxw/run/corpus.properties");
+		config.load(configStream);
+		Corpus[] corpora = getCorporaFromConf(config);
+        //定位到某一语料
+        Corpus corpus = getCorpus(corpora, corpusName);
+        SyntacticAnalysisContextGenerator contextGen = getContextGenerator(config);
+        ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.trainFile)), corpus.encoding);
+        
+        ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
+
+        //默认参数
+        TrainingParameters params = TrainingParameters.defaultParams();
+        params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(3));
+
+        //把刚才属性信息封装
+        SyntacticAnalysisCrossValidationForByStep crossValidator = new SyntacticAnalysisCrossValidationForByStep("zh", params);
+
+        System.out.println(contextGen);
+        crossValidator.evaluate(new File(corpus.posenglish),sampleStream, 10, contextGen);
+	}
+	
 	/**
 	 * 根据配置文件获取特征处理类
 	 * @throws IOException
@@ -217,14 +242,14 @@ public class SyntacticAnalysisRunByStep {
         SyntacticAnalysisMEForBuildAndCheck buildandchecktagger = new SyntacticAnalysisMEForBuildAndCheck(buildandcheckmodel,contextGen);
         
         SyntacticAnalysisMeasure measure = new SyntacticAnalysisMeasure();
-        SyntacticAnalysisEvaluatorForStep evaluator = null;
+        SyntacticAnalysisEvaluatorForByStep evaluator = null;
         SyntacticAnalysisErrorPrinter printer = null;
         if(corpus.errorFile != null){
         	System.out.println("Print error to file " + corpus.errorFile);
         	printer = new SyntacticAnalysisErrorPrinter(new FileOutputStream(corpus.errorFile));    	
-        	evaluator = new SyntacticAnalysisEvaluatorForStep(postagger,chunktagger,buildandchecktagger,printer);
+        	evaluator = new SyntacticAnalysisEvaluatorForByStep(postagger,chunktagger,buildandchecktagger,printer);
         }else{
-        	evaluator = new SyntacticAnalysisEvaluatorForStep(postagger,chunktagger,buildandchecktagger);
+        	evaluator = new SyntacticAnalysisEvaluatorForByStep(postagger,chunktagger,buildandchecktagger);
         }
         evaluator.setMeasure(measure);
         ObjectStream<String> linesStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.testFile)), corpus.encoding);

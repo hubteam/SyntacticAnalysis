@@ -1,11 +1,10 @@
 package com.wxw.model.bystep;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.syntacticanalysis.SyntacticAnalysisForPos;
 import com.wxw.tree.TreeNode;
-import com.wxw.tree.TreeToActions;
 
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
@@ -36,20 +35,8 @@ public class SyntacticAnalysisMEForPos extends POSTaggerME implements SyntacticA
 	 * @return
 	 */
 	public List<List<TreeNode>> tagKpos(int k, String[] words){
-		List<List<TreeNode>> allposTree = new ArrayList<>();
-		
 		String[][] poses = super.tag(k, words);
-		for (int i = 0; i < poses.length; i++) {
-			List<TreeNode> posTree = new ArrayList<>();
-			for (int j = 0; j < poses[i].length; j++) {
-				TreeNode pos = new TreeNode(poses[i][j]);
-				pos.addChild(new TreeNode(words[j]));
-				pos.setHeadWords(words[j]);
-				posTree.add(pos);
-			}
-			allposTree.add(posTree);
-		}
-		return allposTree;
+		return SyntacticAnalysisSample.toPosTree(words, poses);
 	}
 	
 	/**

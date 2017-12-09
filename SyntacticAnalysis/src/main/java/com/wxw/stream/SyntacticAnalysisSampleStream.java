@@ -54,7 +54,7 @@ public class SyntacticAnalysisSampleStream extends FilterObjectStream<String,Syn
 				return sample;
 			}else {
 				sample = new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-				return sample;
+				return null;
 			}
 		}
 		else{

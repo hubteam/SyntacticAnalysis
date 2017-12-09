@@ -14,7 +14,6 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 	private List<TreeNode> tree;
 	private int begin;
 	private int lable;//标记是输入K个结果中的第几个
-	private static final Double ONE = Double.valueOf(1.0D);
 
 	public SyntacticAnalysisSequenceForBuildAndCheck() {
 		this.probs = new ArrayList<>(1);
@@ -60,14 +59,6 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		this.tree = s.tree;
 		this.begin = s.begin;
 	}
-
-//	public SyntacticAnalysisSequenceForBuildAndCheck(List<TreeNode> tree, int begin, int lable) {
-//		this.tree = tree;
-//		this.probs = Collections.nCopies(outcomes.size(), ONE);
-//		this.probscheck = Collections.nCopies(outcomescheck.size(), ONE);
-//		this.begin = begin;
-//		this.lable = lable;
-//	}
 
 	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s,List<TreeNode> tree,double p, double pcheck, int begin, int lable) {
 		this.tree = tree;

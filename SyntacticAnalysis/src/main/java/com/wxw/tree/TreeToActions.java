@@ -60,8 +60,8 @@ public class TreeToActions {
 				actions.add("start_"+treeCopy.getParent().getNodeName());
 				TreeNode node = new TreeNode("start_"+treeCopy.getParent().getNodeName());
 				node.addChild(treeCopy);
-				node.setHeadWords(treeCopy.getParent().getHeadWords());
-				treeCopy.setParent(node);
+//				node.setHeadWords(treeCopy.getParent().getHeadWords());
+//				treeCopy.setParent(node);
 				chunkTree.add(node);
 				//当前节点的父节点不止一个，就遍历所有的子树，判断当前节点是否为flat结构
 			}else if(treeCopy.getParent().getChildren().size() > 1){
@@ -85,16 +85,16 @@ public class TreeToActions {
 						actions.add("start_"+treeCopy.getParent().getNodeName());
 						TreeNode node = new TreeNode("start_"+treeCopy.getParent().getNodeName());
 						node.addChild(treeCopy);
-						node.setHeadWords(treeCopy.getParent().getHeadWords());
-						treeCopy.setParent(node);
+//						node.setHeadWords(treeCopy.getParent().getHeadWords());
+//						treeCopy.setParent(node);
 						chunkTree.add(node);
 					}else{
 						//不是第一个
 						actions.add("join_"+treeCopy.getParent().getNodeName());
 						TreeNode node = new TreeNode("join_"+treeCopy.getParent().getNodeName());
 						node.addChild(treeCopy);
-						node.setHeadWords(treeCopy.getParent().getHeadWords());
-						treeCopy.setParent(node);
+//						node.setHeadWords(treeCopy.getParent().getHeadWords());
+//						treeCopy.setParent(node);
 						chunkTree.add(node);
 					}
 				//当前节点的父节点的子树不满足flat结构	，用other标记
@@ -102,8 +102,8 @@ public class TreeToActions {
 					actions.add("other");
 					TreeNode node = new TreeNode("other");
 					node.addChild(treeCopy);
-					node.setHeadWords(treeCopy.getParent().getHeadWords());
-					treeCopy.setParent(node);
+//					node.setHeadWords(treeCopy.getParent().getHeadWords());
+//					treeCopy.setParent(node);
 					chunkTree.add(node);
 				}		
 			}
@@ -131,7 +131,7 @@ public class TreeToActions {
 				//所以遇到start就生成新的子树
 				TreeNode node = new TreeNode(subTree.get(i).getNodeName().split("_")[1]);
 				node.addChild(subTree.get(i).getChildren().get(0));
-				node.setHeadWords(subTree.get(i).getHeadWords());
+				node.setHeadWords(GenerateHeadWords.getHeadWords(node));
 				subTree.get(i).getChildren().get(0).setParent(node);
 				for (int j = i+1; j < subTree.size(); j++) {
 					//判断start后是否有join如果有，就和之前的start合并
@@ -177,8 +177,8 @@ public class TreeToActions {
 				//改变subTreeCopy
 				TreeNode node = new TreeNode("start_"+tree.getParent().getNodeName());
 				node.addChild(subTree.get(i));
-				node.setHeadWords(subTree.get(i).getHeadWords());
-				subTree.get(i).setParent(node);
+//				node.setHeadWords(subTree.get(i).getHeadWords());
+//				subTree.get(i).setParent(node);
 				subTree.set(i, node);
 				subTreeCopy = new ArrayList<TreeNode>(subTree);
 				buildAndCheckTree.add(subTreeCopy);				
@@ -208,8 +208,8 @@ public class TreeToActions {
 					actions.add("start_"+tree.getParent().getNodeName());	
 					TreeNode node = new TreeNode("start_"+tree.getParent().getNodeName());
 					node.addChild(subTree.get(i));
-					node.setHeadWords(tree.getParent().getHeadWords());
-					subTree.get(i).setParent(node);
+//					node.setHeadWords(tree.getParent().getHeadWords());
+//					subTree.get(i).setParent(node);
 					subTree.set(i, node);
 					subTreeCopy = new ArrayList<TreeNode>(subTree);
 					buildAndCheckTree.add(subTreeCopy);					
@@ -225,8 +225,8 @@ public class TreeToActions {
 					actions.add("join_"+tree.getParent().getNodeName());
 					TreeNode tempnode = new TreeNode("join_"+tree.getParent().getNodeName());
 					tempnode.addChild(subTree.get(i));
-					tempnode.setHeadWords(tree.getParent().getHeadWords());
-					subTree.get(i).setParent(tempnode);
+//					tempnode.setHeadWords(tree.getParent().getHeadWords());
+//					subTree.get(i).setParent(tempnode);
 					subTree.set(i, tempnode);
 					subTreeCopy = new ArrayList<TreeNode>(subTree);
 					buildAndCheckTree.add(subTreeCopy);					
@@ -263,8 +263,8 @@ public class TreeToActions {
 					actions.add("join_"+tree.getParent().getNodeName());
 					TreeNode node = new TreeNode("join_"+tree.getParent().getNodeName());
 					node.addChild(subTree.get(i));
-					node.setHeadWords(tree.getParent().getHeadWords());
-					subTree.get(i).setParent(node);
+//					node.setHeadWords(tree.getParent().getHeadWords());
+//					subTree.get(i).setParent(node);
 					subTree.set(i, node);
 					subTreeCopy = new ArrayList<TreeNode>(subTree);
 					buildAndCheckTree.add(subTreeCopy);					

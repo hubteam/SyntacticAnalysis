@@ -86,7 +86,7 @@ public class SyntacticAnalysisME {
             this.model = model.getTreeSequenceModel();
         } else {
             this.model = new SyntacticAnalysisBeamSearch(beamSize,
-                    model.getTreeModel(), 0);
+                    model.getTreeModel(), 0,"onstep");
         }
 		
 	}
@@ -195,14 +195,6 @@ public class SyntacticAnalysisME {
         }	
 		return null;
 	}
-	
-//	public String[] tag(String[] characters, String[] tags, String[] words, Object[] additionaContext){
-//		bestSequence = model.bestSequence(characters, tags, words, additionaContext, contextGenerator,sequenceValidator);
-//      //  System.out.println(bestSequence);
-//		List<String> t = bestSequence.getOutcomes();
-//        
-//        return t.toArray(new String[t.size()]);
-//	}
 	/**
 	 * 根据训练得到的模型文件得到
 	 * @param modelFile 模型文件
@@ -243,40 +235,7 @@ public class SyntacticAnalysisME {
 		} 
 		return null;
 	}
-	
-	
-	/**
-	 * 统计词语出现的个数
-	 * @param file 训练语料
-	 * @param encoding 编码
-	 * @return
-	 * @throws IOException
-	 * @throws CloneNotSupportedException 
-	 */
-	public static HashMap<String,Integer> buildDictionary(File file, String encoding) throws IOException, CloneNotSupportedException{
-		HashMap<String,Integer> dict = new HashMap<String,Integer>();
-		PlainTextByLineStream lineStream = new PlainTextByLineStream(new FileInputStreamFactory(file), "utf8");
-		PhraseGenerateTree pgt = new PhraseGenerateTree();
-		TreeToActions tta = new TreeToActions();
-		String txt = "";
-		while((txt = lineStream.read())!= null){
-			TreeNode tree = pgt.generateTree(txt);
-			SyntacticAnalysisSample sample = tta.treeToAction(tree);
-			List<String> words = sample.getWords();
-			for (int i = 0; i < words.size(); i++) {
-				if(dict.containsKey(words.get(i))){
-					Integer count = dict.get(words.get(i));
-					count++;
-					dict.put(words.get(i), count);
-				}else{
-					dict.put(words.get(i), 1);
-				}
-			}
-		}
-		lineStream.close();
-		return dict;
-	}
-	
+
 	/**
 	 * 得到最好的K个chunk树
 	 * @param k 结果数目
@@ -284,8 +243,10 @@ public class SyntacticAnalysisME {
 	 * @param ac
 	 * @return
 	 */
-	public List<List<TreeNode>> tagChunk(int k, List<List<TreeNode>> posTree, Object[] ac){
+	public List<List<TreeNode>> tagKChunk(int k, List<List<TreeNode>> posTree, Object[] ac){
 		List<List<TreeNode>> chunkTree = new ArrayList<>();
+		TreeToActions tta = new TreeToActions();
+		List<List<TreeNode>> combineChunkTree = new ArrayList<>();
 		SyntacticAnalysisSequenceForChunk[] sequences = this.model.bestSequencesForChunk(k, posTree, ac, contextGenerator, sequenceValidator);
 		for (int i = 0; i < sequences.length; i++) {
 			int label = sequences[i].getLabel();
@@ -302,34 +263,79 @@ public class SyntacticAnalysisME {
 			}
 			chunkTree.add(tree);
 		}
-		return chunkTree;
+		for (int i = 0; i < chunkTree.size(); i++) {
+			combineChunkTree.add(tta.combine(chunkTree.get(i)));
+		}
+		return combineChunkTree;
 	}
 	
 	/**
-	 * 得到最好的K个BuildAndCheck标记
+	 * 得到最好的K个chunk树
+	 * @param k 结果数目
+	 * @param posTree 词性标注树
+	 * @param ac
+	 * @return
+	 */
+	public List<TreeNode> tagChunk(List<List<TreeNode>> posTree, Object[] ac){
+		List<List<TreeNode>> chunkTree = tagKChunk(1,posTree,null);
+		return chunkTree.get(0);
+	}
+	
+	/**
+	 * 得到最好的K个最好结果的树,List中每一个值都是一颗完整的树
 	 * @param k 结果数目
 	 * @param chunkTree chunk标记树
 	 * @param ac
 	 * @return
 	 */
-	public List<List<TreeNode>> tagBuildAndCheck(int k, List<List<TreeNode>> chunkTree, Object[] ac){
-		List<List<TreeNode>> buildAndCheckTree = new ArrayList<>();
+	public List<TreeNode> tagBuildAndCheck(int k, List<List<TreeNode>> chunkTree, Object[] ac){
+		List<TreeNode> buildAndCheckTree = new ArrayList<>();
 		SyntacticAnalysisSequenceForBuildAndCheck[] sequences = this.model.bestSequencesForBuildAndCheck(k, chunkTree, ac, contextGenerator, sequenceValidator);
 		for (int i = 0; i < sequences.length; i++) {
-			
-			buildAndCheckTree.add(sequences[i].getTree());
+			buildAndCheckTree.add(sequences[i].getTree().get(0));
 		}
 		return buildAndCheckTree;
 	}
+	/**
+	 * 得到最好的K个完整的动作序列
+	 * @param k 结果数
+	 * @param chunkTree k个chunk子树序列
+	 * @param ac
+	 * @return
+	 * @throws CloneNotSupportedException 
+	 */
+	public List<List<String>> tagKactions(int k, List<List<TreeNode>> chunkTree, Object[] ac) throws CloneNotSupportedException{
+		List<List<String>> kActions = new ArrayList<>();
+		List<TreeNode> alltree= tagBuildAndCheck(k,chunkTree,null);
+		for (int i = 0; i < alltree.size(); i++) {
+			TreeToActions tta = new TreeToActions();
+			SyntacticAnalysisSample sample = tta.treeToAction(alltree.get(i));
+			kActions.add(sample.getActions());	
+		}
+		return kActions;
+	}
 	
 	/**
-	 * 得到最好的BuildAndCheck标记
+	 * 得到最好的K个完整的动作序列
+	 * @param k 结果数
+	 * @param chunkTree k个chunk子树序列
+	 * @param ac
+	 * @return
+	 * @throws CloneNotSupportedException 
+	 */
+	public List<String> tagActions(int k, List<List<TreeNode>> chunkTree, Object[] ac) throws CloneNotSupportedException{
+		List<List<String>> kActions = tagKactions(1,chunkTree,null);
+		return kActions.get(0);
+	}
+	
+	/**
+	 * 得到最好的树
 	 * @param chunkTree chunk标记树
 	 * @param ac
 	 * @return
 	 */
-	public List<TreeNode> tagBuildAndCheck(List<List<TreeNode>> chunkTree, Object[] ac){
-		List<List<TreeNode>> buildAndCheckTree = tagBuildAndCheck(1,chunkTree, ac);
+	public TreeNode tagBuildAndCheck(List<List<TreeNode>> chunkTree, Object[] ac){
+		List<TreeNode> buildAndCheckTree = tagBuildAndCheck(1,chunkTree, ac);
 		return buildAndCheckTree.get(0);
 	}
 }

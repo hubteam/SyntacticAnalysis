@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import com.wxw.cross.SyntacticAnalysisCrossValidationForByStep;
+import com.wxw.cross.SyntacticAnalysisCrossValidationForChina;
 import com.wxw.evaluate.SyntacticAnalysisErrorPrinter;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
@@ -16,6 +18,7 @@ import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
 import com.wxw.model.bystep.SyntacticAnalysisModelForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisModelForChunk;
+import com.wxw.run.SyntacticAnalysisRunByStep.Corpus;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
@@ -143,8 +146,36 @@ public class SyntacticAnalysisRunForChina {
 			runFeature();
 		}else if(cmd.equals("-cross")){
 			String corpus = args[1];
-//			crossValidation(corpus);
+			crossValidation(corpus);
 		}
+	}
+	
+	/**
+	 * 交叉验证
+	 * @param corpus 语料的名称
+	 * @throws IOException 
+	 */
+	private static void crossValidation(String corpusName) throws IOException {
+		Properties config = new Properties();
+		InputStream configStream = SyntacticAnalysisRunByStep.class.getClassLoader().getResourceAsStream("com/wxw/run/corpus.properties");
+		config.load(configStream);
+		Corpus[] corpora = getCorporaFromConf(config);
+        //定位到某一语料
+        Corpus corpus = getCorpus(corpora, corpusName);
+        SyntacticAnalysisContextGenerator contextGen = getContextGenerator(config);
+        ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.trainFile)), corpus.encoding);
+        
+        ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
+
+        //默认参数
+        TrainingParameters params = TrainingParameters.defaultParams();
+        params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(3));
+
+        //把刚才属性信息封装
+        SyntacticAnalysisCrossValidationForChina crossValidator = new SyntacticAnalysisCrossValidationForChina("zh", params);
+
+        System.out.println(contextGen);
+        crossValidator.evaluate(new File(corpus.posChina),sampleStream, 10, contextGen);
 	}
 
 	/**
@@ -206,8 +237,6 @@ public class SyntacticAnalysisRunForChina {
 	private static void evaluateOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
 			TrainingParameters params) throws IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);
-//		POSModel posmodel = new POSModelLoader().load(new File(corpus.posenglish));
-//		SyntacticAnalysisMEForPos postagger = new SyntacticAnalysisMEForPos(posmodel);
 		WordSegAndPosModel posmodel = new WordSegAndPosModelLoader().load(new File(corpus.posChina));
 		WordSegAndPosContextGenerator generator = new WordSegAndPosContextGeneratorConfExtend();
 		WordSegAndPosME postagger = new WordSegAndPosME(posmodel, generator);

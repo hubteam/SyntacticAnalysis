@@ -13,7 +13,6 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 	private List<Double> probscheck;
 	private List<TreeNode> tree;
 	private int begin;
-	private int lable;//标记是输入K个结果中的第几个
 
 	public SyntacticAnalysisSequenceForBuildAndCheck() {
 		this.probs = new ArrayList<>(1);
@@ -22,7 +21,6 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		this.score = 0.0D;
 		this.scorecheck = 0.0D;
 		this.begin = 0;
-		this.lable = -1;
 	}
 
 	public SyntacticAnalysisSequenceForBuildAndCheck(List<TreeNode> tree){
@@ -32,7 +30,6 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		this.score = 0.0D;
 		this.scorecheck = 0.0D;
 		this.begin = 0;
-		this.lable = -1;
 	}
 	
 	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s) {
@@ -42,12 +39,11 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		this.probscheck.addAll(s.probscheck);
 		this.score = s.score;
 		this.scorecheck = s.scorecheck;
-		this.lable = s.lable;
 		this.tree = s.tree;
 		this.begin = s.begin;
 	}
 
-	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s,double p,double checkp, int lable) {
+	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s,double p,double checkp) {
 		this.probs = new ArrayList<>(s.probs.size() + 1);
 		this.probs.addAll(s.probs);
 		this.probs.add(Double.valueOf(p));
@@ -55,12 +51,11 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		this.probscheck.addAll(s.probscheck);
 		this.probscheck.add(Double.valueOf(checkp));
 		this.score = s.score + Math.log(p) + Math.log(checkp);
-		this.lable = lable;
 		this.tree = s.tree;
 		this.begin = s.begin;
 	}
 
-	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s,List<TreeNode> tree,double p, double pcheck, int begin, int lable) {
+	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s,List<TreeNode> tree,double p, double pcheck, int begin) {
 		this.tree = tree;
 		this.probs = new ArrayList<>(s.probs.size() + 1);
 		this.probs.addAll(s.probs);
@@ -69,14 +64,7 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		this.probscheck.addAll(s.probscheck);
 		this.probscheck.add(Double.valueOf(pcheck));
 		this.score = s.score + Math.log(p) + Math.log(pcheck);
-		this.lable = lable;
 		this.begin = begin;
-	}
-	
-	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck top,
-			List<TreeNode> tree2, List<String> tmpOutcomes, List<String> temOutcomescheck, double temScore, int index,
-			int label) {
-		
 	}
 
 	public int compareTo(SyntacticAnalysisSequenceForBuildAndCheck s) {
@@ -103,10 +91,6 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 	
 	public double getScore() {
 		return this.score;
-	}
-
-	public int getLabel(){
-		return this.lable;
 	}
 	
 	public List<TreeNode> getTree(){

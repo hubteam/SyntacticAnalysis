@@ -60,11 +60,10 @@ public class TreeToActions {
 				actions.add("start_"+treeCopy.getParent().getNodeName());
 				TreeNode node = new TreeNode("start_"+treeCopy.getParent().getNodeName());
 				node.addChild(treeCopy);
-//				node.setHeadWords(treeCopy.getParent().getHeadWords());
-//				treeCopy.setParent(node);
 				chunkTree.add(node);
 				//当前节点的父节点不止一个，就遍历所有的子树，判断当前节点是否为flat结构
 			}else if(treeCopy.getParent().getChildren().size() > 1){
+				
 				int record = -1;
 				for (int j = 0; j < treeCopy.getParent().getChildren().size(); j++) {
 					//如果有一颗子树破坏了flat结构，退出
@@ -85,16 +84,12 @@ public class TreeToActions {
 						actions.add("start_"+treeCopy.getParent().getNodeName());
 						TreeNode node = new TreeNode("start_"+treeCopy.getParent().getNodeName());
 						node.addChild(treeCopy);
-//						node.setHeadWords(treeCopy.getParent().getHeadWords());
-//						treeCopy.setParent(node);
 						chunkTree.add(node);
 					}else{
 						//不是第一个
 						actions.add("join_"+treeCopy.getParent().getNodeName());
 						TreeNode node = new TreeNode("join_"+treeCopy.getParent().getNodeName());
 						node.addChild(treeCopy);
-//						node.setHeadWords(treeCopy.getParent().getHeadWords());
-//						treeCopy.setParent(node);
 						chunkTree.add(node);
 					}
 				//当前节点的父节点的子树不满足flat结构	，用other标记
@@ -102,8 +97,6 @@ public class TreeToActions {
 					actions.add("other");
 					TreeNode node = new TreeNode("other");
 					node.addChild(treeCopy);
-//					node.setHeadWords(treeCopy.getParent().getHeadWords());
-//					treeCopy.setParent(node);
 					chunkTree.add(node);
 				}		
 			}
@@ -137,7 +130,6 @@ public class TreeToActions {
 					//判断start后是否有join如果有，就和之前的start合并
 					if(subTree.get(j).getNodeName().split("_")[0].equals("join")){
 						node.addChild(subTree.get(j).getChildren().get(0));
-//						node.setHeadWords(subTree.get(j).getHeadWords());
 						subTree.get(j).getChildren().get(0).setParent(node);
 					}else if(subTree.get(j).getNodeName().split("_")[0].equals("start") ||
 							subTree.get(j).getNodeName().split("_")[0].equals("other")){
@@ -177,8 +169,6 @@ public class TreeToActions {
 				//改变subTreeCopy
 				TreeNode node = new TreeNode("start_"+tree.getParent().getNodeName());
 				node.addChild(subTree.get(i));
-//				node.setHeadWords(subTree.get(i).getHeadWords());
-//				subTree.get(i).setParent(node);
 				subTree.set(i, node);
 				subTreeCopy = new ArrayList<TreeNode>(subTree);
 				buildAndCheckTree.add(subTreeCopy);				
@@ -202,14 +192,11 @@ public class TreeToActions {
 					getActionBUILDandCHECK(tree.getParent().getParent(),subTree);
 				}
 			}else if(tree.getParent().getChildren().size() > 1){
-				//if(tree.getParent().getChildren().get(0).equals(tree)){
 				if(tree.getIndex() == 0){
 					//添加start标记
 					actions.add("start_"+tree.getParent().getNodeName());	
 					TreeNode node = new TreeNode("start_"+tree.getParent().getNodeName());
 					node.addChild(subTree.get(i));
-//					node.setHeadWords(tree.getParent().getHeadWords());
-//					subTree.get(i).setParent(node);
 					subTree.set(i, node);
 					subTreeCopy = new ArrayList<TreeNode>(subTree);
 					buildAndCheckTree.add(subTreeCopy);					
@@ -225,8 +212,6 @@ public class TreeToActions {
 					actions.add("join_"+tree.getParent().getNodeName());
 					TreeNode tempnode = new TreeNode("join_"+tree.getParent().getNodeName());
 					tempnode.addChild(subTree.get(i));
-//					tempnode.setHeadWords(tree.getParent().getHeadWords());
-//					subTree.get(i).setParent(tempnode);
 					subTree.set(i, tempnode);
 					subTreeCopy = new ArrayList<TreeNode>(subTree);
 					buildAndCheckTree.add(subTreeCopy);					
@@ -263,8 +248,6 @@ public class TreeToActions {
 					actions.add("join_"+tree.getParent().getNodeName());
 					TreeNode node = new TreeNode("join_"+tree.getParent().getNodeName());
 					node.addChild(subTree.get(i));
-//					node.setHeadWords(tree.getParent().getHeadWords());
-//					subTree.get(i).setParent(node);
 					subTree.set(i, node);
 					subTreeCopy = new ArrayList<TreeNode>(subTree);
 					buildAndCheckTree.add(subTreeCopy);					
@@ -278,8 +261,7 @@ public class TreeToActions {
 				}
 			}
 
-		}else{
-		
+		}else{		
 			for (TreeNode node:tree.getChildren()) {
 				getActionBUILDandCHECK(node,subTree);
 			}

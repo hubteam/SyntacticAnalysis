@@ -187,7 +187,6 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 			}
 		}
 		if(kRes.size() == 0){
-			System.out.println("chunk没有结果");
 			return null;
 		}else{
 			int trueResultNum = Math.min(kRes.size(), num);//防止得到的最终结果小于你需要得到的结果
@@ -249,7 +248,132 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 		for (int i = 0; i < comnineChunkTree.size(); i++) {
 			PriorityQueue<SyntacticAnalysisSequenceForBuildAndCheck> prev = new PriorityQueue<>(this.size);
 			PriorityQueue<SyntacticAnalysisSequenceForBuildAndCheck> next = new PriorityQueue<>(this.size);
-			prev.add(new SyntacticAnalysisSequenceForBuildAndCheck(comnineChunkTree.get(i)));
+			
+			//存在这样的情况，chunk步得到的不是子树序列，而是一棵子树，这种情况就不能用下面的方法处理了
+			//chunk得到一颗子树的时候，prev不加入任何东西，size是0,不会进入下面的那种情况进行处理
+			//此时是一颗子树，直接处理，处理完加入kRes代表最终的结果
+			if(comnineChunkTree.get(i).size() == 1){
+				SyntacticAnalysisSequenceForBuildAndCheck top = new SyntacticAnalysisSequenceForBuildAndCheck(comnineChunkTree.get(i));//取出beam size个结果中的第一个
+				double temScore = top.getScore();
+				String[] contextsForBuild = generator.getContextForBuildForTest(0, top.getTree(), ac);
+				double[] scoresForBuild;
+				//得到每个类别的分数
+				if (this.contextsCache != null) {
+					scoresForBuild = (double[]) this.contextsCache.get(contextsForBuild);
+					if (scoresForBuild == null) {
+						scoresForBuild = this.buildmodel.eval(contextsForBuild, this.buildprobs);
+						this.contextsCache.put(contextsForBuild, scoresForBuild);
+					}
+				} else {
+					scoresForBuild = this.buildmodel.eval(contextsForBuild, this.buildprobs);
+				}
+				//temp_scores的作用就是取出第前beam size个的分数的界限
+				double[] temp_scoresscoresForBuild = new double[scoresForBuild.length];
+				System.arraycopy(scoresForBuild, 0, temp_scoresscoresForBuild, 0, scoresForBuild.length);//数组的复制
+				Arrays.sort(temp_scoresscoresForBuild);//排序
+				//取beam size位置的值，保证取的分数值在前beam size个
+				double min = temp_scoresscoresForBuild[Math.max(0, scoresForBuild.length-this.size)];
+				
+				int p;
+				String out;
+				SyntacticAnalysisSequenceForBuildAndCheck ns = null;
+				for (p = 0; p < scoresForBuild.length; ++p) {
+					if(scoresForBuild[p] >= min){
+						out = this.buildmodel.getOutcome(p);
+						if(validator.validSequenceForBuildAndCheck(0,top.getTree(),out)){
+							
+							List<TreeNode> copy = new ArrayList<>(top.getTree());
+							String[] contextsForCheck = generator.getContextForCheckForTest(0, top.getTree(), out, ac);
+							double[] scoresForCheck = this.checkmodel.eval(contextsForCheck);
+							//找到yes no的概率
+							double yes = 0;
+							double no = 0;
+							for (int j = 0; j < scoresForCheck.length; j++) {
+								String outCheck = this.checkmodel.getOutcome(j);
+								if(outCheck.equals("yes")){
+									yes = scoresForCheck[j];
+								}else if(outCheck.equals("no")){
+									no = scoresForCheck[j];
+								}
+							}
+							if(yes >= no){
+								if(temScore + scoresForBuild[p] + yes> minSequenceScore){
+									//新出的动作，加入树
+									TreeNode outnode = new TreeNode(out);
+									outnode.addChild(copy.get(0));
+									copy.set(0, outnode);
+
+									//下面开始合并
+									if(out.split("_")[0].equals("start")){
+										TreeNode combine = new TreeNode(out.split("_")[1]);
+										combine.setHeadWords(copy.get(0).getHeadWords());
+										combine.addChild(copy.get(0).getChildren().get(0));
+										copy.get(0).getChildren().get(0).setParent(combine);
+										copy.set(0, combine);
+										kRes.add(new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,0));
+									}
+								}
+							}else if(yes < no){
+								//为no的时候，且要处理的树的编号是最后一棵树，且标记为no，证明没法构建出一颗完整的树就退出
+								if(0 == top.getTree().size()-1){
+									continue;
+								}
+							}
+						}
+					}
+				}
+				if(next.size() == 0){
+					for (p = 0; p < scoresForBuild.length; ++p) {
+						out = this.buildmodel.getOutcome(p);
+						if(validator.validSequenceForBuildAndCheck(0,top.getTree(),out)){								
+							List<TreeNode> copy = new ArrayList<>(top.getTree());
+							String[] contextsForCheck = generator.getContextForCheckForTest(0, top.getTree(), out, ac);
+							double[] scoresForCheck = this.checkmodel.eval(contextsForCheck);
+							//排序
+							double[] temp_scoresForCheck = new double[scoresForCheck.length];
+							System.arraycopy(scoresForCheck, 0, temp_scoresForCheck, 0, scoresForCheck.length);//数组的复制
+							Arrays.sort(temp_scoresForCheck);//排序
+							//找到yes no的概率
+							double yes = 0;
+							double no = 0;
+							for (int j = 0; j < scoresForCheck.length; j++) {
+								String outCheck = this.checkmodel.getOutcome(j);
+								if(outCheck.equals("yes")){
+									yes = scoresForCheck[j];
+								}else if(outCheck.equals("no")){
+									no = scoresForCheck[j];
+								}
+							}
+							if(yes >= no){
+								if(temScore + scoresForBuild[p] + yes> minSequenceScore){
+									//新出的动作，加入树
+									TreeNode outnode = new TreeNode(out);
+									outnode.addChild(copy.get(0));
+									copy.set(0, outnode);
+
+									//下面开始合并
+									if(out.split("_")[0].equals("start")){
+										TreeNode combine = new TreeNode(out.split("_")[1]);
+										combine.setHeadWords(copy.get(0).getHeadWords());
+										combine.addChild(copy.get(0).getChildren().get(0));
+										copy.get(0).getChildren().get(0).setParent(combine);
+										copy.set(0, combine);
+										kRes.add(new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,0));
+									}
+								}
+							}else if(yes < no){
+								//为no的时候，且要处理的树的编号是最后一棵树，且标记为no，证明没法构建出一颗完整的树就退出
+								if(0 == top.getTree().size()-1){
+									continue;
+								}
+							}
+						}
+					}
+				}
+			}else{
+				prev.add(new SyntacticAnalysisSequenceForBuildAndCheck(comnineChunkTree.get(i)));
+			}
+			//下面处理的情况是chunk步骤得到的是子树序列，不是一颗子树的情况
 			if (ac == null) {
 				ac = EMPTY_ADDITIONAL_CONTEXT;
 			}
@@ -308,10 +432,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 									if(temScore + scoresForBuild[p] + yes> minSequenceScore){
 										//新出的动作，加入树
 										TreeNode outnode = new TreeNode(out);
-//										outnode.setFlag(true);
 										outnode.addChild(copy.get(numSeq));
-//										outnode.setHeadWords(copy.get(numSeq).getHeadWords());
-//										copy.get(numSeq).setParent(outnode);
 										copy.set(numSeq, outnode);
 										
 										int record = -1;
@@ -324,7 +445,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 											combine.addChild(copy.get(numSeq).getChildren().get(0));
 											copy.get(numSeq).getChildren().get(0).setParent(combine);
 											copy.set(numSeq, combine);
-											ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,numSeq,i);
+											ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,numSeq);
 											next.add(ns);
 										}else {
 											for (int k = numSeq-1;k >= 0; k--) {
@@ -334,8 +455,6 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 												}
 											}
 											TreeNode combine = new TreeNode(out.split("_")[1]);
-											
-//											combine.setFlag(true);
 											for (int k = record; k <= numSeq; k++) {
 												combine.addChild(copy.get(k).getChildren().get(0));
 												copy.get(k).getChildren().get(0).setParent(combine);
@@ -347,7 +466,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 											for (int k = numSeq; k >= record+1; k--) {
 												copy.remove(k);
 											}
-											ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,record,i);
+											ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,record);
 											next.add(ns);
 										}
 									}
@@ -359,12 +478,9 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 									if(temScore + scoresForBuild[p] + no> minSequenceScore){
 										//为no的时候不合并
 										TreeNode outnode = new TreeNode(out);
-//										outnode.setFlag(true);
-//										outnode.setHeadWords(copy.get(numSeq).getHeadWords());
 										outnode.addChild(copy.get(numSeq));
-//										copy.get(numSeq).setParent(outnode);
 										copy.set(numSeq, outnode);
-										ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy,scoresForBuild[p],no,numSeq+1,i);
+										ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy,scoresForBuild[p],no,numSeq+1);
 										next.add(ns);
 									}
 								}
@@ -397,10 +513,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 									if(temScore + scoresForBuild[p] + yes> minSequenceScore){
 										//新出的动作，加入树
 										TreeNode outnode = new TreeNode(out);
-//										outnode.setFlag(true);
 										outnode.addChild(copy.get(numSeq));
-//										outnode.setHeadWords(copy.get(numSeq).getHeadWords());
-//										copy.get(numSeq).setParent(outnode);
 										copy.set(numSeq, outnode);
 										
 										int record = -1;
@@ -408,12 +521,11 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 										//如果标记为start就要合并
 										if(out.split("_")[0].equals("start")){
 											TreeNode combine = new TreeNode(out.split("_")[1]);
-//											combine.setFlag(true);
 											combine.setHeadWords(copy.get(numSeq).getHeadWords());
 											combine.addChild(copy.get(numSeq).getChildren().get(0));
 											copy.get(numSeq).getChildren().get(0).setParent(combine);
 											copy.set(numSeq, combine);
-											ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,numSeq,i);
+											ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,numSeq);
 											next.add(ns);
 										}else {
 											for (int k = numSeq-1;k >= 0; k--) {
@@ -423,8 +535,6 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 												}
 											}
 											TreeNode combine = new TreeNode(out.split("_")[1]);
-											
-//											combine.setFlag(true);
 											for (int k = record; k <= numSeq; k++) {
 												combine.addChild(copy.get(k).getChildren().get(0));
 												copy.get(k).getChildren().get(0).setParent(combine);
@@ -436,7 +546,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 											for (int k = numSeq; k >= record+1; k--) {
 												copy.remove(k);
 											}
-											ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy,scoresForBuild[p],yes,record,i);
+											ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy,scoresForBuild[p],yes,record);
 											next.add(ns);
 										}
 									}
@@ -448,12 +558,9 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 									if(temScore + scoresForBuild[p] + no> minSequenceScore){
 										//为yes的时候要进行合并，合并的过程就是更改comnineChunkTree.get(i)
 										TreeNode outnode = new TreeNode(out);
-//										outnode.setFlag(true);
-//										outnode.setHeadWords(copy.get(numSeq).getHeadWords());
 										outnode.addChild(copy.get(numSeq));
-//										copy.get(numSeq).setParent(outnode);
 										copy.set(numSeq, outnode);
-										ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy,scoresForBuild[p],no,numSeq+1,i);
+										ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy,scoresForBuild[p],no,numSeq+1);
 										next.add(ns);
 									}
 								}
@@ -476,7 +583,6 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 		}
 		
 		if(kRes.size() == 0){
-			System.out.println("无结果");
 			return null;
 		}else{
 			int trueResultNum = Math.min(kRes.size(), num);//防止得到的最终结果小于你需要得到的结果
@@ -502,6 +608,4 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 			Object[] ac, SyntacticAnalysisContextGenerator generator, SyntacticAnalysisSequenceValidator validator) {
 		return this.bestSequencesForBuildAndCheck(num, comnineChunkTree,ac,-1000.0D,generator,validator);
 	}
-
-
 }

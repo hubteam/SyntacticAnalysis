@@ -49,8 +49,9 @@ public class TestBeamSearch extends TestCase{
 //        		"to","7.272","%","in","2009"};
 //      String[] words = {"4",".","buy","a","diamond","necklace","."};
 //      String[] words = {"ASLACTON",",","England"};
-        String[] words = {"``","We","'ve","tried","to","train","the","youngsters",",","they","have","their","discos","and","their","dances",",","and","they","just","drift","away",".","''"};
-		List<List<TreeNode>> posTree = postagger.tagKpos(5,words);
+//        String[] words = {"``","We","'ve","tried","to","train","the","youngsters",",","they","have","their","discos","and","their","dances",",","and","they","just","drift","away",".","''"};
+		String[] words = {"ENERGY",":"};
+        List<List<TreeNode>> posTree = postagger.tagKpos(5,words);
 		List<List<TreeNode>> chunkTree = chunktagger.tagKChunk(5,posTree, null);
 		SyntacticAnalysisModelForBuildAndCheck buildandcheckmodel = SyntacticAnalysisMEForBuildAndCheck.readModel(new File(prop.getProperty("tree.corpus.buildmodeltxt.file")), 
 				new File(prop.getProperty("tree.corpus.checkmodeltxt.file")), params, contextGen, "utf8");	
@@ -65,8 +66,5 @@ public class TestBeamSearch extends TestCase{
 		for (int i = 0; i < actionsPre.size(); i++) {
 			System.out.println(actionsPre.get(i));
 		}
-//		for (int i = 0; i < buildAndCheckTree.size(); i++) {
-//			System.out.println(buildAndCheckTree.get(i));
-//		}
 	}
 }

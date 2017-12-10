@@ -2,11 +2,14 @@ package com.wxw.headwords;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
+import com.wxw.tree.TreeToActions;
 
 /**
  * 测试生成头结点的方法
@@ -20,9 +23,10 @@ public class TestGenerateHeadWords {
 	private String result1;
 	private TreeNode tree2;
 	private String result2;
+	private TreeToActions tta;
 	
 	@Before
-	public void setUP(){
+	public void setUP() throws CloneNotSupportedException{
 		pgt = new PhraseGenerateTree();
 		tree1 = pgt.generateTree("((S(NP(PRP I))(VP(VP(VBD saw)(NP(DT the)(NN man)))(PP(IN with)(NP(DT the)(NN telescope))))))");
 		result1 = "(S{saw}(NP{I}(PRP{I} I))(VP{saw}(VP{saw}(VBD{saw} saw)(NP{man}(DT{the} the)(NN{man} man)))(PP{with}(IN{with} with)(NP{telescope}(DT{the} the)(NN{telescope} telescope)))))";

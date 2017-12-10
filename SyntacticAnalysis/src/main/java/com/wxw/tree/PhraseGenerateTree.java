@@ -21,7 +21,7 @@ public class PhraseGenerateTree {
 	public TreeNode generateTree(String treeStr){
 		treeStr = format(treeStr);
 		int indexTree;//记录当前是第几颗子树
-		List<String> parts = stringToList(treeStr);
+		List<String> parts = stringToList(treeStr); 
         Stack<TreeNode> tree = new Stack<TreeNode>();
         for (int i = 0; i < parts.size(); i++) {
 			if(!parts.get(i).equals(")") && !parts.get(i).equals(" ")){

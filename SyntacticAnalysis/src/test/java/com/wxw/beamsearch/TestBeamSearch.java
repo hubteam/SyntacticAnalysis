@@ -49,22 +49,30 @@ public class TestBeamSearch extends TestCase{
 //        		"to","7.272","%","in","2009"};
 //      String[] words = {"4",".","buy","a","diamond","necklace","."};
 //      String[] words = {"ASLACTON",",","England"};
-//        String[] words = {"``","We","'ve","tried","to","train","the","youngsters",",","they","have","their","discos","and","their","dances",",","and","they","just","drift","away",".","''"};
-		String[] words = {"ENERGY",":"};
-        List<List<TreeNode>> posTree = postagger.tagKpos(5,words);
-		List<List<TreeNode>> chunkTree = chunktagger.tagKChunk(5,posTree, null);
+//      String[] words = {"``","We","'ve","tried","to","train","the","youngsters",",","they","have","their","discos","and","their","dances",",","and","they","just","drift","away",".","''"};
+//		String[] words = {"ENERGY",":"};
+//		String[] words = {"``","You","either","believe","Seymour","can","do","it","again","or","you","do","n't",".","''"};
+//		String[] words = {"``","Who","'s","really","lying","?","''","asks","a","female","voice","."};
+		String[] words = {"Commonwealth","Edison","said","the","ruling","could","force","it","to","slash","its","1989","earnings","by","$","1.55","a","share","."};
+        List<List<TreeNode>> posTree = postagger.tagKpos(20,words);
+		List<List<TreeNode>> chunkTree = chunktagger.tagKChunk(20,posTree, null);
 		SyntacticAnalysisModelForBuildAndCheck buildandcheckmodel = SyntacticAnalysisMEForBuildAndCheck.readModel(new File(prop.getProperty("tree.corpus.buildmodeltxt.file")), 
 				new File(prop.getProperty("tree.corpus.checkmodeltxt.file")), params, contextGen, "utf8");	
         SyntacticAnalysisMEForBuildAndCheck buildandchecktagger = new SyntacticAnalysisMEForBuildAndCheck(buildandcheckmodel,contextGen);
-//		List<TreeNode> kRes = buildandchecktagger.tagBuildAndCheck(5,chunkTree, null);
         TreeNode buildAndCheckTree = buildandchecktagger.tagBuildAndCheck(chunkTree, null);
-		TreeToActions tta = new TreeToActions();
-		PhraseGenerateTree pgt = new PhraseGenerateTree();
-		TreeNode node = pgt.generateTree("("+buildAndCheckTree.toBracket()+")");
-		SyntacticAnalysisSample samplePre = tta.treeToAction(node);
-		List<String> actionsPre = samplePre.getActions();
-		for (int i = 0; i < actionsPre.size(); i++) {
-			System.out.println(actionsPre.get(i));
-		}
+        if(buildAndCheckTree == null){
+        	System.out.println("error");
+        }else{
+        	System.out.println(buildAndCheckTree);
+     		TreeToActions tta = new TreeToActions();
+     		PhraseGenerateTree pgt = new PhraseGenerateTree();
+     		String bra = buildAndCheckTree.toBracket();
+     		TreeNode node = pgt.generateTree("("+bra+")");
+     		SyntacticAnalysisSample samplePre = tta.treeToAction(node);
+     		List<String> actionsPre = samplePre.getActions();
+     		for (int i = 0; i < actionsPre.size(); i++) {
+     			System.out.println(actionsPre.get(i));
+     		}
+        }   
 	}
 }

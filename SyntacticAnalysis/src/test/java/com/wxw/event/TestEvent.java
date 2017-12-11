@@ -1,24 +1,29 @@
-package com.wxw.feature;
+package com.wxw.event;
 
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.wxw.feature.SyntacticAnalysisContextGenerator;
+import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
 import com.wxw.tree.TreeToActions;
 
+import opennlp.tools.ml.model.Event;
+
 /**
- * 对特征生成类的测试
+ * 测试事件的生成
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisContextGeneratorConfTest{
+public class TestEvent {
 
 	private PhraseGenerateTree pgt;
 	private TreeNode tree;
@@ -31,6 +36,30 @@ public class SyntacticAnalysisContextGeneratorConfTest{
 	private List<String> actions;
 	private String[][] ac;
 	private SyntacticAnalysisContextGenerator generator;
+	private List<Event> events = new ArrayList<Event>();	
+	private List<Event> event1 = new ArrayList<>();
+	private List<Event> event2 = new ArrayList<>();
+	private List<Event> event3 = new ArrayList<>();
+	private List<Event> event4 = new ArrayList<>();
+	private List<Event> event5 = new ArrayList<>();
+	private List<Event> event6 = new ArrayList<>();
+	private List<Event> event7 = new ArrayList<>();
+	private List<Event> event8 = new ArrayList<>();
+	private List<Event> event9 = new ArrayList<>();
+	private List<Event> event10 = new ArrayList<>();
+	private List<Event> event11 = new ArrayList<>();
+	private List<Event> event12 = new ArrayList<>();
+	private List<Event> event13 = new ArrayList<>();
+	private List<Event> event14 = new ArrayList<>();
+	private List<Event> event15 = new ArrayList<>();
+	private List<Event> event16 = new ArrayList<>();
+	private List<Event> event17 = new ArrayList<>();
+	private List<Event> event18 = new ArrayList<>();
+	private List<Event> event19 = new ArrayList<>();
+	private List<Event> event20 = new ArrayList<>();
+	private List<Event> event21 = new ArrayList<>();
+	private List<Event> event22 = new ArrayList<>();
+	private List<Event> event23 = new ArrayList<>();
 	
 	private String[] chunk0 = {"chunkandpostag0=PRP|I","chunkandpostag0*=PRP","chunkandpostag1=VBD|saw","chunkandpostag1*=VBD","chunkandpostag2=DT|the",
 			"chunkandpostag2*=DT","chunkandpostag01=PRP|I;VBD|saw","chunkandpostag01*=PRP|I;VBD","chunkandpostag0*1=PRP;VBD|saw","chunkandpostag0*1*=PRP;VBD"};
@@ -110,12 +139,11 @@ public class SyntacticAnalysisContextGeneratorConfTest{
 			"checkcons_0last=VP|VP|saw;VP|PP|with","production=VP→VP,PP","surround_1=PRP|I","surround_1*=PRP"};
 	private String[] check7 = {"checkcons_begin=S|NP|I","checkcons_begin*=S|NP","checkcons_last=S|VP|saw","checkcons_last*=S|VP","checkcons_0last=S|NP|I;S|VP|saw",
 			"production=S→NP,VP"};
-
+	
 	@Before
-	public void setUP() throws CloneNotSupportedException, IOException{
+	public void setUp() throws CloneNotSupportedException, IOException{
 		pgt = new PhraseGenerateTree();
 		tree = pgt.generateTree("((S(NP(PRP I))(VP(VP(VBD saw)(NP(DT the)(NN man)))(PP(IN with)(NP(DT the)(NN telescope))))))");
-
 		tta = new TreeToActions();
 		sample = tta.treeToAction(tree);
 		words = sample.getWords();
@@ -124,41 +152,97 @@ public class SyntacticAnalysisContextGeneratorConfTest{
 		actions = sample.getActions();
 		ac = sample.getAdditionalContext();
 		generator = new SyntacticAnalysisContextGeneratorConf();
+		//chunk
+		for (int i = words.size(); i < 2*words.size(); i++) {		
+			String[] context = generator.getContextForChunk(i-words.size(),chunkTree, actions, ac);
+            events.add(new Event(actions.get(i), context));
+		}		
+		//buildAndCheck 两个变量i j   i控制第几个list  j控制list中的第几个
+		int j = 0;
+		for (int i = 2*words.size(); i < actions.size(); i=i+2) {
+			String[] buildContext = generator.getContextForBuild(j,buildAndCheckTree.get(i-2*words.size()), actions, ac);
+			events.add(new Event(actions.get(i), buildContext));
+			if(actions.get(i+1).equals("yes")){
+				int record = j-1;
+				for (int k = record; k >= 0; k--) {
+					if(buildAndCheckTree.get(i-2*words.size()).get(k).getNodeName().split("_")[0].equals("start")){
+						j = k;
+						break;
+					}
+				}
+			}else if(actions.get(i+1).equals("no")){            	
+				j++;
+			}  
+		}
+		//buildAndCheck 两个变量i j   i控制第几个list  j控制list中的第几个
+		j = 0;
+		for (int i = 2*words.size(); i < actions.size(); i=i+2) {    
+			if(actions.get(i+1).equals("yes")){
+				String[] checkContext = generator.getContextForCheck(j,buildAndCheckTree.get(i+1-2*words.size()), actions, ac);
+				int record = j-1;
+				for (int k = record; k >= 0; k--) {		    
+					if(buildAndCheckTree.get(i-2*words.size()).get(k).getNodeName().split("_")[0].equals("start")){			    
+						j = k;
+						break;
+						}
+				}
+				events.add(new Event(actions.get(i+1), checkContext));
+			}else if(actions.get(i+1).equals("no")){            	
+				String[] checkContext = generator.getContextForCheck(j,buildAndCheckTree.get(i+1-2*words.size()), actions, ac);
+				events.add(new Event(actions.get(i+1), checkContext));
+				j++;
+			}  
+		}
+		
+		event1.add(new Event("start_NP",chunk0));
+		event2.add(new Event("other",chunk1));
+		event3.add(new Event("start_NP",chunk2));
+		event4.add(new Event("join_NP",chunk3));
+		event5.add(new Event("other",chunk4));
+		event6.add(new Event("start_NP",chunk5));
+		event7.add(new Event("join_NP",chunk6));
+		event8.add(new Event("start_S",build0));
+		event9.add(new Event("start_VP",build1));
+		event10.add(new Event("join_VP",build2));
+		event11.add(new Event("start_VP",build3));
+		event12.add(new Event("start_PP",build4));
+		event13.add(new Event("join_PP",build5));
+		event14.add(new Event("join_VP",build6));
+		event15.add(new Event("join_S",build7));
+		event16.add(new Event("no",check0));
+		event17.add(new Event("no",check1));
+		event18.add(new Event("yes",check2));
+		event19.add(new Event("no",check3));
+		event20.add(new Event("no",check4));
+		event21.add(new Event("yes",check5));
+		event22.add(new Event("yes",check6));
+		event23.add(new Event("yes",check7));
 	}
 	
-	/**
-	 * 对生成的特征进行测试
-	 * @throws IOException
-	 * @throws CloneNotSupportedException
-	 */
 	@Test
-	public void testFeature() throws IOException, CloneNotSupportedException{
-		
-		//chunk的特征
-		assertArrayEquals(generator.getContextForChunk(0,chunkTree, actions, ac),chunk0);
-		assertArrayEquals(generator.getContextForChunk(1,chunkTree, actions, ac),chunk1);
-		assertArrayEquals(generator.getContextForChunk(2,chunkTree, actions, ac),chunk2);
-		assertArrayEquals(generator.getContextForChunk(3,chunkTree, actions, ac),chunk3);
-		assertArrayEquals(generator.getContextForChunk(4,chunkTree, actions, ac),chunk4);
-		assertArrayEquals(generator.getContextForChunk(5,chunkTree, actions, ac),chunk5);
-		assertArrayEquals(generator.getContextForChunk(6,chunkTree, actions, ac),chunk6);
-		//build步骤
-	    assertArrayEquals(generator.getContextForBuild(0,buildAndCheckTree.get(0), actions, ac),build0);
-		assertArrayEquals(generator.getContextForBuild(1,buildAndCheckTree.get(2), actions, ac),build1);
-		assertArrayEquals(generator.getContextForBuild(2,buildAndCheckTree.get(4), actions, ac),build2);
-		assertArrayEquals(generator.getContextForBuild(1,buildAndCheckTree.get(6), actions, ac),build3);
-		assertArrayEquals(generator.getContextForBuild(2,buildAndCheckTree.get(8), actions, ac),build4);
-		assertArrayEquals(generator.getContextForBuild(3,buildAndCheckTree.get(10), actions, ac),build5);
-		assertArrayEquals(generator.getContextForBuild(2,buildAndCheckTree.get(12), actions, ac),build6);
-		assertArrayEquals(generator.getContextForBuild(1,buildAndCheckTree.get(14), actions, ac),build7);				
-		//check步骤
-		assertArrayEquals(generator.getContextForCheck(0,buildAndCheckTree.get(1), actions, ac),check0);
-		assertArrayEquals(generator.getContextForCheck(1,buildAndCheckTree.get(3), actions, ac),check1);
-		assertArrayEquals(generator.getContextForCheck(2,buildAndCheckTree.get(5), actions, ac),check2);
-		assertArrayEquals(generator.getContextForCheck(1,buildAndCheckTree.get(7), actions, ac),check3);
-		assertArrayEquals(generator.getContextForCheck(2,buildAndCheckTree.get(9), actions, ac),check4);
-		assertArrayEquals(generator.getContextForCheck(3,buildAndCheckTree.get(11), actions, ac),check5);
-		assertArrayEquals(generator.getContextForCheck(2,buildAndCheckTree.get(13), actions, ac),check6);
-		assertArrayEquals(generator.getContextForCheck(1,buildAndCheckTree.get(15), actions, ac),check7);
+	public void test(){
+		assertEquals(events.get(0).toString(),event1.get(0).toString());
+		assertEquals(events.get(1).toString(),event2.get(0).toString());
+		assertEquals(events.get(2).toString(),event3.get(0).toString());
+		assertEquals(events.get(3).toString(),event4.get(0).toString());
+		assertEquals(events.get(4).toString(),event5.get(0).toString());
+		assertEquals(events.get(5).toString(),event6.get(0).toString());
+		assertEquals(events.get(6).toString(),event7.get(0).toString());
+		assertEquals(events.get(7).toString(),event8.get(0).toString());
+		assertEquals(events.get(8).toString(),event9.get(0).toString());
+		assertEquals(events.get(9).toString(),event10.get(0).toString());
+		assertEquals(events.get(10).toString(),event11.get(0).toString());
+		assertEquals(events.get(11).toString(),event12.get(0).toString());
+		assertEquals(events.get(12).toString(),event13.get(0).toString());
+		assertEquals(events.get(13).toString(),event14.get(0).toString());
+		assertEquals(events.get(14).toString(),event15.get(0).toString());
+		assertEquals(events.get(15).toString(),event16.get(0).toString());
+		assertEquals(events.get(16).toString(),event17.get(0).toString());
+		assertEquals(events.get(17).toString(),event18.get(0).toString());
+		assertEquals(events.get(18).toString(),event19.get(0).toString());
+		assertEquals(events.get(19).toString(),event20.get(0).toString());
+		assertEquals(events.get(20).toString(),event21.get(0).toString());
+		assertEquals(events.get(21).toString(),event22.get(0).toString());
+		assertEquals(events.get(22).toString(),event23.get(0).toString());
 	}
 }

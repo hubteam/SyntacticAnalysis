@@ -1248,6 +1248,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 			for (int i = index-1; i >= 0; i--) {
 				if(buildAndCheckTree.get(i).getNodeName().split("_")[0].equals("start")){
 					record = i;
+					break;
 				}
 			}
 		}

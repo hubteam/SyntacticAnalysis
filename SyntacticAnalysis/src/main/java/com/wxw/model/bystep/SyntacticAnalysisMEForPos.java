@@ -15,7 +15,7 @@ import opennlp.tools.tokenize.WhitespaceTokenizer;
  *
  */
 public class SyntacticAnalysisMEForPos extends POSTaggerME implements SyntacticAnalysisForPos{
-
+	
 	public SyntacticAnalysisMEForPos(POSModel model) {
 		super(model);
 	}
@@ -47,7 +47,7 @@ public class SyntacticAnalysisMEForPos extends POSTaggerME implements SyntacticA
 	@Override
 	public String[] pos(String[] words) {
 		String[] poses = super.tag(words);
-		String[] output = null;
+		String[] output = new String[poses.length];
 		for (int i = 0; i < poses.length && i < words.length; i++) {
 			output[i] = words[i]+"/"+poses[i];
 		}

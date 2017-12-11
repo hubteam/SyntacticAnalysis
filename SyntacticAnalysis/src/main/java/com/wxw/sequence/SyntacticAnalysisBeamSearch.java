@@ -413,7 +413,6 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 						if(scoresForBuild[p] >= min){
 							out = this.buildmodel.getOutcome(p);
 							if(validator.validSequenceForBuildAndCheck(numSeq,top.getTree(),out)){
-								
 								List<TreeNode> copy = new ArrayList<>(top.getTree());
 								String[] contextsForCheck = generator.getContextForCheckForTest(numSeq, top.getTree(), out, ac);
 								double[] scoresForCheck = this.checkmodel.eval(contextsForCheck);

@@ -66,12 +66,16 @@ public class SyntacticAnalysisEvaluatorForByStep extends Evaluator<SyntacticAnal
 			try {
 				List<String> actionsRef = sample.getActions();
 				List<String> words = sample.getWords();
-				List<List<TreeNode>> posTree = postagger.tagKpos(5,words.toArray(new String[words.size()]));
-				List<List<TreeNode>> chunkTree = chunktagger.tagKChunk(5, posTree, null);	
+				List<List<TreeNode>> posTree = postagger.tagKpos(20,words.toArray(new String[words.size()]));
+				List<List<TreeNode>> chunkTree = chunktagger.tagKChunk(20, posTree, null);	
 				buildAndCheckTree = buildAndChecktagger.tagBuildAndCheck(chunkTree, null);
 				if(buildAndCheckTree == null){
 					samplePre = new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 					measure.countNodeDecodeTrees(buildAndCheckTree);
+					for (int i = 0; i < words.size(); i++) {
+						System.out.print(words.get(i)+" ");
+					}
+					System.out.println();
 				}else{
 					TreeToActions tta = new TreeToActions();
 					PhraseGenerateTree pgt = new PhraseGenerateTree();

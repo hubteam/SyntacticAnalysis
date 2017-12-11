@@ -37,10 +37,7 @@ public class SyntacticAnalysisSampleEventForBuild extends AbstractEventStream<Sy
 	@Override
 	protected Iterator<Event> createEvents(SyntacticAnalysisSample sample) {
 		List<String> words = sample.getWords();
-		List<String> poses = sample.getPoses();
 		List<String> actions = sample.getActions();
-	
-		List<TreeNode> chunkTree = sample.getChunkTree();
 		List<List<TreeNode>> buildAndCheckTree = sample.getBuildAndCheckTree();
 		String[][] ac = sample.getAdditionalContext();
 		List<Event> events = generateEvents(words, buildAndCheckTree,actions,ac);
@@ -61,9 +58,7 @@ public class SyntacticAnalysisSampleEventForBuild extends AbstractEventStream<Sy
 			List<List<TreeNode>> buildAndCheckTree, List<String> actions, String[][] ac) {
 		List<Event> events = new ArrayList<Event>(actions.size());		
 		//buildAndCheck
-		//两个变量i j
-		//i控制第几个list
-		//j控制list中的第几个
+		//两个变量i j   i控制第几个list  j控制list中的第几个
 		int j = 0;
 		for (int i = 2*words.size(); i < actions.size(); i=i+2) {
 			String[] buildContext = generator.getContextForBuild(j,buildAndCheckTree.get(i-2*words.size()), actions, ac);
@@ -77,11 +72,7 @@ public class SyntacticAnalysisSampleEventForBuild extends AbstractEventStream<Sy
 		        		break;
 		        	}
 				}
-//            	String[] checkContext = generator.getContextForCheck(j,buildAndCheckTree.get(i+1-2*words.size()), actions, ac);
-//                events.add(new Event(actions.get(i+1), checkContext));
             }else if(actions.get(i+1).equals("no")){            	
-//            	String[] checkContext = generator.getContextForCheck(j,buildAndCheckTree.get(i+1-2*words.size()), actions, ac);
-//                events.add(new Event(actions.get(i+1), checkContext));
             	j++;
             }  
 		}

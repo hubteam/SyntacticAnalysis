@@ -149,10 +149,8 @@ public class SyntacticAnalysisSample {
 				TreeNode pos = new TreeNode(poses[i][j]);
 				TreeNode word = new TreeNode(words[j]);
 				pos.addChild(word);
-//				word.setParent(pos);
-//				pos.setFlag(true);
-//				word.setFlag(true);
-//				pos.setHeadWords(words[j]);
+				word.setParent(pos);
+				pos.setHeadWords(words[j]);
 				posTree.add(pos);
 			}
 			posTrees.add(posTree);

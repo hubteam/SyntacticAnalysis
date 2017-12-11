@@ -133,7 +133,7 @@ public class TreeNode implements Cloneable{
 			String treestr = "";
 			treestr = "("+this.nodename;
 			for (TreeNode node:this.children) {
-				treestr += node.toString();
+				treestr += node.toBracket();
 			}
 			treestr += ")";
 			return treestr;

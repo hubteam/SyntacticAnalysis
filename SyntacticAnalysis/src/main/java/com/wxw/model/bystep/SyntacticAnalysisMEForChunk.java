@@ -45,7 +45,7 @@ import opennlp.tools.util.TrainingParameters;
  */
 public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk{
 
-	public static final int DEFAULT_BEAM_SIZE = 10;
+	public static final int DEFAULT_BEAM_SIZE = 20;
 	private SyntacticAnalysisContextGenerator contextGenerator;
 	private int size;
 	private Sequence bestSequence;

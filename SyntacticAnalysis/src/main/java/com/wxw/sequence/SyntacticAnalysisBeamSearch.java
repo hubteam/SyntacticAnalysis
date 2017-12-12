@@ -439,11 +439,10 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 										//如果标记为start就要合并
 										if(out.split("_")[0].equals("start")){
 											TreeNode combine = new TreeNode(out.split("_")[1]);
-//											combine.setFlag(true);
 											combine.setHeadWords(copy.get(numSeq).getHeadWords());
 											combine.addChild(copy.get(numSeq).getChildren().get(0));
 											copy.get(numSeq).getChildren().get(0).setParent(combine);
-											copy.set(numSeq, combine);
+											copy.set(numSeq, combine);											
 											ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,numSeq);
 											next.add(ns);
 										}else {

@@ -10,7 +10,7 @@ import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.model.all.SyntacticAnalysisEvaluatorForOneStep;
 import com.wxw.model.all.SyntacticAnalysisME;
 import com.wxw.model.all.SyntacticAnalysisModel;
-import com.wxw.model.bystep.SyntacticAnalysisMEForPos;
+import com.wxw.model.bystep.POSTaggerMEExtend;
 import com.wxw.model.pos.unused.FeatureContainsPosTools;
 import com.wxw.model.pos.unused.SyntacticAnalysisContextGeneratorContainsPos;
 import com.wxw.model.pos.unused.SyntacticAnalysisEvaluatorContainsPos;
@@ -63,7 +63,7 @@ public class SyntacticAnalysisCrossValidationForOneStep {
 			System.out.println("Run"+run+"...");
 			CrossValidationPartitioner.TrainingSampleStream<SyntacticAnalysisSample> trainingSampleStream = partitioner.next();
 			POSModel posmodel = new POSModelLoader().load(file);
-			SyntacticAnalysisMEForPos postagger = new SyntacticAnalysisMEForPos(posmodel);
+			POSTaggerMEExtend postagger = new POSTaggerMEExtend(posmodel);
 			//训练句法分析模型
 			SyntacticAnalysisModel model = SyntacticAnalysisME.train(languageCode, trainingSampleStream, params, contextGenerator);
 			SyntacticAnalysisEvaluatorForOneStep evaluator = new SyntacticAnalysisEvaluatorForOneStep(postagger,new SyntacticAnalysisME(model, contextGenerator),monitor);

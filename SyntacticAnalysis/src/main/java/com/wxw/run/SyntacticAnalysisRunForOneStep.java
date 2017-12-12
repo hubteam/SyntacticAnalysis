@@ -16,6 +16,7 @@ import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
 import com.wxw.model.all.SyntacticAnalysisEvaluatorForOneStep;
 import com.wxw.model.all.SyntacticAnalysisME;
 import com.wxw.model.all.SyntacticAnalysisModel;
+import com.wxw.model.bystep.POSTaggerMEExtend;
 import com.wxw.model.pos.unused.FeatureContainsPosTools;
 import com.wxw.model.pos.unused.SyntacticAnalysisContextGeneratorConfContainsPos;
 import com.wxw.model.pos.unused.SyntacticAnalysisContextGeneratorContainsPos;
@@ -417,7 +418,7 @@ public class SyntacticAnalysisRunForOneStep {
         SyntacticAnalysisModel treemodel = SyntacticAnalysisME.readModel(new File(corpus.treemodeltxtFile), params, contextGen, corpus.encoding);	
         SyntacticAnalysisME treetagger = new SyntacticAnalysisME(treemodel,contextGen);
 		POSModel model = new POSModelLoader().load(new File(corpus.posenglish));
-		POSTaggerME postagger = new POSTaggerME(model);
+		POSTaggerMEExtend postagger = new POSTaggerMEExtend(model);
         
         SyntacticAnalysisMeasure measure = new SyntacticAnalysisMeasure();
         SyntacticAnalysisEvaluatorForOneStep evaluator = null;

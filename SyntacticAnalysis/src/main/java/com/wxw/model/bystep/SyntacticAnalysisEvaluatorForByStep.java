@@ -8,9 +8,12 @@ import java.util.logging.Logger;
 import com.wxw.evaluate.SyntacticAnalysisEvaluateMonitor;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
 import com.wxw.stream.SyntacticAnalysisSample;
+import com.wxw.tool.EvaluationTools;
+import com.wxw.tree.ActionsToTree;
 import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
 import com.wxw.tree.TreeToActions;
+import com.wxw.tree.TreeToNonTerminal;
 
 import opennlp.tools.util.eval.Evaluator;
 /**
@@ -21,18 +24,18 @@ import opennlp.tools.util.eval.Evaluator;
 public class SyntacticAnalysisEvaluatorForByStep extends Evaluator<SyntacticAnalysisSample>{
 
 	private Logger logger = Logger.getLogger(SyntacticAnalysisEvaluatorForByStep.class.getName());
-	private SyntacticAnalysisMEForPos postagger;
+	private POSTaggerMEExtend postagger;
 	private SyntacticAnalysisMEForChunk chunktagger;
 	private SyntacticAnalysisMEForBuildAndCheck buildAndChecktagger;
 	private SyntacticAnalysisMeasure measure;
 	
-	public SyntacticAnalysisEvaluatorForByStep(SyntacticAnalysisMEForPos postagger,SyntacticAnalysisMEForChunk chunktagger,SyntacticAnalysisMEForBuildAndCheck buildAndChecktagger) {
+	public SyntacticAnalysisEvaluatorForByStep(POSTaggerMEExtend postagger,SyntacticAnalysisMEForChunk chunktagger,SyntacticAnalysisMEForBuildAndCheck buildAndChecktagger) {
 		this.postagger = postagger;
 		this.chunktagger = chunktagger;
 		this.buildAndChecktagger = buildAndChecktagger;
 	}
 	
-	public SyntacticAnalysisEvaluatorForByStep(SyntacticAnalysisMEForPos postagger,SyntacticAnalysisMEForChunk chunktagger,SyntacticAnalysisMEForBuildAndCheck buildAndChecktagger, SyntacticAnalysisEvaluateMonitor... evaluateMonitors) {
+	public SyntacticAnalysisEvaluatorForByStep(POSTaggerMEExtend postagger,SyntacticAnalysisMEForChunk chunktagger,SyntacticAnalysisMEForBuildAndCheck buildAndChecktagger, SyntacticAnalysisEvaluateMonitor... evaluateMonitors) {
 		super(evaluateMonitors);
 		this.postagger = postagger;
 		this.chunktagger = chunktagger;
@@ -64,25 +67,27 @@ public class SyntacticAnalysisEvaluatorForByStep extends Evaluator<SyntacticAnal
 			return new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 		}else{
 			try {
-				List<String> actionsRef = sample.getActions();
 				List<String> words = sample.getWords();
+				List<String> actionsRef = sample.getActions();
+				ActionsToTree att = new ActionsToTree();
+				//参考样本没有保存完整的一棵树，需要将动作序列转成一颗完整的树
+				TreeNode treeRef = att.actionsToTree(words, actionsRef);
+				TreeToNonTerminal ttn1 = new TreeToNonTerminal();
+				List<EvaluationTools> etRef = ttn1.getTreeToNonterminal(treeRef);
 				List<List<TreeNode>> posTree = postagger.tagKpos(20,words.toArray(new String[words.size()]));
 				List<List<TreeNode>> chunkTree = chunktagger.tagKChunk(20, posTree, null);	
 				buildAndCheckTree = buildAndChecktagger.tagBuildAndCheck(chunkTree, null);
 				if(buildAndCheckTree == null){
 					samplePre = new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 					measure.countNodeDecodeTrees(buildAndCheckTree);
-					for (int i = 0; i < words.size(); i++) {
-						System.out.print(words.get(i)+" ");
-					}
-					System.out.println();
 				}else{
 					TreeToActions tta = new TreeToActions();
 					PhraseGenerateTree pgt = new PhraseGenerateTree();
-					TreeNode node = pgt.generateTree("("+buildAndCheckTree.toBracket()+")");
-					samplePre = tta.treeToAction(node);
-					List<String> actionsPre = samplePre.getActions();
-					measure.update(actionsRef, actionsPre);
+					TreeNode treePre = pgt.generateTree("("+buildAndCheckTree.toBracket()+")");
+					samplePre = tta.treeToAction(treePre);
+					TreeToNonTerminal ttn2 = new TreeToNonTerminal();
+					List<EvaluationTools> etPre = ttn2.getTreeToNonterminal(treePre);
+					measure.update(etRef, etPre);
 				}	
 			} catch (CloneNotSupportedException e) {
 				e.printStackTrace();
@@ -95,5 +100,4 @@ public class SyntacticAnalysisEvaluatorForByStep extends Evaluator<SyntacticAnal
 			return samplePre;
 		}
 	}
-
 }

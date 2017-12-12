@@ -22,7 +22,6 @@ public class TreeToActions {
 	//第三部得到的列表
 	private List<List<TreeNode>> buildAndCheckTree = new ArrayList<List<TreeNode>>();
 		
-	
 	/**
 	 * 第一步POS
 	 * @param tree 一棵树

@@ -8,9 +8,9 @@ import java.util.Properties;
 
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
+import com.wxw.model.bystep.POSTaggerMEExtend;
 import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
-import com.wxw.model.bystep.SyntacticAnalysisMEForPos;
 import com.wxw.model.bystep.SyntacticAnalysisModelForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisModelForChunk;
 import com.wxw.stream.SyntacticAnalysisSample;
@@ -23,8 +23,18 @@ import opennlp.tools.cmdline.postag.POSModelLoader;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.util.TrainingParameters;
 
+/**
+ * 解码测试类
+ * @author 王馨苇
+ *
+ */
 public class TestBeamSearch extends TestCase{
 
+	/**
+	 * 测试能不能解码成一颗树
+	 * @throws IOException
+	 * @throws CloneNotSupportedException
+	 */
 	public void testBeamSearch() throws IOException, CloneNotSupportedException{
 		TrainingParameters params = TrainingParameters.defaultParams();
 		params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(3));
@@ -35,8 +45,7 @@ public class TestBeamSearch extends TestCase{
 		SyntacticAnalysisModelForChunk chunkmodel = SyntacticAnalysisMEForChunk.readModel(new File(prop.getProperty("tree.corpus.chunkmodeltxt.file")), params, contextGen, "utf8");	
         SyntacticAnalysisMEForChunk chunktagger = new SyntacticAnalysisMEForChunk(chunkmodel,contextGen);
 		POSModel model = new POSModelLoader().load(new File(prop.getProperty("tree.corpus.posenglish.file")));
-		SyntacticAnalysisMEForPos postagger = new SyntacticAnalysisMEForPos(model);
-		
+		POSTaggerMEExtend postagger = new POSTaggerMEExtend(model);		
 //		String[] words = {"I","saw","the","man","with","the","telescope","."};//yes
 //		String[] words = {"Mr.","Vinken","is","chairman","of","Elsevier","N.V.",",","the","Dutch","publishing","group","."};//no
 //		String[] words = {"It","has","no","bearing","on","our","work","force","today","."};//yes
@@ -51,10 +60,11 @@ public class TestBeamSearch extends TestCase{
 //      String[] words = {"ASLACTON",",","England"};
 //      String[] words = {"``","We","'ve","tried","to","train","the","youngsters",",","they","have","their","discos","and","their","dances",",","and","they","just","drift","away",".","''"};
 //		String[] words = {"ENERGY",":"};
-//		String[] words = {"``","You","either","believe","Seymour","can","do","it","again","or","you","do","n't",".","''"};
+		String[] words = {"``","You","either","believe","Seymour","can","do","it","again","or","you","do","n't",".","''"};
 //		String[] words = {"``","Who","'s","really","lying","?","''","asks","a","female","voice","."};
-		String[] words = {"Commonwealth","Edison","said","the","ruling","could","force","it","to","slash","its","1989","earnings","by","$","1.55","a","share","."};
-        List<List<TreeNode>> posTree = postagger.tagKpos(20,words);
+//		String[] words = {"Commonwealth","Edison","said","the","ruling","could","force","it","to","slash","its","1989","earnings","by","$","1.55","a","share","."};
+//      String[] words = {"We","must","be","very","cautious","about","labeling","investors","as","``","long-term","''","or","``","short-term",".","''"};
+		List<List<TreeNode>> posTree = postagger.tagKpos(20,words);
 		List<List<TreeNode>> chunkTree = chunktagger.tagKChunk(20,posTree, null);
 		SyntacticAnalysisModelForBuildAndCheck buildandcheckmodel = SyntacticAnalysisMEForBuildAndCheck.readModel(new File(prop.getProperty("tree.corpus.buildmodeltxt.file")), 
 				new File(prop.getProperty("tree.corpus.checkmodeltxt.file")), params, contextGen, "utf8");	

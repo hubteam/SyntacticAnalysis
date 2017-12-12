@@ -23,7 +23,6 @@ public class TestGenerateHeadWords {
 	private String result1;
 	private TreeNode tree2;
 	private String result2;
-	private TreeToActions tta;
 	
 	@Before
 	public void setUP() throws CloneNotSupportedException{

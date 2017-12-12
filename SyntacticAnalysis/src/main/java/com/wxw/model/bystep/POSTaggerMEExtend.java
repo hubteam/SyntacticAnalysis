@@ -67,11 +67,11 @@ public class POSTaggerMEExtend  implements POSTagger,SyntacticAnalysisForPos {
 		this.tagDictionary = factory.getTagDictionary();
 		this.size = beamSize;
 		this.sequenceValidator = factory.getSequenceValidator();
-		if (model.getPosSequenceModel() != null) {
-			this.model = model.getPosSequenceModel();
-		} else {
+//		if (model.getPosSequenceModel() != null) {
+//			this.model = model.getPosSequenceModel();
+//		} else {
 			this.model = new BeamSearch(beamSize, model.getPosModel(), 0);
-		}
+//		}
 
 	}
 

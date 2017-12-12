@@ -3,6 +3,8 @@ package com.wxw.tree;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.wxw.tool.EvaluationTools;
+
 /**
  * 树结构
  * @author 王馨苇
@@ -22,6 +24,8 @@ public class TreeNode implements Cloneable{
 	private int index;
 	//为预处理步骤所用，标记当前节点是否要用
 	private boolean flag;
+	//计算评价指标的时候需要
+	private EvaluationTools evaluationTool;
 	
 	public TreeNode(){
 		
@@ -52,9 +56,7 @@ public class TreeNode implements Cloneable{
 	public void setFlag(boolean flag){
 		this.flag = flag;
 	}
-//	public void setParent(String parent){
-//		this.parent = new TreeNode(parent);
-//	}
+	
 	//添加子节点
 	public void addChild(String children){
 		this.children.add(new TreeNode(children));
@@ -140,6 +142,14 @@ public class TreeNode implements Cloneable{
 		}
 	}
 
+	public void setEvaluationTools(EvaluationTools evaluationTool){
+		this.evaluationTool = evaluationTool;
+	}
+	
+	public EvaluationTools getEvaluationTool(){
+		return this.evaluationTool;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 

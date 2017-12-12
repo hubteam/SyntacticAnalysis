@@ -12,6 +12,7 @@ import com.wxw.evaluate.SyntacticAnalysisErrorPrinter;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
+import com.wxw.model.bystep.POSTaggerMEExtend;
 import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForByStep;
 import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
@@ -233,7 +234,7 @@ public class SyntacticAnalysisRunByStep {
 			TrainingParameters params) throws IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);
 		POSModel posmodel = new POSModelLoader().load(new File(corpus.posenglish));
-		SyntacticAnalysisMEForPos postagger = new SyntacticAnalysisMEForPos(posmodel);
+		POSTaggerMEExtend postagger = new POSTaggerMEExtend(posmodel);
 		
         SyntacticAnalysisModelForChunk chunkmodel = SyntacticAnalysisMEForChunk.readModel(new File(corpus.chunkmodeltxtFile), params, contextGen, corpus.encoding);	
         SyntacticAnalysisMEForChunk chunktagger = new SyntacticAnalysisMEForChunk(chunkmodel,contextGen);

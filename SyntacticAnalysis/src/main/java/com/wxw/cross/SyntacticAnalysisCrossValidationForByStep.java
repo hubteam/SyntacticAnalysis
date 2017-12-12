@@ -6,6 +6,7 @@ import java.io.IOException;
 import com.wxw.evaluate.SyntacticAnalysisEvaluateMonitor;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
+import com.wxw.model.bystep.POSTaggerMEExtend;
 import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForByStep;
 import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
@@ -58,7 +59,8 @@ public class SyntacticAnalysisCrossValidationForByStep {
 		while(partitioner.hasNext()){
 			System.out.println("Run"+run+"...");
 			POSModel posmodel = new POSModelLoader().load(file);
-			SyntacticAnalysisMEForPos postagger = new SyntacticAnalysisMEForPos(posmodel);
+			POSTaggerMEExtend postagger = new POSTaggerMEExtend(posmodel);
+//			SyntacticAnalysisMEForPos postagger = new SyntacticAnalysisMEForPos(posmodel);
 			CrossValidationPartitioner.TrainingSampleStream<SyntacticAnalysisSample> trainingSampleStream = partitioner.next();			
 			//训练句法分析模型
 			SyntacticAnalysisModelForChunk chunkModel = SyntacticAnalysisMEForChunk.train(languageCode, trainingSampleStream, params, contextGenerator);

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.wxw.tool.EvaluationTools;
 import com.wxw.tree.TreeNode;
 
 /**
@@ -32,16 +33,9 @@ public class SyntacticAnalysisSample {
         this.chunkTree = Collections.unmodifiableList(chunkTree);
         this.buildAndCheckTree = Collections.unmodifiableList(buildAndCheckTree);
         this.actions = Collections.unmodifiableList(actions);
-
-//        for (int i = 0; i < actions.size(); i++) {
-//			System.out.print(actions.get(i)+" ");
-//		}
-//        System.out.println();
-        
         String[][] ac;
         if (additionalContext != null) {
             ac = new String[additionalContext.length][];
-
             for (int i = 0; i < additionalContext.length; i++) {
                 ac[i] = new String[additionalContext[i].length];
                 System.arraycopy(additionalContext[i], 0, ac[i], 0,

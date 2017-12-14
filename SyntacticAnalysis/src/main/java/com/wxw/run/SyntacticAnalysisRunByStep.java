@@ -166,6 +166,7 @@ public class SyntacticAnalysisRunByStep {
         //默认参数
         TrainingParameters params = TrainingParameters.defaultParams();
         params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(1));
+//        params.put(TrainingParameters.ITERATIONS_PARAM, Integer.toString(50));
 
         //把刚才属性信息封装
         SyntacticAnalysisCrossValidationForByStep crossValidator = new SyntacticAnalysisCrossValidationForByStep("zh", params);

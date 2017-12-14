@@ -80,6 +80,10 @@ public class SyntacticAnalysisEvaluatorForByStep extends Evaluator<SyntacticAnal
 				if(buildAndCheckTree == null){
 					samplePre = new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 					measure.countNodeDecodeTrees(buildAndCheckTree);
+					for (int i = 0; i < words.size(); i++) {
+						System.out.print(words.get(i));
+					}
+					System.out.println();
 				}else{
 					TreeToActions tta = new TreeToActions();
 					PhraseGenerateTree pgt = new PhraseGenerateTree();

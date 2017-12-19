@@ -23,6 +23,7 @@ import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
+import com.wxw.tree.HeadTreeNode;
 import com.wxw.wordsegandpos.feature.WordSegAndPosContextGenerator;
 import com.wxw.wordsegandpos.feature.WordSegAndPosContextGeneratorConfExtend;
 import com.wxw.wordsegandpos.model.WordSegAndPosME;
@@ -117,7 +118,7 @@ public class SyntacticAnalysisRunForChina {
 	 * @param config 配置文件
 	 * @return
 	 */
-	private static SyntacticAnalysisContextGenerator getContextGenerator(Properties config) {
+	private static SyntacticAnalysisContextGenerator<HeadTreeNode> getContextGenerator(Properties config) {
 		String featureClass = config.getProperty("feature.class");
 		if(featureClass.equals("com.wxw.feature.SyntacticAnalysisContextGeneratorConf")){
         	return  new SyntacticAnalysisContextGeneratorConf(config);
@@ -162,10 +163,10 @@ public class SyntacticAnalysisRunForChina {
 		Corpus[] corpora = getCorporaFromConf(config);
         //定位到某一语料
         Corpus corpus = getCorpus(corpora, corpusName);
-        SyntacticAnalysisContextGenerator contextGen = getContextGenerator(config);
+        SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen = getContextGenerator(config);
         ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.trainFile)), corpus.encoding);
         
-        ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
+        ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
 
         //默认参数
         TrainingParameters params = TrainingParameters.defaultParams();
@@ -194,7 +195,7 @@ public class SyntacticAnalysisRunForChina {
         config.load(configStream);
         Corpus[] corpora = getCorporaFromConf(config);//获取语料
 
-        SyntacticAnalysisContextGenerator contextGen = getContextGenerator(config);
+        SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen = getContextGenerator(config);
 
         runFeatureOnCorporaByFlag(contextGen, corpora, params);
 	}
@@ -209,7 +210,7 @@ public class SyntacticAnalysisRunForChina {
 	 * @throws FileNotFoundException 
 	 * @throws UnsupportedOperationException 
 	 */
-	private static void runFeatureOnCorporaByFlag(SyntacticAnalysisContextGenerator contextGen, Corpus[] corpora,
+	private static void runFeatureOnCorporaByFlag(SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, Corpus[] corpora,
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		if(flag == "train" || flag.equals("train")){
 			for (int i = 0; i < corpora.length; i++) {
@@ -234,7 +235,7 @@ public class SyntacticAnalysisRunForChina {
 	 * @throws CloneNotSupportedException 
 	 * @throws IOException 
 	 */
-	private static void evaluateOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
+	private static void evaluateOnCorpus(SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, Corpus corpus,
 			TrainingParameters params) throws IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);
 		WordSegAndPosModel posmodel = new WordSegAndPosModelLoader().load(new File(corpus.posChina));
@@ -258,7 +259,7 @@ public class SyntacticAnalysisRunForChina {
         }
         evaluator.setMeasure(measure);
         ObjectStream<String> linesStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.testFile)), corpus.encoding);
-        ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(linesStream);
+        ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(linesStream);
         evaluator.evaluate(sampleStream);
         SyntacticAnalysisMeasure measureRes = evaluator.getMeasure();
         System.out.println("--------结果--------");
@@ -275,7 +276,7 @@ public class SyntacticAnalysisRunForChina {
 	 * @throws UnsupportedOperationException 
 	 * @throws CloneNotSupportedException 
 	 */
-	private static void modelOutOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
+	private static void modelOutOnCorpus(SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, Corpus corpus,
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
 		//训练句法分析模型
@@ -294,7 +295,7 @@ public class SyntacticAnalysisRunForChina {
 	 * @throws UnsupportedOperationException 
 	 * @throws CloneNotSupportedException 
 	 */
-	private static void trainOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
+	private static void trainOnCorpus(SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, Corpus corpus,
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
 		//训练句法分析模型

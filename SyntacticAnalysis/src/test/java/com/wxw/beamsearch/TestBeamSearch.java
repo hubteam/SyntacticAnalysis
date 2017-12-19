@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
+import com.wxw.actions.HeadTreeToActions;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
 import com.wxw.model.bystep.POSTaggerMEExtend;
@@ -14,9 +15,9 @@ import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
 import com.wxw.model.bystep.SyntacticAnalysisModelForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisModelForChunk;
 import com.wxw.stream.SyntacticAnalysisSample;
-import com.wxw.tree.PhraseGenerateTree;
+import com.wxw.tree.HeadTreeNode;
+import com.wxw.tree.PhraseGenerateHeadTree;
 import com.wxw.tree.TreeNode;
-import com.wxw.tree.TreeToActions;
 
 import junit.framework.TestCase;
 import opennlp.tools.cmdline.postag.POSModelLoader;
@@ -41,7 +42,7 @@ public class TestBeamSearch extends TestCase{
 		Properties prop = new Properties();
 		InputStream is = TestBeamSearch.class.getClassLoader().getResourceAsStream("com/wxw/run/corpus.properties");
 		prop.load(is);
-		SyntacticAnalysisContextGenerator contextGen = new SyntacticAnalysisContextGeneratorConf();
+		SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen = new SyntacticAnalysisContextGeneratorConf();
 		SyntacticAnalysisModelForChunk chunkmodel = SyntacticAnalysisMEForChunk.readModel(new File(prop.getProperty("tree.corpus.chunkmodeltxt.file")), params, contextGen, "utf8");	
         SyntacticAnalysisMEForChunk chunktagger = new SyntacticAnalysisMEForChunk(chunkmodel,contextGen);
 		POSModel model = new POSModelLoader().load(new File(prop.getProperty("tree.corpus.posenglish.file")));
@@ -64,21 +65,21 @@ public class TestBeamSearch extends TestCase{
 //		String[] words = {"``","Who","'s","really","lying","?","''","asks","a","female","voice","."};
 //		String[] words = {"Commonwealth","Edison","said","the","ruling","could","force","it","to","slash","its","1989","earnings","by","$","1.55","a","share","."};
 //      String[] words = {"We","must","be","very","cautious","about","labeling","investors","as","``","long-term","''","or","``","short-term",".","''"};
-		List<List<TreeNode>> posTree = postagger.tagKpos(20,words);
-		List<List<TreeNode>> chunkTree = chunktagger.tagKChunk(20,posTree, null);
+		List<List<HeadTreeNode>> posTree = postagger.tagKpos(20,words);
+		List<List<HeadTreeNode>> chunkTree = chunktagger.tagKChunk(20,posTree, null);
 		SyntacticAnalysisModelForBuildAndCheck buildandcheckmodel = SyntacticAnalysisMEForBuildAndCheck.readModel(new File(prop.getProperty("tree.corpus.buildmodeltxt.file")), 
 				new File(prop.getProperty("tree.corpus.checkmodeltxt.file")), params, contextGen, "utf8");	
         SyntacticAnalysisMEForBuildAndCheck buildandchecktagger = new SyntacticAnalysisMEForBuildAndCheck(buildandcheckmodel,contextGen);
-        TreeNode buildAndCheckTree = buildandchecktagger.tagBuildAndCheck(chunkTree, null);
+        HeadTreeNode buildAndCheckTree = buildandchecktagger.tagBuildAndCheck(chunkTree, null);
         if(buildAndCheckTree == null){
         	System.out.println("error");
         }else{
         	System.out.println(buildAndCheckTree);
-     		TreeToActions tta = new TreeToActions();
-     		PhraseGenerateTree pgt = new PhraseGenerateTree();
+     		HeadTreeToActions tta = new HeadTreeToActions();
+     		PhraseGenerateHeadTree pgt = new PhraseGenerateHeadTree();
      		String bra = buildAndCheckTree.toBracket();
-     		TreeNode node = pgt.generateTree("("+bra+")");
-     		SyntacticAnalysisSample samplePre = tta.treeToAction(node);
+     		HeadTreeNode node = pgt.generateTree("("+bra+")");
+     		SyntacticAnalysisSample<HeadTreeNode> samplePre = tta.treeToAction(node);
      		List<String> actionsPre = samplePre.getActions();
      		for (int i = 0; i < actionsPre.size(); i++) {
      			System.out.println(actionsPre.get(i));

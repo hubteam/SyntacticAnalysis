@@ -1,17 +1,16 @@
 package com.wxw.sequence;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.wxw.tree.TreeNode;
 
-public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<SyntacticAnalysisSequenceForBuildAndCheck> {
+public class SyntacticAnalysisSequenceForBuildAndCheck<T extends TreeNode> implements Comparable<SyntacticAnalysisSequenceForBuildAndCheck<T>> {
 	private double score;
 	private double scorecheck;
 	private List<Double> probs;
 	private List<Double> probscheck;
-	private List<TreeNode> tree;
+	private List<T> tree;
 	private int begin;
 
 	public SyntacticAnalysisSequenceForBuildAndCheck() {
@@ -23,7 +22,7 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		this.begin = 0;
 	}
 
-	public SyntacticAnalysisSequenceForBuildAndCheck(List<TreeNode> tree){
+	public SyntacticAnalysisSequenceForBuildAndCheck(List<T> tree){
 		this.probs = new ArrayList<>(1);
 		this.probscheck = new ArrayList<>(1);
 		this.tree = tree;
@@ -32,7 +31,7 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		this.begin = 0;
 	}
 	
-	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s) {
+	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck<T> s) {
 		this.probs = new ArrayList<>(s.probs.size() + 1);
 		this.probs.addAll(s.probs);
 		this.probscheck = new ArrayList<>(s.probscheck.size() + 1);
@@ -43,7 +42,7 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		this.begin = s.begin;
 	}
 
-	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s,double p,double checkp) {
+	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck<T> s,double p,double checkp) {
 		this.probs = new ArrayList<>(s.probs.size() + 1);
 		this.probs.addAll(s.probs);
 		this.probs.add(Double.valueOf(p));
@@ -55,7 +54,7 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		this.begin = s.begin;
 	}
 
-	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck s,List<TreeNode> tree,double p, double pcheck, int begin) {
+	public SyntacticAnalysisSequenceForBuildAndCheck(SyntacticAnalysisSequenceForBuildAndCheck<T> s,List<T> tree,double p, double pcheck, int begin) {
 		this.tree = tree;
 		this.probs = new ArrayList<>(s.probs.size() + 1);
 		this.probs.addAll(s.probs);
@@ -67,7 +66,7 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		this.begin = begin;
 	}
 
-	public int compareTo(SyntacticAnalysisSequenceForBuildAndCheck s) {
+	public int compareTo(SyntacticAnalysisSequenceForBuildAndCheck<T> s) {
 		return this.score < s.score ? 1 : (this.score > s.score ? -1 : 0);
 	}
 
@@ -93,7 +92,7 @@ public class SyntacticAnalysisSequenceForBuildAndCheck implements Comparable<Syn
 		return this.score;
 	}
 	
-	public List<TreeNode> getTree(){
+	public List<T> getTree(){
 		return this.tree;
 	}
 	

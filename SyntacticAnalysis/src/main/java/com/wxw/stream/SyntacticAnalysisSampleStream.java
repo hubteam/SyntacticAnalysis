@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.wxw.tree.PhraseGenerateTree;
+import com.wxw.actions.HeadTreeToActions;
+import com.wxw.tree.HeadTreeNode;
+import com.wxw.tree.PhraseGenerateHeadTree;
 import com.wxw.tree.TreeNode;
-import com.wxw.tree.TreeToActions;
 
 import opennlp.tools.util.FilterObjectStream;
 import opennlp.tools.util.ObjectStream;
@@ -18,7 +19,7 @@ import opennlp.tools.util.ObjectStream;
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisSampleStream extends FilterObjectStream<String,SyntacticAnalysisSample>{
+public class SyntacticAnalysisSampleStream extends FilterObjectStream<String,SyntacticAnalysisSample<HeadTreeNode>>{
 
 	
 	private Logger logger = Logger.getLogger(SyntacticAnalysisSampleStream.class.getName());
@@ -35,25 +36,25 @@ public class SyntacticAnalysisSampleStream extends FilterObjectStream<String,Syn
 	 * @return 
 	 */	
 	@Override
-	public SyntacticAnalysisSample read() throws IOException {
+	public SyntacticAnalysisSample<HeadTreeNode> read() throws IOException {
 		String sentence = samples.read();	
-		SyntacticAnalysisSample sample = null;
-		PhraseGenerateTree pgt = new PhraseGenerateTree();
-		TreeToActions tta = new TreeToActions();
+		SyntacticAnalysisSample<HeadTreeNode> sample = null;
+		PhraseGenerateHeadTree pgt = new PhraseGenerateHeadTree();
+		HeadTreeToActions tta = new HeadTreeToActions();
 		if(sentence != null){
 			if(sentence.compareTo("") != 0){
 				try{
-					TreeNode tree = pgt.generateTree(sentence);
+					HeadTreeNode tree = pgt.generateTree(sentence);
 					sample = tta.treeToAction(tree);
 				}catch(Exception e){
 					if (logger.isLoggable(Level.WARNING)) {						
 	                    logger.warning("Error during parsing, ignoring sentence: " + sentence);
 	                }	
-					sample = new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+					sample = new SyntacticAnalysisSample<HeadTreeNode>(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 				}
 				return sample;
 			}else {
-				sample = new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+				sample = new SyntacticAnalysisSample<HeadTreeNode>(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 				return null;
 			}
 		}

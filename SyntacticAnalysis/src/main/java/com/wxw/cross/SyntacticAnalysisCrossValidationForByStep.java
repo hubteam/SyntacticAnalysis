@@ -14,6 +14,7 @@ import com.wxw.model.bystep.SyntacticAnalysisMEForPos;
 import com.wxw.model.bystep.SyntacticAnalysisModelForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisModelForChunk;
 import com.wxw.stream.SyntacticAnalysisSample;
+import com.wxw.tree.HeadTreeNode;
 
 import opennlp.tools.cmdline.postag.POSModelLoader;
 import opennlp.tools.postag.POSModel;
@@ -51,9 +52,9 @@ public class SyntacticAnalysisCrossValidationForByStep {
 	 * @param contextGenerator 上下文
 	 * @throws IOException io异常
 	 */
-	public void evaluate(File file,ObjectStream<SyntacticAnalysisSample> sample, int nFolds,
-			SyntacticAnalysisContextGenerator contextGenerator) throws IOException{
-		CrossValidationPartitioner<SyntacticAnalysisSample> partitioner = new CrossValidationPartitioner<SyntacticAnalysisSample>(sample, nFolds);
+	public void evaluate(File file,ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sample, int nFolds,
+			SyntacticAnalysisContextGenerator<HeadTreeNode> contextGenerator) throws IOException{
+		CrossValidationPartitioner<SyntacticAnalysisSample<HeadTreeNode>> partitioner = new CrossValidationPartitioner<SyntacticAnalysisSample<HeadTreeNode>>(sample, nFolds);
 		int run = 1;
 		//小于折数的时候
 		while(partitioner.hasNext()){
@@ -61,7 +62,7 @@ public class SyntacticAnalysisCrossValidationForByStep {
 			POSModel posmodel = new POSModelLoader().load(file);
 			POSTaggerMEExtend postagger = new POSTaggerMEExtend(posmodel);
 //			SyntacticAnalysisMEForPos postagger = new SyntacticAnalysisMEForPos(posmodel);
-			CrossValidationPartitioner.TrainingSampleStream<SyntacticAnalysisSample> trainingSampleStream = partitioner.next();			
+			CrossValidationPartitioner.TrainingSampleStream<SyntacticAnalysisSample<HeadTreeNode>> trainingSampleStream = partitioner.next();			
 			//训练句法分析模型
 			SyntacticAnalysisModelForChunk chunkModel = SyntacticAnalysisMEForChunk.train(languageCode, trainingSampleStream, params, contextGenerator);
 			trainingSampleStream.reset();

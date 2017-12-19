@@ -9,7 +9,7 @@ import com.wxw.tree.TreeNode;
  * @author 王馨苇
  *
  */
-public interface SyntacticAnalysisForPos {
+public interface SyntacticAnalysisForPos<T extends TreeNode> {
 
 	/**
 	 * 得到词性标注的结果
@@ -23,16 +23,17 @@ public interface SyntacticAnalysisForPos {
 	 * @return
 	 */
 	String[] pos(String sentence);
+	
 	/**
 	 * 得到词性标注子树序列
 	 * @param words 分词数组
 	 * @return
 	 */
-	List<TreeNode> posTree(String[] words);
+	List<T> posTree(String[] words);
 	/**
 	 * 得到词性标注子树序列
 	 * @param sentece 分词句子
 	 * @return
 	 */
-	List<TreeNode> posTree(String sentece);
+	List<T> posTree(String sentece);
 }

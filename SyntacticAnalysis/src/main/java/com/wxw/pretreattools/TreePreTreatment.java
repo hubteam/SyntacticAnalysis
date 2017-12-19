@@ -3,15 +3,9 @@ package com.wxw.pretreattools;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.Format;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-
-import org.junit.Test;
 
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
@@ -58,16 +52,14 @@ public class TreePreTreatment{
 			}else{
 				filename = "0" + i;
 			}
-//			System.out.println(filename);
 			lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File("data\\"+path+"\\wsj_"+filename+".mrg")), "utf8");
 			String tree = "";
 			while((tree = lineStream.read()) != ""){
-				String treeStr = format(tree);
-				TreeNode node = pgt.generateTreeForPreTreatment(treeStr);
+				TreeNode node = pgt.generateTree(tree);
 				//对树进行遍历
 				travelTree(node);	
-				String newTreeStr = node.toNewSample();
-				TreeNode newTree = pgt.generateTreeForPreTreatment(newTreeStr);
+				String newTreeStr = node.toNoNoneSample();
+				TreeNode newTree = pgt.generateTree("("+newTreeStr+")");
 				bw.write("("+TreeNode.printTree(newTree, 1)+")");
 				bw.newLine();
 			}
@@ -77,35 +69,13 @@ public class TreePreTreatment{
 	}
 	
 	//判断是否是数字【中文数字，阿拉伯数字（全角和半角）】
-	public static boolean isDigit(char c){
+	private static boolean isDigit(char c){
 		if(hsalbdigit.contains(c)){
 			return true;
 		}else{
 			return false;
 		}	
 	}
-	
-	/**
-	 * 格式化为形如：(A(B1(C1 d1)(C2 d2))(B2 d3)) 的括号表达式。叶子及其父节点用一个空格分割，其他字符紧密相连。
-	 * @param tree 从训练语料拼接出的一棵树
-	 */
-	public static String format(String tree){
-		//去除最外围的括号
-        tree = tree.substring(1, tree.length() - 1).trim();
-        //所有空白符替换成一位空格
-        tree = tree.replaceAll("\\s+", " ");
-        //去掉 ( 和 ) 前的空格
-        String newTree = "";
-        for (int c = 0; c < tree.length(); ++c) {
-            if (tree.charAt(c) == ' ' && (tree.charAt(c + 1) == '(' || tree.charAt(c + 1) == ')')) {
-                continue;
-            } else {
-                newTree = newTree + (tree.charAt(c));
-            }
-        }
-        return newTree;
-	}
-	
 
 	/**
 	 * 对树进行遍历删除NONE【这里的删除试将属性flag设置为false】

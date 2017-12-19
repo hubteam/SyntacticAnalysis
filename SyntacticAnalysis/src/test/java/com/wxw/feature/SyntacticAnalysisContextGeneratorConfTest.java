@@ -8,10 +8,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.wxw.actions.HeadTreeToActions;
 import com.wxw.stream.SyntacticAnalysisSample;
-import com.wxw.tree.PhraseGenerateTree;
-import com.wxw.tree.TreeNode;
-import com.wxw.tree.TreeToActions;
+import com.wxw.tree.HeadTreeNode;
+import com.wxw.tree.PhraseGenerateHeadTree;
 
 /**
  * 对特征生成类的测试
@@ -20,17 +20,17 @@ import com.wxw.tree.TreeToActions;
  */
 public class SyntacticAnalysisContextGeneratorConfTest{
 
-	private PhraseGenerateTree pgt;
-	private TreeNode tree;
+	private PhraseGenerateHeadTree pgt;
+	private HeadTreeNode tree;
 
-	private TreeToActions tta;
-	private SyntacticAnalysisSample sample;
+	private HeadTreeToActions tta;
+	private SyntacticAnalysisSample<HeadTreeNode> sample;
 	private List<String> words;
-	private List<TreeNode> chunkTree;
-	private List<List<TreeNode>> buildAndCheckTree;
+	private List<HeadTreeNode> chunkTree;
+	private List<List<HeadTreeNode>> buildAndCheckTree;
 	private List<String> actions;
 	private String[][] ac;
-	private SyntacticAnalysisContextGenerator generator;
+	private SyntacticAnalysisContextGenerator<HeadTreeNode> generator;
 	
 	private String[] chunk0 = {"chunkandpostag0=PRP|I","chunkandpostag0*=PRP","chunkandpostag1=VBD|saw","chunkandpostag1*=VBD","chunkandpostag2=DT|the",
 			"chunkandpostag2*=DT","chunkandpostag01=PRP|I;VBD|saw","chunkandpostag01*=PRP|I;VBD","chunkandpostag0*1=PRP;VBD|saw","chunkandpostag0*1*=PRP;VBD"};
@@ -113,10 +113,10 @@ public class SyntacticAnalysisContextGeneratorConfTest{
 
 	@Before
 	public void setUP() throws CloneNotSupportedException, IOException{
-		pgt = new PhraseGenerateTree();
+		pgt = new PhraseGenerateHeadTree();
 		tree = pgt.generateTree("((S(NP(PRP I))(VP(VP(VBD saw)(NP(DT the)(NN man)))(PP(IN with)(NP(DT the)(NN telescope))))))");
 
-		tta = new TreeToActions();
+		tta = new HeadTreeToActions();
 		sample = tta.treeToAction(tree);
 		words = sample.getWords();
 		chunkTree = sample.getChunkTree();

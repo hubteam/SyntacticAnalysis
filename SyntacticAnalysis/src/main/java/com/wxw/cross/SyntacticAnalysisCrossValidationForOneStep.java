@@ -17,6 +17,7 @@ import com.wxw.model.pos.unused.SyntacticAnalysisEvaluatorContainsPos;
 import com.wxw.model.pos.unused.SyntacticAnalysisMEContainsPos;
 import com.wxw.model.pos.unused.SyntacticAnalysisModelContainsPos;
 import com.wxw.stream.SyntacticAnalysisSample;
+import com.wxw.tree.HeadTreeNode;
 
 import opennlp.tools.cmdline.postag.POSModelLoader;
 import opennlp.tools.postag.POSModel;
@@ -54,14 +55,14 @@ public class SyntacticAnalysisCrossValidationForOneStep {
 	 * @param contextGenerator 上下文
 	 * @throws IOException io异常
 	 */
-	public void evaluate(File file,ObjectStream<SyntacticAnalysisSample> sample, int nFolds,
-			SyntacticAnalysisContextGenerator contextGenerator) throws IOException{
-		CrossValidationPartitioner<SyntacticAnalysisSample> partitioner = new CrossValidationPartitioner<SyntacticAnalysisSample>(sample, nFolds);
+	public void evaluate(File file,ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sample, int nFolds,
+			SyntacticAnalysisContextGenerator<HeadTreeNode> contextGenerator) throws IOException{
+		CrossValidationPartitioner<SyntacticAnalysisSample<HeadTreeNode>> partitioner = new CrossValidationPartitioner<SyntacticAnalysisSample<HeadTreeNode>>(sample, nFolds);
 		int run = 1;
 		//小于折数的时候
 		while(partitioner.hasNext()){
 			System.out.println("Run"+run+"...");
-			CrossValidationPartitioner.TrainingSampleStream<SyntacticAnalysisSample> trainingSampleStream = partitioner.next();
+			CrossValidationPartitioner.TrainingSampleStream<SyntacticAnalysisSample<HeadTreeNode>> trainingSampleStream = partitioner.next();
 			POSModel posmodel = new POSModelLoader().load(file);
 			POSTaggerMEExtend postagger = new POSTaggerMEExtend(posmodel);
 			//训练句法分析模型
@@ -85,14 +86,14 @@ public class SyntacticAnalysisCrossValidationForOneStep {
 	 * @param contextGenerator 上下文
 	 * @throws IOException io异常
 	 */
-	public void evaluateContainsPos(ObjectStream<SyntacticAnalysisSample> sample, int nFolds,
-			SyntacticAnalysisContextGenerator contextGenerator,SyntacticAnalysisContextGeneratorContainsPos contextGenForPos) throws IOException{
-		CrossValidationPartitioner<SyntacticAnalysisSample> partitioner = new CrossValidationPartitioner<SyntacticAnalysisSample>(sample, nFolds);
+	public void evaluateContainsPos(ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sample, int nFolds,
+			SyntacticAnalysisContextGenerator<HeadTreeNode> contextGenerator,SyntacticAnalysisContextGeneratorContainsPos contextGenForPos) throws IOException{
+		CrossValidationPartitioner<SyntacticAnalysisSample<HeadTreeNode>> partitioner = new CrossValidationPartitioner<SyntacticAnalysisSample<HeadTreeNode>>(sample, nFolds);
 		int run = 1;
 		//小于折数的时候
 		while(partitioner.hasNext()){
 			System.out.println("Run"+run+"...");
-			CrossValidationPartitioner.TrainingSampleStream<SyntacticAnalysisSample> trainingSampleStream = partitioner.next();
+			CrossValidationPartitioner.TrainingSampleStream<SyntacticAnalysisSample<HeadTreeNode>> trainingSampleStream = partitioner.next();
 			//根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数【为训练词性标注的模型准备】
 			HashMap<String,Integer> dict = SyntacticAnalysisMEContainsPos.buildDictionary(trainingSampleStream);
 			FeatureContainsPosTools tools = new FeatureContainsPosTools(dict);

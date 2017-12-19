@@ -7,9 +7,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.wxw.tree.PhraseGenerateTree;
+import com.wxw.actions.HeadTreeToActions;
+import com.wxw.tree.PhraseGenerateHeadTree;
 import com.wxw.tree.TreeNode;
-import com.wxw.tree.TreeToActions;
 
 /**
  * 测试生成头结点的方法
@@ -18,7 +18,7 @@ import com.wxw.tree.TreeToActions;
  */
 public class TestGenerateHeadWords {
 
-	private PhraseGenerateTree pgt;
+	private PhraseGenerateHeadTree pgt;
 	private TreeNode tree1;
 	private String result1;
 	private TreeNode tree2;
@@ -26,7 +26,7 @@ public class TestGenerateHeadWords {
 	
 	@Before
 	public void setUP() throws CloneNotSupportedException{
-		pgt = new PhraseGenerateTree();
+		pgt = new PhraseGenerateHeadTree();
 		tree1 = pgt.generateTree("((S(NP(PRP I))(VP(VP(VBD saw)(NP(DT the)(NN man)))(PP(IN with)(NP(DT the)(NN telescope))))))");
 		result1 = "(S{saw}(NP{I}(PRP{I} I))(VP{saw}(VP{saw}(VBD{saw} saw)(NP{man}(DT{the} the)(NN{man} man)))(PP{with}(IN{with} with)(NP{telescope}(DT{the} the)(NN{telescope} telescope)))))";
 		tree2 = pgt.generateTree("((S(NP(EX There))(VP(VBZ is)(NP(DT no)(NN asbestos))(PP(IN in)(NP(PRP$ our)(NNS products)))(ADVP (RB now)))(. .)('' '') ))");

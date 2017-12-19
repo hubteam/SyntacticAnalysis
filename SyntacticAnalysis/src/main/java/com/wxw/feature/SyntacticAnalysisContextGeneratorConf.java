@@ -6,14 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import com.wxw.tree.TreeNode;
+import com.wxw.tree.HeadTreeNode;
 
 /**
  * 根据配置文件生成特征
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisContextGenerator{
+public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisContextGenerator<HeadTreeNode>{
 
 	//chunk
 	private boolean chunkandpostag0Set;
@@ -225,9 +225,9 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @param actions 动作序列
 	 * @return
 	 */
-	public String[] getContextForChunk(int index, List<TreeNode> chunkTree, List<String> actions) {
+	public String[] getContextForChunk(int index, List<HeadTreeNode> chunkTree, List<String> actions) {
 		List<String> features = new ArrayList<String>();
-		TreeNode tree0,tree1,tree2,tree_1,tree_2;
+		HeadTreeNode tree0,tree1,tree2,tree_1,tree_2;
 		tree0 = tree1 = tree2 = tree_1 = tree_2 = null;
 		tree0 = chunkTree.get(index);
 		if (chunkTree.size() > index + 1) {
@@ -338,9 +338,9 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @param actions 动作序列
 	 * @return
 	 */
-	public String[] getContextForBuild(int index, List<TreeNode> buildAndCheckTree, List<String> actions) {
+	public String[] getContextForBuild(int index, List<HeadTreeNode> buildAndCheckTree, List<String> actions) {
 		List<String> features = new ArrayList<String>();
-		TreeNode tree0,tree1,tree2,tree_1,tree_2;
+		HeadTreeNode tree0,tree1,tree2,tree_1,tree_2;
 		tree0 = tree1 = tree2 = tree_1 = tree_2 = null;
 		tree0 = buildAndCheckTree.get(index);
 		if (buildAndCheckTree.size() > index + 1) {
@@ -561,7 +561,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @param actions 动作序列
 	 * @return
 	 */
-	public String[] getContextForCheck(int index, List<TreeNode> buildAndCheckTree, List<String> actions) {
+	public String[] getContextForCheck(int index, List<HeadTreeNode> buildAndCheckTree, List<String> actions) {
 		List<String> features = new ArrayList<String>();
 		String rightRule = "";
 		int record = -1;
@@ -636,10 +636,10 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 				features.add("production="+buildAndCheckTree.get(index).getNodeName().split("_")[1]+"→"+rightRule);
 			}
 		}
-		List<TreeNode> left_1posAndWordTree = null;
-		List<TreeNode> left_2posAndWordTree = null;
-		List<TreeNode> right1posAndWordTree = null;
-		List<TreeNode> right2posAndWordTree = null;
+		List<HeadTreeNode> left_1posAndWordTree = null;
+		List<HeadTreeNode> left_2posAndWordTree = null;
+		List<HeadTreeNode> right1posAndWordTree = null;
+		List<HeadTreeNode> right2posAndWordTree = null;
 		if(record != 0){
 			if(record - 1 >=0){
 				left_1posAndWordTree = getPosAndWordTree(buildAndCheckTree.get(record-1));
@@ -747,13 +747,13 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @param tree 输入的一棵树
 	 * @return
 	 */
-	public List<TreeNode> getPosAndWordTree(TreeNode tree){
-		List<TreeNode> posAndWordTree = new ArrayList<>();
+	public List<HeadTreeNode> getPosAndWordTree(HeadTreeNode tree){
+		List<HeadTreeNode> posAndWordTree = new ArrayList<>();
 		if(tree.getChildren().size() == 1 && tree.getChildren().get(0).getChildren().size() == 0){
 			posAndWordTree.add(tree);
 			return posAndWordTree;
 		}else{
-			for (TreeNode treeNode : tree.getChildren()) {
+			for (HeadTreeNode treeNode : tree.getChildren()) {
 				posAndWordTree.addAll(getPosAndWordTree(treeNode));
 			}
 			return posAndWordTree;
@@ -769,7 +769,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @return
 	 */
 	@Override
-	public String[] getContextForChunk(int index, List<TreeNode> chunkTree, List<String> actions, Object[] ac) {
+	public String[] getContextForChunk(int index, List<HeadTreeNode> chunkTree, List<String> actions, Object[] ac) {
 
 		return getContextForChunk(index,chunkTree,actions);
 	}
@@ -783,7 +783,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @return
 	 */
 	@Override
-	public String[] getContextForBuild(int index, List<TreeNode> buildAndCheckTree, List<String> actions, Object[] ac) {
+	public String[] getContextForBuild(int index, List<HeadTreeNode> buildAndCheckTree, List<String> actions, Object[] ac) {
 
 		return getContextForBuild(index,buildAndCheckTree,actions);
 	}
@@ -797,7 +797,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @return
 	 */
 	@Override
-	public String[] getContextForCheck(int index, List<TreeNode> buildAndCheckTree, List<String> actions, Object[] ac) {
+	public String[] getContextForCheck(int index, List<HeadTreeNode> buildAndCheckTree, List<String> actions, Object[] ac) {
 
 		return getContextForCheck(index,buildAndCheckTree,actions);
 	}
@@ -860,7 +860,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @return
 	 */
 	@Override
-	public String[] getContextForChunkForTest(int index, List<TreeNode> posTree, List<String> actions, Object[] ac) {
+	public String[] getContextForChunkForTest(int index, List<HeadTreeNode> posTree, List<String> actions, Object[] ac) {
 		
 		return getContextForChunkForTest(index,posTree,actions);
 	}
@@ -871,9 +871,9 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @param posTree 词性标注的子树，【区别于训练语料中的chunkTree，这里chunkTree还包含了动作序列作为根节点】
 	 * @return
 	 */
-	private String[] getContextForChunkForTest(int index, List<TreeNode> posTree, List<String> actions) {
+	private String[] getContextForChunkForTest(int index, List<HeadTreeNode> posTree, List<String> actions) {
 		List<String> features = new ArrayList<String>();
-		TreeNode tree0,tree1,tree2,tree_1,tree_2;
+		HeadTreeNode tree0,tree1,tree2,tree_1,tree_2;
 		tree0 = tree1 = tree2 = tree_1 = tree_2 = null;
 		String action_1, action_2;
 		action_1 = action_2 = null;
@@ -989,7 +989,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @return
 	 */
 	@Override
-	public String[] getContextForBuildForTest(int index, List<TreeNode> chunkTree, Object[] ac) {
+	public String[] getContextForBuildForTest(int index, List<HeadTreeNode> chunkTree, Object[] ac) {
 		
 		return getContextForBuildForTest(index,chunkTree);
 	}
@@ -1000,9 +1000,9 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @param chunkTree 子树序列
 	 * @return
 	 */
-	private String[] getContextForBuildForTest(int index, List<TreeNode> chunkTree) {
+	private String[] getContextForBuildForTest(int index, List<HeadTreeNode> chunkTree) {
 		List<String> features = new ArrayList<String>();
-		TreeNode tree0,tree1,tree2,tree_1,tree_2;
+		HeadTreeNode tree0,tree1,tree2,tree_1,tree_2;
 		tree0 = tree1 = tree2 = tree_1 = tree_2 = null;
 		tree0 = chunkTree.get(index);
 		if (chunkTree.size() > index + 1) {
@@ -1225,7 +1225,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @return
 	 */
 	@Override
-	public String[] getContextForCheckForTest(int index, List<TreeNode> chunkTree, String out, Object[] ac) {
+	public String[] getContextForCheckForTest(int index, List<HeadTreeNode> chunkTree, String out, Object[] ac) {
 		
 		return getContextForCheckForTest(index,chunkTree,out);
 	}
@@ -1237,7 +1237,7 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 	 * @param out 当前的动作序列
 	 * @return
 	 */
-	private String[] getContextForCheckForTest(int index, List<TreeNode> buildAndCheckTree, String out) {
+	private String[] getContextForCheckForTest(int index, List<HeadTreeNode> buildAndCheckTree, String out) {
 		List<String> features = new ArrayList<String>();
 		String rightRule = "";
 		
@@ -1337,10 +1337,10 @@ public class SyntacticAnalysisContextGeneratorConf implements SyntacticAnalysisC
 			}
 		}
 		
-		List<TreeNode> left_1posAndWordTree = null;
-		List<TreeNode> left_2posAndWordTree = null;
-		List<TreeNode> right1posAndWordTree = null;
-		List<TreeNode> right2posAndWordTree = null;
+		List<HeadTreeNode> left_1posAndWordTree = null;
+		List<HeadTreeNode> left_2posAndWordTree = null;
+		List<HeadTreeNode> right1posAndWordTree = null;
+		List<HeadTreeNode> right2posAndWordTree = null;
 		if(record != 0){
 			if(record - 1 >=0){
 				left_1posAndWordTree = getPosAndWordTree(buildAndCheckTree.get(record-1));

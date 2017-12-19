@@ -7,7 +7,7 @@ import java.util.PriorityQueue;
 
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.tree.GenerateHeadWords;
-import com.wxw.tree.TreeNode;
+import com.wxw.tree.HeadTreeNode;
 
 import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.util.Cache;
@@ -17,7 +17,7 @@ import opennlp.tools.util.Cache;
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceClassificationModel{
+public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceClassificationModel<HeadTreeNode>{
 
 	public static final String BEAM_SIZE_PARAMETER = "BeamSize";
 	private static final Object[] EMPTY_ADDITIONAL_CONTEXT = new Object[0];
@@ -88,8 +88,8 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 	 * @return
 	 */
 	@Override
-	public SyntacticAnalysisSequenceForChunk bestSequenceForChunk( List<List<TreeNode>> posTree, Object[] ac,
-			SyntacticAnalysisContextGenerator generator, SyntacticAnalysisSequenceValidator validator) {
+	public SyntacticAnalysisSequenceForChunk bestSequenceForChunk( List<List<HeadTreeNode>> posTree, Object[] ac,
+			SyntacticAnalysisContextGenerator<HeadTreeNode> generator, SyntacticAnalysisSequenceValidator<HeadTreeNode> validator) {
 		SyntacticAnalysisSequenceForChunk[] sequences = this.bestSequencesForChunk(1,posTree,ac,generator,validator);
 		return sequences.length > 0 ? sequences[0] : null;
 	}
@@ -104,9 +104,8 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 	 * @param validator 序列验证
 	 * @return
 	 */
-	@Override
-	public SyntacticAnalysisSequenceForChunk[] bestSequencesForChunk(int num,List<List<TreeNode>> posTree, Object[] ac,
-			double minSequenceScore, SyntacticAnalysisContextGenerator generator, SyntacticAnalysisSequenceValidator validator) {
+	public SyntacticAnalysisSequenceForChunk[] bestSequencesForChunk(int num,List<List<HeadTreeNode>> posTree, Object[] ac,
+			double minSequenceScore, SyntacticAnalysisContextGenerator<HeadTreeNode> generator, SyntacticAnalysisSequenceValidator<HeadTreeNode> validator) {
 		//用于存放输入的K个结果中每一个得到的K个结果
 		PriorityQueue<SyntacticAnalysisSequenceForChunk> kRes = new PriorityQueue<>(this.size);
 		//遍历posTree中的K个结果
@@ -208,8 +207,8 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 	 * @return
 	 */
 	@Override
-	public SyntacticAnalysisSequenceForChunk[] bestSequencesForChunk(int num,List<List<TreeNode>> posTree, Object[] ac,
-			SyntacticAnalysisContextGenerator generator, SyntacticAnalysisSequenceValidator validator) {
+	public SyntacticAnalysisSequenceForChunk[] bestSequencesForChunk(int num,List<List<HeadTreeNode>> posTree, Object[] ac,
+			SyntacticAnalysisContextGenerator<HeadTreeNode> generator, SyntacticAnalysisSequenceValidator<HeadTreeNode> validator) {
 		
 		return this.bestSequencesForChunk(num, posTree, ac, -1000.0D ,generator,validator);
 	}
@@ -223,9 +222,9 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 	 * @return
 	 */
 	@Override
-	public SyntacticAnalysisSequenceForBuildAndCheck bestSequenceForBuildAndCheck(List<List<TreeNode>> comnineChunkTree, Object[] ac,
-			SyntacticAnalysisContextGenerator generator, SyntacticAnalysisSequenceValidator validator) {
-		SyntacticAnalysisSequenceForBuildAndCheck[] sequences = this.bestSequencesForBuildAndCheck(1,comnineChunkTree,ac,generator,validator);
+	public SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode> bestSequenceForBuildAndCheck(List<List<HeadTreeNode>> comnineChunkTree, Object[] ac,
+			SyntacticAnalysisContextGenerator<HeadTreeNode> generator, SyntacticAnalysisSequenceValidator<HeadTreeNode> validator) {
+		SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>[] sequences = this.bestSequencesForBuildAndCheck(1,comnineChunkTree,ac,generator,validator);
 		return sequences.length > 0 ? sequences[0] : null;
 	}
 
@@ -239,21 +238,20 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 	 * @param validator 序列验证
 	 * @return
 	 */
-	@Override
-	public SyntacticAnalysisSequenceForBuildAndCheck[] bestSequencesForBuildAndCheck(int num, List<List<TreeNode>> comnineChunkTree,
-			Object[] ac, double minSequenceScore, SyntacticAnalysisContextGenerator generator,
-			SyntacticAnalysisSequenceValidator validator) {
-		PriorityQueue<SyntacticAnalysisSequenceForBuildAndCheck> kRes = new PriorityQueue<>(this.size);
+	public SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>[] bestSequencesForBuildAndCheck(int num, List<List<HeadTreeNode>> comnineChunkTree,
+			Object[] ac, double minSequenceScore, SyntacticAnalysisContextGenerator<HeadTreeNode> generator,
+			SyntacticAnalysisSequenceValidator<HeadTreeNode> validator) {
+		PriorityQueue<SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>> kRes = new PriorityQueue<>(this.size);
 		//遍历K个结果
 		for (int i = 0; i < comnineChunkTree.size(); i++) {
-			PriorityQueue<SyntacticAnalysisSequenceForBuildAndCheck> prev = new PriorityQueue<>(this.size);
-			PriorityQueue<SyntacticAnalysisSequenceForBuildAndCheck> next = new PriorityQueue<>(this.size);
+			PriorityQueue<SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>> prev = new PriorityQueue<>(this.size);
+			PriorityQueue<SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>> next = new PriorityQueue<>(this.size);
 			
 			//存在这样的情况，chunk步得到的不是子树序列，而是一棵子树，这种情况就不能用下面的方法处理了
 			//chunk得到一颗子树的时候，prev不加入任何东西，size是0,不会进入下面的那种情况进行处理
 			//此时是一颗子树，直接处理，处理完加入kRes代表最终的结果
 			if(comnineChunkTree.get(i).size() == 1){
-				SyntacticAnalysisSequenceForBuildAndCheck top = new SyntacticAnalysisSequenceForBuildAndCheck(comnineChunkTree.get(i));//取出beam size个结果中的第一个
+				SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode> top = new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(comnineChunkTree.get(i));//取出beam size个结果中的第一个
 				double temScore = top.getScore();
 				String[] contextsForBuild = generator.getContextForBuildForTest(0, top.getTree(), ac);
 				double[] scoresForBuild;
@@ -276,13 +274,13 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 				
 				int p;
 				String out;
-				SyntacticAnalysisSequenceForBuildAndCheck ns = null;
+				SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode> ns = null;
 				for (p = 0; p < scoresForBuild.length; ++p) {
 					if(scoresForBuild[p] >= min){
 						out = this.buildmodel.getOutcome(p);
 						if(validator.validSequenceForBuildAndCheck(0,top.getTree(),out)){
 							
-							List<TreeNode> copy = new ArrayList<>(top.getTree());
+							List<HeadTreeNode> copy = new ArrayList<>(top.getTree());
 							String[] contextsForCheck = generator.getContextForCheckForTest(0, top.getTree(), out, ac);
 							double[] scoresForCheck = this.checkmodel.eval(contextsForCheck);
 							//找到yes no的概率
@@ -299,18 +297,18 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 							if(yes >= no){
 								if(temScore + scoresForBuild[p] + yes> minSequenceScore){
 									//新出的动作，加入树
-									TreeNode outnode = new TreeNode(out);
+									HeadTreeNode outnode = new HeadTreeNode(out);
 									outnode.addChild(copy.get(0));
 									copy.set(0, outnode);
 
 									//下面开始合并
 									if(out.split("_")[0].equals("start")){
-										TreeNode combine = new TreeNode(out.split("_")[1]);
+										HeadTreeNode combine = new HeadTreeNode(out.split("_")[1]);
 										combine.setHeadWords(copy.get(0).getHeadWords());
 										combine.addChild(copy.get(0).getChildren().get(0));
 										copy.get(0).getChildren().get(0).setParent(combine);
 										copy.set(0, combine);
-										kRes.add(new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,0));
+										kRes.add(new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(top,copy, scoresForBuild[p],yes,0));
 									}
 								}
 							}else if(yes < no){
@@ -326,7 +324,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 					for (p = 0; p < scoresForBuild.length; ++p) {
 						out = this.buildmodel.getOutcome(p);
 						if(validator.validSequenceForBuildAndCheck(0,top.getTree(),out)){								
-							List<TreeNode> copy = new ArrayList<>(top.getTree());
+							List<HeadTreeNode> copy = new ArrayList<>(top.getTree());
 							String[] contextsForCheck = generator.getContextForCheckForTest(0, top.getTree(), out, ac);
 							double[] scoresForCheck = this.checkmodel.eval(contextsForCheck);
 							//排序
@@ -347,18 +345,18 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 							if(yes >= no){
 								if(temScore + scoresForBuild[p] + yes> minSequenceScore){
 									//新出的动作，加入树
-									TreeNode outnode = new TreeNode(out);
+									HeadTreeNode outnode = new HeadTreeNode(out);
 									outnode.addChild(copy.get(0));
 									copy.set(0, outnode);
 
 									//下面开始合并
 									if(out.split("_")[0].equals("start")){
-										TreeNode combine = new TreeNode(out.split("_")[1]);
+										HeadTreeNode combine = new HeadTreeNode(out.split("_")[1]);
 										combine.setHeadWords(copy.get(0).getHeadWords());
 										combine.addChild(copy.get(0).getChildren().get(0));
 										copy.get(0).getChildren().get(0).setParent(combine);
 										copy.set(0, combine);
-										kRes.add(new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,0));
+										kRes.add(new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(top,copy, scoresForBuild[p],yes,0));
 									}
 								}
 							}else if(yes < no){
@@ -371,7 +369,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 					}
 				}
 			}else{
-				prev.add(new SyntacticAnalysisSequenceForBuildAndCheck(comnineChunkTree.get(i)));
+				prev.add(new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(comnineChunkTree.get(i)));
 			}
 			//下面处理的情况是chunk步骤得到的是子树序列，不是一颗子树的情况
 			if (ac == null) {
@@ -384,7 +382,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 			for (seqIndex = 0; prev.size() > 0 && seqIndex < topSequences; ++seqIndex) {
 				
 				if(prev.peek().getTree().size() != 1){//不是一颗完整的树的时候需要处理
-					SyntacticAnalysisSequenceForBuildAndCheck top = prev.remove();//取出beam size个结果中的第一个
+					SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode> top = prev.remove();//取出beam size个结果中的第一个
 					double temScore = top.getScore();
 					numSeq = top.getBegin();//要处理的树的编号
 					String[] contextsForBuild = generator.getContextForBuildForTest(numSeq, top.getTree(), ac);
@@ -408,12 +406,12 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 					
 					int p;
 					String out;
-					SyntacticAnalysisSequenceForBuildAndCheck ns = null;
+					SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode> ns = null;
 					for (p = 0; p < scoresForBuild.length; ++p) {
 						if(scoresForBuild[p] >= min){
 							out = this.buildmodel.getOutcome(p);
 							if(validator.validSequenceForBuildAndCheck(numSeq,top.getTree(),out)){
-								List<TreeNode> copy = new ArrayList<>(top.getTree());
+								List<HeadTreeNode> copy = new ArrayList<>(top.getTree());
 								String[] contextsForCheck = generator.getContextForCheckForTest(numSeq, top.getTree(), out, ac);
 								double[] scoresForCheck = this.checkmodel.eval(contextsForCheck);
 								//找到yes no的概率
@@ -430,7 +428,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 								if(yes >= no){
 									if(temScore + scoresForBuild[p] + yes> minSequenceScore){
 										//新出的动作，加入树
-										TreeNode outnode = new TreeNode(out);
+										HeadTreeNode outnode = new HeadTreeNode(out);
 										outnode.addChild(copy.get(numSeq));
 										copy.set(numSeq, outnode);
 										
@@ -438,12 +436,12 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 										//下面开始合并
 										//如果标记为start就要合并
 										if(out.split("_")[0].equals("start")){
-											TreeNode combine = new TreeNode(out.split("_")[1]);
+											HeadTreeNode combine = new HeadTreeNode(out.split("_")[1]);
 											combine.setHeadWords(copy.get(numSeq).getHeadWords());
 											combine.addChild(copy.get(numSeq).getChildren().get(0));
 											copy.get(numSeq).getChildren().get(0).setParent(combine);
 											copy.set(numSeq, combine);											
-											ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,numSeq);
+											ns = new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(top,copy, scoresForBuild[p],yes,numSeq);
 											next.add(ns);
 										}else {
 											for (int k = numSeq-1;k >= 0; k--) {
@@ -452,7 +450,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 													break;
 												}
 											}
-											TreeNode combine = new TreeNode(out.split("_")[1]);
+											HeadTreeNode combine = new HeadTreeNode(out.split("_")[1]);
 											for (int k = record; k <= numSeq; k++) {
 												combine.addChild(copy.get(k).getChildren().get(0));
 												copy.get(k).getChildren().get(0).setParent(combine);
@@ -464,7 +462,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 											for (int k = numSeq; k >= record+1; k--) {
 												copy.remove(k);
 											}
-											ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,record);
+											ns = new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(top,copy, scoresForBuild[p],yes,record);
 											next.add(ns);
 										}
 									}
@@ -475,10 +473,10 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 									}
 									if(temScore + scoresForBuild[p] + no> minSequenceScore){
 										//为no的时候不合并
-										TreeNode outnode = new TreeNode(out);
+										HeadTreeNode outnode = new HeadTreeNode(out);
 										outnode.addChild(copy.get(numSeq));
 										copy.set(numSeq, outnode);
-										ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy,scoresForBuild[p],no,numSeq+1);
+										ns = new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(top,copy,scoresForBuild[p],no,numSeq+1);
 										next.add(ns);
 									}
 								}
@@ -489,7 +487,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 						for (p = 0; p < scoresForBuild.length; ++p) {
 							out = this.buildmodel.getOutcome(p);
 							if(validator.validSequenceForBuildAndCheck(numSeq,top.getTree(),out)){								
-								List<TreeNode> copy = new ArrayList<>(top.getTree());
+								List<HeadTreeNode> copy = new ArrayList<>(top.getTree());
 								String[] contextsForCheck = generator.getContextForCheckForTest(numSeq, top.getTree(), out, ac);
 								double[] scoresForCheck = this.checkmodel.eval(contextsForCheck);
 								//排序
@@ -510,7 +508,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 								if(yes >= no){
 									if(temScore + scoresForBuild[p] + yes> minSequenceScore){
 										//新出的动作，加入树
-										TreeNode outnode = new TreeNode(out);
+										HeadTreeNode outnode = new HeadTreeNode(out);
 										outnode.addChild(copy.get(numSeq));
 										copy.set(numSeq, outnode);
 										
@@ -518,12 +516,12 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 										//下面开始合并
 										//如果标记为start就要合并
 										if(out.split("_")[0].equals("start")){
-											TreeNode combine = new TreeNode(out.split("_")[1]);
+											HeadTreeNode combine = new HeadTreeNode(out.split("_")[1]);
 											combine.setHeadWords(copy.get(numSeq).getHeadWords());
 											combine.addChild(copy.get(numSeq).getChildren().get(0));
 											copy.get(numSeq).getChildren().get(0).setParent(combine);
 											copy.set(numSeq, combine);
-											ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy, scoresForBuild[p],yes,numSeq);
+											ns = new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(top,copy, scoresForBuild[p],yes,numSeq);
 											next.add(ns);
 										}else {
 											for (int k = numSeq-1;k >= 0; k--) {
@@ -532,7 +530,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 													break;
 												}
 											}
-											TreeNode combine = new TreeNode(out.split("_")[1]);
+											HeadTreeNode combine = new HeadTreeNode(out.split("_")[1]);
 											for (int k = record; k <= numSeq; k++) {
 												combine.addChild(copy.get(k).getChildren().get(0));
 												copy.get(k).getChildren().get(0).setParent(combine);
@@ -544,7 +542,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 											for (int k = numSeq; k >= record+1; k--) {
 												copy.remove(k);
 											}
-											ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy,scoresForBuild[p],yes,record);
+											ns = new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(top,copy,scoresForBuild[p],yes,record);
 											next.add(ns);
 										}
 									}
@@ -555,10 +553,10 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 									}
 									if(temScore + scoresForBuild[p] + no> minSequenceScore){
 										//为yes的时候要进行合并，合并的过程就是更改comnineChunkTree.get(i)
-										TreeNode outnode = new TreeNode(out);
+										HeadTreeNode outnode = new HeadTreeNode(out);
 										outnode.addChild(copy.get(numSeq));
 										copy.set(numSeq, outnode);
-										ns = new SyntacticAnalysisSequenceForBuildAndCheck(top,copy,scoresForBuild[p],no,numSeq+1);
+										ns = new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(top,copy,scoresForBuild[p],no,numSeq+1);
 										next.add(ns);
 									}
 								}
@@ -571,7 +569,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 				
 				if(seqIndex == topSequences-1){//此时一个队列处理完毕
 					prev.clear();
-					PriorityQueue<SyntacticAnalysisSequenceForBuildAndCheck> tmp = prev;
+					PriorityQueue<SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>> tmp = prev;
 					prev = next;
 					next = tmp;
 					seqIndex = -1;
@@ -584,7 +582,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 			return null;
 		}else{
 			int trueResultNum = Math.min(kRes.size(), num);//防止得到的最终结果小于你需要得到的结果
-			SyntacticAnalysisSequenceForBuildAndCheck[] result = new SyntacticAnalysisSequenceForBuildAndCheck[trueResultNum];
+			SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>[] result = new SyntacticAnalysisSequenceForBuildAndCheck[trueResultNum];
 			for (int j = 0; j < trueResultNum; j++) {
 				result[j] = kRes.remove();
 			}
@@ -601,9 +599,8 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 	 * @param validator 序列验证
 	 * @return
 	 */
-	@Override
-	public SyntacticAnalysisSequenceForBuildAndCheck[] bestSequencesForBuildAndCheck(int num, List<List<TreeNode>> comnineChunkTree,
-			Object[] ac, SyntacticAnalysisContextGenerator generator, SyntacticAnalysisSequenceValidator validator) {
+	public SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>[] bestSequencesForBuildAndCheck(int num, List<List<HeadTreeNode>> comnineChunkTree,
+			Object[] ac, SyntacticAnalysisContextGenerator<HeadTreeNode> generator, SyntacticAnalysisSequenceValidator<HeadTreeNode> validator) {
 		return this.bestSequencesForBuildAndCheck(num, comnineChunkTree,ac,-1000.0D,generator,validator);
 	}
 }

@@ -9,12 +9,12 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.wxw.actions.HeadTreeToActions;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
 import com.wxw.stream.SyntacticAnalysisSample;
-import com.wxw.tree.PhraseGenerateTree;
-import com.wxw.tree.TreeNode;
-import com.wxw.tree.TreeToActions;
+import com.wxw.tree.HeadTreeNode;
+import com.wxw.tree.PhraseGenerateHeadTree;
 
 import opennlp.tools.ml.model.Event;
 
@@ -25,17 +25,17 @@ import opennlp.tools.ml.model.Event;
  */
 public class TestEvent {
 
-	private PhraseGenerateTree pgt;
-	private TreeNode tree;
+	private PhraseGenerateHeadTree pgt;
+	private HeadTreeNode tree;
 
-	private TreeToActions tta;
-	private SyntacticAnalysisSample sample;
+	private HeadTreeToActions tta;
+	private SyntacticAnalysisSample<HeadTreeNode> sample;
 	private List<String> words;
-	private List<TreeNode> chunkTree;
-	private List<List<TreeNode>> buildAndCheckTree;
+	private List<HeadTreeNode> chunkTree;
+	private List<List<HeadTreeNode>> buildAndCheckTree;
 	private List<String> actions;
 	private String[][] ac;
-	private SyntacticAnalysisContextGenerator generator;
+	private SyntacticAnalysisContextGenerator<HeadTreeNode> generator;
 	private List<Event> events = new ArrayList<Event>();	
 	private List<Event> event1 = new ArrayList<>();
 	private List<Event> event2 = new ArrayList<>();
@@ -142,9 +142,9 @@ public class TestEvent {
 	
 	@Before
 	public void setUp() throws CloneNotSupportedException, IOException{
-		pgt = new PhraseGenerateTree();
+		pgt = new PhraseGenerateHeadTree();
 		tree = pgt.generateTree("((S(NP(PRP I))(VP(VP(VBD saw)(NP(DT the)(NN man)))(PP(IN with)(NP(DT the)(NN telescope))))))");
-		tta = new TreeToActions();
+		tta = new HeadTreeToActions();
 		sample = tta.treeToAction(tree);
 		words = sample.getWords();
 		chunkTree = sample.getChunkTree();

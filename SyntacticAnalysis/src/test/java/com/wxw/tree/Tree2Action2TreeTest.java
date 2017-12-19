@@ -11,6 +11,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.wxw.actions.ActionsToHeadTree;
+import com.wxw.actions.HeadTreeToActions;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
@@ -25,15 +27,15 @@ public class Tree2Action2TreeTest{
 	private URL is;
 	private PlainTextByTreeStream lineStream ;
 	private String txt ;
-	private PhraseGenerateTree pgt ;
-	private TreeNode tree ;
+	private PhraseGenerateHeadTree pgt ;
+	private HeadTreeNode tree ;
 
-	private TreeToActions tta ;
-	private SyntacticAnalysisSample sample ;
+	private HeadTreeToActions tta ;
+	private SyntacticAnalysisSample<HeadTreeNode> sample ;
 	private List<String> words ;
 	private List<String> actions ;
 
-	private ActionsToTree att ;
+	private ActionsToHeadTree att ;
 	private TreeNode newTree ;
 	
 	@Before
@@ -41,15 +43,15 @@ public class Tree2Action2TreeTest{
 		is = Tree2Action2TreeTest.class.getClassLoader().getResource("com/wxw/test/wsj_0076.mrg");
 		lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(is.getFile())), "utf8");
 		txt = lineStream.read();
-		pgt = new PhraseGenerateTree();
+		pgt = new PhraseGenerateHeadTree();
 		tree = pgt.generateTree(txt);
 
-		tta = new TreeToActions();
+		tta = new HeadTreeToActions();
 		sample = tta.treeToAction(tree);
 		words = sample.getWords();
 		actions = sample.getActions();
 
-		att = new ActionsToTree();
+		att = new ActionsToHeadTree();
 		newTree = att.actionsToTree(words, actions);
 	}
 	
@@ -61,7 +63,6 @@ public class Tree2Action2TreeTest{
 	 */
 	@Test
 	public void testLoadTree() throws FileNotFoundException, IOException, CloneNotSupportedException{
-		
 		assertEquals(tree, newTree);
 	}	
 	

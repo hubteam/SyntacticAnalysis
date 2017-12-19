@@ -51,21 +51,20 @@ public class TreePreTreatmentTest{
 	public void testPreTreatment() throws UnsupportedOperationException, FileNotFoundException, IOException{
 		
 		while((tree = lineStream.read()) != ""){
-			String treeStr = TreePreTreatment.format(tree);
-			TreeNode node = pgt.generateTreeForPreTreatment(treeStr);
+			TreeNode node = pgt.generateTree(tree);
 			//对树进行遍历
 			TreePreTreatment.travelTree(node);
-			String newStr = node.toNewSample();
-			TreeNode newTree = pgt.generateTreeForPreTreatment(newStr);
+			String newStr = node.toNoNoneSample();
+			TreeNode newTree = pgt.generateTree("("+newStr+")");
 			String oneTree = "";
 			String[] str = ("("+TreeNode.printTree(newTree, 1)+")").split("\n");
 			for (int i = 0; i < str.length; i++) {
 				oneTree += str[i].trim();
 			}
-			begin += TreePreTreatment.format(oneTree)+"\n";
+			begin += pgt.format(oneTree)+"\n";
 		}
 		while((line = lineStreamnew.read()) != ""){
-			line = TreePreTreatment.format(line)+"\n";
+			line = pgt.format(line)+"\n";
 			after += line;
 		}
 		assertEquals(begin,after);

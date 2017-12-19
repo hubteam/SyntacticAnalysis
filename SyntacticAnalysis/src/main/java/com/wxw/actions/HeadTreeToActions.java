@@ -1,32 +1,34 @@
-package com.wxw.tree;
+package com.wxw.actions;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.wxw.stream.SyntacticAnalysisSample;
+import com.wxw.tree.GenerateHeadWords;
+import com.wxw.tree.HeadTreeNode;
 
 /**
  * 根据句法树得到动作序列
  * @author 王馨苇
  *
  */
-public class TreeToActions {
+public class HeadTreeToActions {
 
 	
 	//动作序列
 	private List<String> actions = new ArrayList<String>();
 	//第一步POS后得到的n颗子树
-	private List<TreeNode> posTree = new ArrayList<TreeNode>();
+	private List<HeadTreeNode> posTree = new ArrayList<HeadTreeNode>();
 	//记录第二部CHUNK后得到的n棵子树
-	private List<TreeNode> chunkTree = new ArrayList<TreeNode>();
+	private List<HeadTreeNode> chunkTree = new ArrayList<HeadTreeNode>();
 	//第三部得到的列表
-	private List<List<TreeNode>> buildAndCheckTree = new ArrayList<List<TreeNode>>();
+	private List<List<HeadTreeNode>> buildAndCheckTree = new ArrayList<List<HeadTreeNode>>();
 		
 	/**
 	 * 第一步POS
 	 * @param tree 一棵树
 	 */
-	public void getActionPOS(TreeNode tree){
+	public void getActionPOS(HeadTreeNode tree){
 
 		//如果是叶子节点，肯定是具体的词，父节点是词性
 		if(tree.getChildren().size() == 0){
@@ -34,7 +36,7 @@ public class TreeToActions {
 			actions.add(tree.getParent().getNodeName());
 		}else{
 			//不是叶子节点的时候，递归
-			for (TreeNode node:tree.getChildren()) {
+			for (HeadTreeNode node:tree.getChildren()) {
 				getActionPOS(node);
 			}
 		}
@@ -46,9 +48,9 @@ public class TreeToActions {
 	 * @param subTree 第一步POS后得到的若干子树
 	 * @throws CloneNotSupportedException 
 	 */
-	public void getActionCHUNK(TreeNode tree,List<TreeNode> subTree) throws CloneNotSupportedException{
+	public void getActionCHUNK(HeadTreeNode tree,List<HeadTreeNode> subTree) throws CloneNotSupportedException{
 		//为了防止原来的tree被修改
-		TreeNode treeCopy = tree.clone();
+		HeadTreeNode treeCopy = (HeadTreeNode) tree.clone();
 		//如果当前节点只有一颗子树，这子树可能就是具体的词了，但也存在特殊：（NP(NN chairman)）
 		//subTree.contains(tree):因为第二部在第一步的基础上产生，如果当前子树和第一步得到的结果匹配，去除了（NP(NN chairman)）这样的情况
 		//这样得到的子树为1的都是具体的词性和词语组成的子树
@@ -57,7 +59,7 @@ public class TreeToActions {
 			if(treeCopy.getParent().getChildren().size() == 1){	
 				//用start标记作为当前节点的父节点
 				actions.add("start_"+treeCopy.getParent().getNodeName());
-				TreeNode node = new TreeNode("start_"+treeCopy.getParent().getNodeName());
+				HeadTreeNode node = new HeadTreeNode("start_"+treeCopy.getParent().getNodeName());
 				node.addChild(treeCopy);
 				chunkTree.add(node);
 				//当前节点的父节点不止一个，就遍历所有的子树，判断当前节点是否为flat结构
@@ -81,27 +83,27 @@ public class TreeToActions {
 					//当前节点是是第一颗子树，
 					if(treeCopy.getParent().getChildren().get(0).equals(treeCopy)){
 						actions.add("start_"+treeCopy.getParent().getNodeName());
-						TreeNode node = new TreeNode("start_"+treeCopy.getParent().getNodeName());
+						HeadTreeNode node = new HeadTreeNode("start_"+treeCopy.getParent().getNodeName());
 						node.addChild(treeCopy);
 						chunkTree.add(node);
 					}else{
 						//不是第一个
 						actions.add("join_"+treeCopy.getParent().getNodeName());
-						TreeNode node = new TreeNode("join_"+treeCopy.getParent().getNodeName());
+						HeadTreeNode node = new HeadTreeNode("join_"+treeCopy.getParent().getNodeName());
 						node.addChild(treeCopy);
 						chunkTree.add(node);
 					}
 				//当前节点的父节点的子树不满足flat结构	，用other标记
 				}else{
 					actions.add("other");
-					TreeNode node = new TreeNode("other");
+					HeadTreeNode node = new HeadTreeNode("other");
 					node.addChild(treeCopy);
 					chunkTree.add(node);
 				}		
 			}
 		}else{
 			//当前节点不满足上述条件，递归
-			for (TreeNode node:treeCopy.getChildren()) {
+			for (HeadTreeNode node:treeCopy.getChildren()) {
 				getActionCHUNK(node,subTree);
 			}
 		}
@@ -112,8 +114,8 @@ public class TreeToActions {
 	 * @param subTree 第二部CHUNK得到的若干棵子树
 	 * @return
 	 */
-	public List<TreeNode> combine(List<TreeNode> subTree){
-		List<TreeNode> combineChunk = new ArrayList<TreeNode>();
+	public List<HeadTreeNode> combine(List<HeadTreeNode> subTree){
+		List<HeadTreeNode> combineChunk = new ArrayList<HeadTreeNode>();
 		//遍历所有子树
 		for (int i = 0; i < subTree.size(); i++) {
 			//当前子树的根节点是start标记的
@@ -121,7 +123,7 @@ public class TreeToActions {
 				//只要是start标记的就去掉root中的start，生成一颗新的子树，
 				//因为有些结构，如（NP(NN chairman)），只有start没有join部分，
 				//所以遇到start就生成新的子树
-				TreeNode node = new TreeNode(subTree.get(i).getNodeName().split("_")[1]);
+				HeadTreeNode node = new HeadTreeNode(subTree.get(i).getNodeName().split("_")[1]);
 				node.addChild(subTree.get(i).getChildren().get(0));
 				node.setHeadWords(GenerateHeadWords.getHeadWords(node));
 				subTree.get(i).getChildren().get(0).setParent(node);
@@ -154,11 +156,11 @@ public class TreeToActions {
 	 * @param tree 一棵完整的句法树
 	 * @param subTree 第二步CHUNK得到的若干颗子树进行合并之后的若干颗子树
 	 */
-	public void getActionBUILDandCHECK(TreeNode tree,List<TreeNode> subTree){
+	public void getActionBUILDandCHECK(HeadTreeNode tree,List<HeadTreeNode> subTree){
 		
 		//这里的subTree用于判断，定义一个subTree的副本用于过程中的改变
 		//这里的TreeNode实现了克隆的接口，这里也就是深拷贝
-		List<TreeNode> subTreeCopy;
+		List<HeadTreeNode> subTreeCopy;
 		//如果当前的节点子树是第二步CHUNK后合并后的一个结果
 		if(subTree.get(i).equals(tree)){	
 			
@@ -166,19 +168,19 @@ public class TreeToActions {
 				//添加start标记
 				actions.add("start_"+tree.getParent().getNodeName());
 				//改变subTreeCopy
-				TreeNode node = new TreeNode("start_"+tree.getParent().getNodeName());
+				HeadTreeNode node = new HeadTreeNode("start_"+tree.getParent().getNodeName());
 				node.addChild(subTree.get(i));
 				subTree.set(i, node);
-				subTreeCopy = new ArrayList<TreeNode>(subTree);
+				subTreeCopy = new ArrayList<HeadTreeNode>(subTree);
 				buildAndCheckTree.add(subTreeCopy);				
 				actions.add("yes");
 				
 				//改动的地方【为yes的时候先不合并加入，用于yes的特征的生成】
-				subTreeCopy = new ArrayList<TreeNode>(subTree);
+				subTreeCopy = new ArrayList<HeadTreeNode>(subTree);
 				buildAndCheckTree.add(subTreeCopy);	
 				
 				//然后再去合并，但是不加入
-				TreeNode tempnode = new TreeNode(tree.getParent().getNodeName());
+				HeadTreeNode tempnode = new HeadTreeNode(tree.getParent().getNodeName());
 				tempnode.setParent(tree.getParent().getParent());
 				tempnode.setHeadWords(tree.getParent().getHeadWords());
 				tempnode.addChild(tree.getParent().getChildren().get(0));
@@ -194,13 +196,13 @@ public class TreeToActions {
 				if(tree.getIndex() == 0){
 					//添加start标记
 					actions.add("start_"+tree.getParent().getNodeName());	
-					TreeNode node = new TreeNode("start_"+tree.getParent().getNodeName());
+					HeadTreeNode node = new HeadTreeNode("start_"+tree.getParent().getNodeName());
 					node.addChild(subTree.get(i));
 					subTree.set(i, node);
-					subTreeCopy = new ArrayList<TreeNode>(subTree);
+					subTreeCopy = new ArrayList<HeadTreeNode>(subTree);
 					buildAndCheckTree.add(subTreeCopy);					
 					actions.add("no");
-					subTreeCopy = new ArrayList<TreeNode>(subTree);
+					subTreeCopy = new ArrayList<HeadTreeNode>(subTree);
 					//为no的时候没有合并的操作，其实是不变的
 					buildAndCheckTree.add(subTreeCopy);
 					i++;
@@ -209,18 +211,18 @@ public class TreeToActions {
 					}
 				}else if(tree.getIndex() == tree.getParent().getChildren().size()-1){
 					actions.add("join_"+tree.getParent().getNodeName());
-					TreeNode tempnode = new TreeNode("join_"+tree.getParent().getNodeName());
+					HeadTreeNode tempnode = new HeadTreeNode("join_"+tree.getParent().getNodeName());
 					tempnode.addChild(subTree.get(i));
 					subTree.set(i, tempnode);
-					subTreeCopy = new ArrayList<TreeNode>(subTree);
+					subTreeCopy = new ArrayList<HeadTreeNode>(subTree);
 					buildAndCheckTree.add(subTreeCopy);					
 					actions.add("yes");
 					
-					subTreeCopy = new ArrayList<TreeNode>(subTree);
+					subTreeCopy = new ArrayList<HeadTreeNode>(subTree);
 					buildAndCheckTree.add(subTreeCopy);	
 					
 					//需要合并,node为合并后的父节点
-					TreeNode node = new TreeNode(tree.getParent().getNodeName());
+					HeadTreeNode node = new HeadTreeNode(tree.getParent().getNodeName());
 					node.setParent(tree.getParent().getParent());
 					node.setHeadWords(tree.getParent().getHeadWords());
 					for (int j = 0; j < tree.getParent().getChildren().size(); j++) {								
@@ -245,13 +247,13 @@ public class TreeToActions {
 					}
 				}else{
 					actions.add("join_"+tree.getParent().getNodeName());
-					TreeNode node = new TreeNode("join_"+tree.getParent().getNodeName());
+					HeadTreeNode node = new HeadTreeNode("join_"+tree.getParent().getNodeName());
 					node.addChild(subTree.get(i));
 					subTree.set(i, node);
-					subTreeCopy = new ArrayList<TreeNode>(subTree);
+					subTreeCopy = new ArrayList<HeadTreeNode>(subTree);
 					buildAndCheckTree.add(subTreeCopy);					
 					actions.add("no");
-					subTreeCopy = new ArrayList<TreeNode>(subTree);
+					subTreeCopy = new ArrayList<HeadTreeNode>(subTree);
 					buildAndCheckTree.add(subTreeCopy);
 					i++;
 					if(i >= subTree.size()){
@@ -261,7 +263,7 @@ public class TreeToActions {
 			}
 
 		}else{		
-			for (TreeNode node:tree.getChildren()) {
+			for (HeadTreeNode node:tree.getChildren()) {
 				getActionBUILDandCHECK(node,subTree);
 			}
 		}
@@ -272,10 +274,10 @@ public class TreeToActions {
 	 * @param tree 树
 	 * @throws CloneNotSupportedException
 	 */
-	public SyntacticAnalysisSample treeToAction(TreeNode tree) throws CloneNotSupportedException{
+	public SyntacticAnalysisSample<HeadTreeNode> treeToAction(HeadTreeNode tree) throws CloneNotSupportedException{
 		getActionPOS(tree);		
 		getActionCHUNK(tree, posTree);
 		getActionBUILDandCHECK(tree, combine(chunkTree));
-		return new SyntacticAnalysisSample(posTree,chunkTree,buildAndCheckTree,actions);
+		return new SyntacticAnalysisSample<HeadTreeNode>(posTree,chunkTree,buildAndCheckTree,actions);
 	}
 }

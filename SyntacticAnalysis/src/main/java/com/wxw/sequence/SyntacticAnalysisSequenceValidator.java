@@ -9,7 +9,7 @@ import com.wxw.tree.TreeNode;
  * @author 王馨苇
  *
  */
-public interface SyntacticAnalysisSequenceValidator {
+public interface SyntacticAnalysisSequenceValidator<T extends TreeNode> {
 
 	/**
 	 * 检验chunk步的标记是否正确
@@ -19,7 +19,7 @@ public interface SyntacticAnalysisSequenceValidator {
 	 * @param out 当前位置的结果
 	 * @return
 	 */
-	boolean validSequenceForChunk(int i, List<TreeNode> posTree,List<String> outcomes, String out);
+	boolean validSequenceForChunk(int i, List<T> posTree,List<String> outcomes, String out);
 	
 	/**
 	 * 检验build和check步骤的标记是否正确
@@ -28,5 +28,5 @@ public interface SyntacticAnalysisSequenceValidator {
 	 * @param out 当前位置的结果
 	 * @return
 	 */
-	boolean validSequenceForBuildAndCheck(int i, List<TreeNode> combineChunkTree, String out );
+	boolean validSequenceForBuildAndCheck(int i, List<T> combineChunkTree, String out );
 }

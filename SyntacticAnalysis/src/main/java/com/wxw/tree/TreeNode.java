@@ -3,8 +3,6 @@ package com.wxw.tree;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.wxw.tool.EvaluationTools;
-
 /**
  * 树结构
  * @author 王馨苇
@@ -13,19 +11,15 @@ import com.wxw.tool.EvaluationTools;
 public class TreeNode implements Cloneable{
 
 	//节点名称
-	private String nodename;
-	//头节点
-	private String headwords;
+	protected String nodename;
 	//父节点
-	private TreeNode parent;
+	protected TreeNode parent;
 	//子节点
-	private List<TreeNode> children = new ArrayList<TreeNode>();
+	protected List<TreeNode> children = new ArrayList<TreeNode>();
 	//当前父节点下的第几颗子树
 	private int index;
 	//为预处理步骤所用，标记当前节点是否要用
 	private boolean flag;
-	//计算评价指标的时候需要
-	private EvaluationTools evaluationTool;
 	
 	public TreeNode(){
 		
@@ -37,11 +31,6 @@ public class TreeNode implements Cloneable{
 	
 	public void setNewName(String name){
 		this.nodename = name;
-	}
-	
-	//设置头节点
-	public void setHeadWords(String headwords){
-		this.headwords = headwords;
 	}
 	
 	//设置父节点
@@ -89,10 +78,6 @@ public class TreeNode implements Cloneable{
 	public String getNodeName(){
 		return this.nodename;
 	}
-	//头节点
-	public String getHeadWords(){
-		return this.headwords;
-	}
 	
 	//返回父节点
 	public TreeNode getParent(){
@@ -100,54 +85,29 @@ public class TreeNode implements Cloneable{
 	}
 
 	//返回子节点列表
-	public List<TreeNode> getChildren(){
+	public List<? extends TreeNode> getChildren(){
 		return this.children;
 	}
 	
 	public int getIndex(){
 		return this.index;
 	}
-	
+	/**
+	 * 输出为一行的括号表达式
+	 */
 	@Override
 	public String toString() {
 		if(this.children.size() == 0){
 			return " "+this.nodename;
 		}else{
 			String treestr = "";
-			if(this.headwords != null){
-				treestr = "("+this.nodename+"{"+this.headwords+"}";
-			}else{
-				treestr = "("+this.nodename;
-			}
-			
+			treestr = "("+this.nodename;
 			for (TreeNode node:this.children) {
 				treestr += node.toString();
 			}
 			treestr += ")";
 			return treestr;
 		}
-	}
-	
-	public String toBracket() {
-		if(this.children.size() == 0){
-			return " "+this.nodename;
-		}else{
-			String treestr = "";
-			treestr = "("+this.nodename;
-			for (TreeNode node:this.children) {
-				treestr += node.toBracket();
-			}
-			treestr += ")";
-			return treestr;
-		}
-	}
-
-	public void setEvaluationTools(EvaluationTools evaluationTool){
-		this.evaluationTool = evaluationTool;
-	}
-	
-	public EvaluationTools getEvaluationTool(){
-		return this.evaluationTool;
 	}
 	
 	@Override
@@ -166,10 +126,10 @@ public class TreeNode implements Cloneable{
 	}
 	
 	/**
-	 * 打印没有换行的一整行括号表达式
+	 * 打印没有换行的一整行括号表达式【去掉删除的节点】
 	 * @return
 	 */
-	public String toNewSample(){
+	public String toNoNoneSample(){
 		if(this.children.size() == 0 && this.flag == true){
 			return " "+this.nodename;
 		}else{
@@ -179,7 +139,7 @@ public class TreeNode implements Cloneable{
 			}	
 			for (TreeNode node:this.children) {
 				
-				treestr += node.toNewSample();
+				treestr += node.toNoNoneSample();
 			}
 			if(this.flag == true){
 				treestr += ")";
@@ -193,8 +153,7 @@ public class TreeNode implements Cloneable{
 	 * 输出有缩进和换行的括号表达式
 	 * @param level 缩进的空格数
 	 */
-	public static String printTree(TreeNode tree, int level){
-		
+	public static String printTree(TreeNode tree, int level){		
 		if(tree.getChildren().size() == 1 && tree.getChildren().get(0).getChildren().size() == 0){
 			return "("+tree.getNodeName()+" "+tree.getChildren().get(0).getNodeName()+")";
 		}else if(tree.getChildren().size() == 1 && tree.getChildren().get(0).getChildren().size() == 1 && tree.getChildren().get(0).getChildren().get(0).getChildren().size() == 0){
@@ -205,7 +164,6 @@ public class TreeNode implements Cloneable{
 			str += " "+"("+tree.getChildren().get(0).getNodeName()+" "+tree.getChildren().get(0).getChildren().get(0).getNodeName()+")"+"\n";
 			String s = "";
 			for (int i = 1; i < tree.getChildren().size(); i++) {
-//				s+="\n";
 				for (int j = 0; j < level; j++) {
 					s += "	";
 				}
@@ -217,8 +175,7 @@ public class TreeNode implements Cloneable{
 				}
 			}
 			return str + s;
-		}
-		else if(tree.getChildren().size() > 1  && childrenOnlyOne(tree)){
+		}else if(tree.getChildren().size() > 1  && childrenOnlyOne(tree)){
 			String str = "";
 			str += "("+tree.getNodeName();
 			for (int i = 0; i < tree.getChildren().size(); i++) {
@@ -249,7 +206,6 @@ public class TreeNode implements Cloneable{
 			}
 			return treeStr;
 		}
-		
 	}
 	
 	/**
@@ -270,7 +226,12 @@ public class TreeNode implements Cloneable{
 	   return flag;
     }
 	
-	public static boolean childrenHasOne(TreeNode tree){
+	/**
+	 * 判断节点下，有一个子节点是叶子节点
+	 * @param tree
+	 * @return
+	 */
+	private static boolean childrenHasOne(TreeNode tree){
 		if(tree.getChildren().get(0).getChildren().size() == 1 && tree.getChildren().get(0).getChildren().get(0).getChildren().size() == 0){
 			if(tree.getChildren().get(1).getChildren().size() > 1 || (tree.getChildren().get(1).getChildren().size() == 1) && tree.getChildren().get(1).getChildren().get(0).getChildren().size() > 0){
 				return true;

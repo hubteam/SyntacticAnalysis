@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.stream.SyntacticAnalysisSample;
-import com.wxw.tree.TreeNode;
+import com.wxw.tree.HeadTreeNode;
 
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.util.AbstractEventStream;
@@ -16,16 +16,16 @@ import opennlp.tools.util.ObjectStream;
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisSampleEventForChunk extends AbstractEventStream<SyntacticAnalysisSample>{
+public class SyntacticAnalysisSampleEventForChunk extends AbstractEventStream<SyntacticAnalysisSample<HeadTreeNode>>{
 
-	private SyntacticAnalysisContextGenerator generator;
+	private SyntacticAnalysisContextGenerator<HeadTreeNode> generator;
 	
 	/**
 	 * 构造
 	 * @param samples 样本流
 	 * @param generator 上下文产生器
 	 */
-	public SyntacticAnalysisSampleEventForChunk(ObjectStream<SyntacticAnalysisSample> samples,SyntacticAnalysisContextGenerator generator) {
+	public SyntacticAnalysisSampleEventForChunk(ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> samples,SyntacticAnalysisContextGenerator<HeadTreeNode> generator) {
 		super(samples);
 		this.generator = generator;
 	}
@@ -34,10 +34,10 @@ public class SyntacticAnalysisSampleEventForChunk extends AbstractEventStream<Sy
 	 * 生成事件
 	 */
 	@Override
-	protected Iterator<Event> createEvents(SyntacticAnalysisSample sample) {
+	protected Iterator<Event> createEvents(SyntacticAnalysisSample<HeadTreeNode> sample) {
 		List<String> words = sample.getWords();
 		List<String> actions = sample.getActions();
-		List<TreeNode> chunkTree = sample.getChunkTree();
+		List<HeadTreeNode> chunkTree = sample.getChunkTree();
 		String[][] ac = sample.getAdditionalContext();
 		List<Event> events = generateEvents(words, chunkTree, actions,ac);
         return events.iterator();
@@ -53,7 +53,7 @@ public class SyntacticAnalysisSampleEventForChunk extends AbstractEventStream<Sy
 	 * @param ac
 	 * @return
 	 */
-	private List<Event> generateEvents( List<String> words, List<TreeNode> chunkTree,
+	private List<Event> generateEvents( List<String> words, List<HeadTreeNode> chunkTree,
 			List<String> actions, String[][] ac) {
 		List<Event> events = new ArrayList<Event>(actions.size());		
 		//chunk

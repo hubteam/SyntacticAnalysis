@@ -1,9 +1,12 @@
-package com.wxw.tree;
+package com.wxw.actions;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActionsToTree {
+import com.wxw.tree.GenerateHeadWords;
+import com.wxw.tree.HeadTreeNode;
+
+public class ActionsToHeadTree {
 
 	/**
 	 * 第一步pos
@@ -11,12 +14,12 @@ public class ActionsToTree {
 	 * @param actions 动作序列
 	 * @return
 	 */
-	public List<TreeNode> getPosTree(List<String> words,List<String> actions){
+	public List<HeadTreeNode> getPosTree(List<String> words,List<String> actions){
 		//第一步pos
-		List<TreeNode> postree = new ArrayList<TreeNode>();
+		List<HeadTreeNode> postree = new ArrayList<HeadTreeNode>();
 		for (int i = 0; i < words.size(); i++) {
-			TreeNode node = new TreeNode(words.get(i));
-			TreeNode actionsNode = new TreeNode(actions.get(i));
+			HeadTreeNode node = new HeadTreeNode(words.get(i));
+			HeadTreeNode actionsNode = new HeadTreeNode(actions.get(i));
 			actionsNode.addChild(node);
 			node.setParent(actionsNode);
 			actionsNode.setHeadWords(node.getNodeName());//需要设置头结点
@@ -31,13 +34,13 @@ public class ActionsToTree {
 	 * @param actions 动作序列
 	 * @return
 	 */
-	public List<TreeNode> getChunkTree(List<TreeNode> postree,List<String> actions){
+	public List<HeadTreeNode> getChunkTree(List<HeadTreeNode> postree,List<String> actions){
 		//第二部chunk
 		//不用在这里设置头结点
-		List<TreeNode> chunktree = new ArrayList<TreeNode>();
+		List<HeadTreeNode> chunktree = new ArrayList<HeadTreeNode>();
 		int len = postree.size();
 		for (int i = 0; i < len; i++) {
-			TreeNode chunk = new TreeNode(actions.get(i+len));
+			HeadTreeNode chunk = new HeadTreeNode(actions.get(i+len));
 			chunk.addChild(postree.get(i));
 			postree.get(i).setParent(chunk);
 			chunktree.add(chunk);
@@ -50,10 +53,10 @@ public class ActionsToTree {
 	 * @param chunktree chunk子树
 	 * @return
 	 */
-	public List<TreeNode> combine(List<TreeNode> chunktree){
+	public List<HeadTreeNode> combine(List<HeadTreeNode> chunktree){
 		//第三部合并
 		//需要为合并后的结点设置头结点
-		List<TreeNode> combine = new ArrayList<TreeNode>();
+		List<HeadTreeNode> combine = new ArrayList<HeadTreeNode>();
 		//遍历所有子树
 		for (int i = 0; i < chunktree.size(); i++) {		
 			//当前子树的根节点是start标记的		
@@ -61,7 +64,7 @@ public class ActionsToTree {
 				//只要是start标记的就去掉root中的start，生成一颗新的子树，		
 				//因为有些结构，如（NP(NN chairman)），只有start没有join部分，
 				//所以遇到start就生成新的子树
-				TreeNode node = new TreeNode(chunktree.get(i).getNodeName().split("_")[1]);			
+				HeadTreeNode node = new HeadTreeNode(chunktree.get(i).getNodeName().split("_")[1]);			
 				node.addChild(chunktree.get(i).getChildren().get(0));	
 				node.setHeadWords(GenerateHeadWords.getHeadWords(node));
 				chunktree.get(i).getChildren().get(0).setParent(node);			
@@ -97,12 +100,12 @@ public class ActionsToTree {
 	 * @param actions 动作序列
 	 * @return
 	 */
-	public TreeNode getTree(int len,List<TreeNode> combine,List<String> actions){
+	public HeadTreeNode getTree(int len,List<HeadTreeNode> combine,List<String> actions){
 		//第四部build和check
 		int j = 0;
 		//遍历上一步得到的combine，根据action进行操作
 		for (int i = 0; i < combine.size(); i++) {
-			TreeNode node = new TreeNode(actions.get(j+2*len));
+			HeadTreeNode node = new HeadTreeNode(actions.get(j+2*len));
 			node.addChild(combine.get(i));
 			combine.get(i).setParent(node);
 			combine.set(i, node);
@@ -121,7 +124,7 @@ public class ActionsToTree {
 				preIndex = i+1;
 				//进行合并
 				//建立合并后的父节点
-				TreeNode combineNode = new TreeNode(combine.get(preIndex).getNodeName().split("_")[1]);
+				HeadTreeNode combineNode = new HeadTreeNode(combine.get(preIndex).getNodeName().split("_")[1]);
 				for (int k = preIndex; k <= currentIndex; k++) {
 					combineNode.addChild(combine.get(k).getChildren().get(0));
 					combine.get(k).getChildren().get(0).setParent(combineNode);
@@ -151,16 +154,16 @@ public class ActionsToTree {
 	 * @param actions 动作序列
 	 * @return
 	 */
-	public TreeNode actionsToTree(List<String> words,List<String> actions){
+	public HeadTreeNode actionsToTree(List<String> words,List<String> actions){
 		//第一步pos
-		List<TreeNode> postree = getPosTree(words,actions);
+		List<HeadTreeNode> postree = getPosTree(words,actions);
 		//第二部chunk
-		List<TreeNode> chunktree = getChunkTree(postree,actions);
+		List<HeadTreeNode> chunktree = getChunkTree(postree,actions);
 		//第三部合并
 		//需要为合并后的结点设置头结点
-		List<TreeNode> combine = combine(chunktree);
+		List<HeadTreeNode> combine = combine(chunktree);
 		//第四部build和check
-		TreeNode tree = getTree(words.size(),combine,actions);
+		HeadTreeNode tree = getTree(words.size(),combine,actions);
 		return tree;
 	}
 }

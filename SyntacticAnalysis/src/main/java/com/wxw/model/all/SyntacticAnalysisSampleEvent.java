@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.stream.SyntacticAnalysisSample;
+import com.wxw.tree.HeadTreeNode;
 import com.wxw.tree.TreeNode;
 
 import opennlp.tools.ml.model.Event;
@@ -17,16 +18,16 @@ import opennlp.tools.util.ObjectStream;
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<SyntacticAnalysisSample>{
+public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<SyntacticAnalysisSample<HeadTreeNode>>{
 
-	private SyntacticAnalysisContextGenerator generator;
+	private SyntacticAnalysisContextGenerator<HeadTreeNode> generator;
 	
 	/**
 	 * 构造
 	 * @param samples 样本流
 	 * @param generator 上下文产生器
 	 */
-	public SyntacticAnalysisSampleEvent(ObjectStream<SyntacticAnalysisSample> samples,SyntacticAnalysisContextGenerator generator) {
+	public SyntacticAnalysisSampleEvent(ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> samples,SyntacticAnalysisContextGenerator<HeadTreeNode> generator) {
 		super(samples);
 		this.generator = generator;
 	}
@@ -35,13 +36,13 @@ public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<Syntactic
 	 * 生成事件
 	 */
 	@Override
-	protected Iterator<Event> createEvents(SyntacticAnalysisSample sample) {
+	protected Iterator<Event> createEvents(SyntacticAnalysisSample<HeadTreeNode> sample) {
 		List<String> words = sample.getWords();
 		List<String> poses = sample.getPoses();
 		List<String> actions = sample.getActions();
 	
-		List<TreeNode> chunkTree = sample.getChunkTree();
-		List<List<TreeNode>> buildAndCheckTree = sample.getBuildAndCheckTree();
+		List<HeadTreeNode> chunkTree = sample.getChunkTree();
+		List<List<HeadTreeNode>> buildAndCheckTree = sample.getBuildAndCheckTree();
 		String[][] ac = sample.getAdditionalContext();
 		List<Event> events = generateEvents(words, poses, chunkTree, buildAndCheckTree,actions,ac);
         return events.iterator();
@@ -57,8 +58,8 @@ public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<Syntactic
 	 * @param ac
 	 * @return
 	 */
-	private List<Event> generateEvents( List<String> words, List<String> poses, List<TreeNode> chunkTree,
-			List<List<TreeNode>> buildAndCheckTree, List<String> actions, String[][] ac) {
+	private List<Event> generateEvents( List<String> words, List<String> poses, List<HeadTreeNode> chunkTree,
+			List<List<HeadTreeNode>> buildAndCheckTree, List<String> actions, String[][] ac) {
 		List<Event> events = new ArrayList<Event>(actions.size());		
 		//chunk
 		for (int i = words.size(); i < 2*words.size(); i++) {		

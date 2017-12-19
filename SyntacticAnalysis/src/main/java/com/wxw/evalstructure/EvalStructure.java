@@ -1,17 +1,17 @@
-package com.wxw.tool;
+package com.wxw.evalstructure;
 
 /**
  * 评估需要的工具类
  * @author 王馨苇
  *
  */
-public class EvaluationTools {
+public class EvalStructure {
 
 	private String nonterminal;
 	private int begin;
 	private int end;
 	
-	public EvaluationTools(String nonterminal,int begin,int end){
+	public EvalStructure(String nonterminal,int begin,int end){
 		this.nonterminal = nonterminal;
 		this.begin = begin;
 		this.end = end;
@@ -45,8 +45,8 @@ public class EvaluationTools {
 	public boolean equals(Object obj) {
 		if (this == obj) {
             return true;
-        } else if (obj instanceof EvaluationTools) {
-        	EvaluationTools et = (EvaluationTools) obj;
+        } else if (obj instanceof EvalStructure) {
+        	EvalStructure et = (EvalStructure) obj;
         	if(getNonTerminal().equals(et.getNonTerminal()) && getBegin()== et.getBegin() && getEnd() == et.getEnd()){
     			return true;
     		}else{

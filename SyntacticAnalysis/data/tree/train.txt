@@ -68970,7 +68970,7 @@
 					(NNS bonds))
 				(PP (IN from)
 					(NP
-						(NP ())
+						(NP (NNP Detroit))
 						(, ,)
 						(NP (NNP Mich.))
 						(, ,))))))

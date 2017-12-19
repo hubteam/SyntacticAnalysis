@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.stream.SyntacticAnalysisSample;
+import com.wxw.tree.HeadTreeNode;
 
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.util.AbstractEventStream;
@@ -16,7 +16,7 @@ import opennlp.tools.util.ObjectStream;
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisSampleEventContainsPos extends AbstractEventStream<SyntacticAnalysisSample>{
+public class SyntacticAnalysisSampleEventContainsPos extends AbstractEventStream<SyntacticAnalysisSample<HeadTreeNode>>{
 
 	private SyntacticAnalysisContextGeneratorContainsPos generator;
 	
@@ -25,7 +25,7 @@ public class SyntacticAnalysisSampleEventContainsPos extends AbstractEventStream
 	 * @param samples 样本流
 	 * @param generator 上下文产生器
 	 */
-	public SyntacticAnalysisSampleEventContainsPos(ObjectStream<SyntacticAnalysisSample> samples,SyntacticAnalysisContextGeneratorContainsPos generator) {
+	public SyntacticAnalysisSampleEventContainsPos(ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> samples,SyntacticAnalysisContextGeneratorContainsPos generator) {
 		super(samples);
 		this.generator = generator;
 	}
@@ -34,7 +34,7 @@ public class SyntacticAnalysisSampleEventContainsPos extends AbstractEventStream
 	 * 生成事件
 	 */
 	@Override
-	protected Iterator<Event> createEvents(SyntacticAnalysisSample sample) {
+	protected Iterator<Event> createEvents(SyntacticAnalysisSample<HeadTreeNode> sample) {
 		List<String> words = sample.getWords();
 		List<String> poses = sample.getPoses();
 		String[][] ac = sample.getAdditionalContext();

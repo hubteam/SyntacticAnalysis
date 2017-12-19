@@ -2,14 +2,14 @@ package com.wxw.sequence;
 
 import java.util.List;
 
-import com.wxw.tree.TreeNode;
+import com.wxw.tree.HeadTreeNode;
 
 /**
  * 序列验证实现类
  * @author 王馨苇
  *
  */
-public class DefaultSyntacticAnalysisSequenceValidator implements SyntacticAnalysisSequenceValidator{
+public class DefaultSyntacticAnalysisSequenceValidator implements SyntacticAnalysisSequenceValidator<HeadTreeNode>{
 
 	/**
 	 * 检测chunk步骤的标记是否正确【chunk的标记有start join other】
@@ -20,7 +20,7 @@ public class DefaultSyntacticAnalysisSequenceValidator implements SyntacticAnaly
 	 * @return
 	 */
 	@Override
-	public boolean validSequenceForChunk(int i, List<TreeNode> posTree, List<String> outcomes, String out) {
+	public boolean validSequenceForChunk(int i, List<HeadTreeNode> posTree, List<String> outcomes, String out) {
 		
 		if(i == 0){
 			if(out.equals("other")){
@@ -64,7 +64,7 @@ public class DefaultSyntacticAnalysisSequenceValidator implements SyntacticAnaly
 	 * @return
 	 */
 	@Override
-	public boolean validSequenceForBuildAndCheck(int i, List<TreeNode> combineChunkTree, String out) {
+	public boolean validSequenceForBuildAndCheck(int i, List<HeadTreeNode> combineChunkTree, String out) {
 		if(i == 0){
 			if(out.split("_")[0].equals("start")){
 				return true;

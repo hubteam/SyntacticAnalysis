@@ -10,7 +10,7 @@ import com.wxw.tree.TreeNode;
  * @author 王馨苇
  *
  */
-public interface SyntacticAnalysisSequenceClassificationModel {
+public interface SyntacticAnalysisSequenceClassificationModel<T extends TreeNode> {
 
 	/**
 	 * 得到最好的chunk结果
@@ -20,7 +20,7 @@ public interface SyntacticAnalysisSequenceClassificationModel {
 	 * @param validator 序列验证
 	 * @return
 	 */
-	SyntacticAnalysisSequenceForChunk bestSequenceForChunk(List<List<TreeNode>> posTree, Object[] ac, SyntacticAnalysisContextGenerator generator, SyntacticAnalysisSequenceValidator validator) ;
+	SyntacticAnalysisSequenceForChunk bestSequenceForChunk(List<List<T>> posTree, Object[] ac, SyntacticAnalysisContextGenerator<T> generator, SyntacticAnalysisSequenceValidator<T> validator) ;
 
 	/**
 	 * 得到最好的num个chunk结果
@@ -32,8 +32,8 @@ public interface SyntacticAnalysisSequenceClassificationModel {
 	 * @param validator 序列验证
 	 * @return
 	 */
-	SyntacticAnalysisSequenceForChunk[] bestSequencesForChunk(int num, List<List<TreeNode>> posTree, Object[] ac, double min, SyntacticAnalysisContextGenerator generator,
-			SyntacticAnalysisSequenceValidator validator);
+	SyntacticAnalysisSequenceForChunk[] bestSequencesForChunk(int num, List<List<T>> posTree, Object[] ac, double min, SyntacticAnalysisContextGenerator<T> generator,
+			SyntacticAnalysisSequenceValidator<T> validator);
 
 	/**
 	 * 得到最好的num个chunk结果
@@ -44,8 +44,8 @@ public interface SyntacticAnalysisSequenceClassificationModel {
 	 * @param validator 序列验证
 	 * @return
 	 */
-	SyntacticAnalysisSequenceForChunk[] bestSequencesForChunk(int num, List<List<TreeNode>> posTree, Object[] ac, SyntacticAnalysisContextGenerator generator,
-			SyntacticAnalysisSequenceValidator validator);
+	SyntacticAnalysisSequenceForChunk[] bestSequencesForChunk(int num, List<List<T>> posTree, Object[] ac, SyntacticAnalysisContextGenerator<T> generator,
+			SyntacticAnalysisSequenceValidator<T> validator);
 	
 	/**
 	 * 得到最好的BuildAndCheck结果
@@ -55,7 +55,7 @@ public interface SyntacticAnalysisSequenceClassificationModel {
 	 * @param validator 序列验证
 	 * @return
 	 */
-	SyntacticAnalysisSequenceForBuildAndCheck bestSequenceForBuildAndCheck(List<List<TreeNode>> comnineChunkTree, Object[] ac, SyntacticAnalysisContextGenerator generator, SyntacticAnalysisSequenceValidator validator) ;
+	SyntacticAnalysisSequenceForBuildAndCheck<T> bestSequenceForBuildAndCheck(List<List<T>> comnineChunkTree, Object[] ac, SyntacticAnalysisContextGenerator<T> generator, SyntacticAnalysisSequenceValidator<T> validator) ;
 
 	/**
 	 * 得到最好的num个BuildAndCheck结果
@@ -67,8 +67,8 @@ public interface SyntacticAnalysisSequenceClassificationModel {
 	 * @param validator 序列验证
 	 * @return
 	 */
-	SyntacticAnalysisSequenceForBuildAndCheck[] bestSequencesForBuildAndCheck(int num, List<List<TreeNode>> comnineChunkTree, Object[] ac, double min, SyntacticAnalysisContextGenerator generator,
-			SyntacticAnalysisSequenceValidator validator);
+	SyntacticAnalysisSequenceForBuildAndCheck<T>[] bestSequencesForBuildAndCheck(int num, List<List<T>> comnineChunkTree, Object[] ac, double min, SyntacticAnalysisContextGenerator<T> generator,
+			SyntacticAnalysisSequenceValidator<T> validator);
 
 	/**
 	 * 得到最好的num个BuildAndCheck结果
@@ -79,6 +79,6 @@ public interface SyntacticAnalysisSequenceClassificationModel {
 	 * @param validator 序列验证
 	 * @return
 	 */
-	SyntacticAnalysisSequenceForBuildAndCheck[] bestSequencesForBuildAndCheck(int num, List<List<TreeNode>> comnineChunkTree, Object[] ac, SyntacticAnalysisContextGenerator generator,
-			SyntacticAnalysisSequenceValidator validator);
+	SyntacticAnalysisSequenceForBuildAndCheck<T>[] bestSequencesForBuildAndCheck(int num, List<List<T>> comnineChunkTree, Object[] ac, SyntacticAnalysisContextGenerator<T> generator,
+			SyntacticAnalysisSequenceValidator<T> validator);
 }

@@ -5,17 +5,17 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.wxw.actions.ActionsToHeadTree;
+import com.wxw.actions.HeadTreeToActions;
+import com.wxw.evalstructure.EvalStructure;
 import com.wxw.evaluate.SyntacticAnalysisEvaluateMonitor;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
 import com.wxw.model.bystep.POSTaggerMEExtend;
 import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForByStep;
 import com.wxw.stream.SyntacticAnalysisSample;
-import com.wxw.tool.EvaluationTools;
-import com.wxw.tree.ActionsToTree;
-import com.wxw.tree.PhraseGenerateTree;
-import com.wxw.tree.TreeNode;
-import com.wxw.tree.TreeToActions;
-import com.wxw.tree.TreeToNonTerminal;
+import com.wxw.tree.HeadTreeNode;
+import com.wxw.tree.PhraseGenerateHeadTree;
+import com.wxw.tree.TreeToEvalStructure;
 
 import opennlp.tools.util.eval.Evaluator;
 
@@ -24,7 +24,7 @@ import opennlp.tools.util.eval.Evaluator;
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisEvaluatorForOneStep extends Evaluator<SyntacticAnalysisSample>{
+public class SyntacticAnalysisEvaluatorForOneStep extends Evaluator<SyntacticAnalysisSample<HeadTreeNode>>{
 	private Logger logger = Logger.getLogger(SyntacticAnalysisEvaluatorForByStep.class.getName());
 
 	private POSTaggerMEExtend postagger;
@@ -59,43 +59,33 @@ public class SyntacticAnalysisEvaluatorForOneStep extends Evaluator<SyntacticAna
 	}
 	
 	@Override
-	protected SyntacticAnalysisSample processSample(SyntacticAnalysisSample sample) {
-		SyntacticAnalysisSample samplePre = null;
-		TreeNode buildAndCheckTree = null;
+	protected SyntacticAnalysisSample<HeadTreeNode> processSample(SyntacticAnalysisSample<HeadTreeNode> sample) {
+		SyntacticAnalysisSample<HeadTreeNode> samplePre = null;
+		HeadTreeNode treePre = null;
 		//在验证的过程中，有些配ignore的句子，也会来验证，这是没有意义的，为了防止这种情况，就加入判断
 		if(sample.getActions().size() == 0 && sample.getWords().size() == 0){
-			return new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+			return new SyntacticAnalysisSample<HeadTreeNode>(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 		}else{
 			try {
 				List<String> words = sample.getWords();
 				List<String> actionsRef = sample.getActions();
-				ActionsToTree att = new ActionsToTree();
+				ActionsToHeadTree att = new ActionsToHeadTree();
 				//参考样本没有保存完整的一棵树，需要将动作序列转成一颗完整的树
-				TreeNode treeRef = att.actionsToTree(words, actionsRef);
-				TreeToNonTerminal ttn1 = new TreeToNonTerminal();
-				List<EvaluationTools> etRef = ttn1.getTreeToNonterminal(treeRef);
-				List<List<TreeNode>> posTree = postagger.tagKpos(20,words.toArray(new String[words.size()]));
-				List<List<TreeNode>> chunkTree = treetagger.tagKChunk(20, posTree, null);	
-				buildAndCheckTree = treetagger.tagBuildAndCheck(chunkTree, null);
-				if(buildAndCheckTree == null){
-					samplePre = new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-					measure.countNodeDecodeTrees(buildAndCheckTree);
+				HeadTreeNode treeRef = att.actionsToTree(words, actionsRef);
+				List<List<HeadTreeNode>> posTree = postagger.tagKpos(20,words.toArray(new String[words.size()]));
+				List<List<HeadTreeNode>> chunkTree = treetagger.tagKChunk(20, posTree, null);	
+				treePre = treetagger.tagBuildAndCheck(chunkTree, null);
+				if(treePre == null){
+					samplePre = new SyntacticAnalysisSample<HeadTreeNode>(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+					measure.countNodeDecodeTrees(treePre);
 				}else{
-					TreeToActions tta = new TreeToActions();
-					PhraseGenerateTree pgt = new PhraseGenerateTree();
-					TreeNode treePre = pgt.generateTree("("+buildAndCheckTree.toBracket()+")");
-					samplePre = tta.treeToAction(treePre);
-					TreeToNonTerminal ttn2 = new TreeToNonTerminal();
-					List<EvaluationTools> etPre = ttn2.getTreeToNonterminal(treePre);
-					measure.update(etRef, etPre);
+					measure.update(treeRef, treePre);
 				}	
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
 			} catch(Exception e){
 				if (logger.isLoggable(Level.WARNING)) {						
-                    logger.warning("Error during parsing, ignoring sentence: " + buildAndCheckTree.toBracket());
+                    logger.warning("Error during parsing, ignoring sentence: " + treePre.toBracket());
                 }	
-				samplePre = new SyntacticAnalysisSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+				samplePre = new SyntacticAnalysisSample<HeadTreeNode>(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 			}
 			return samplePre;
 		}

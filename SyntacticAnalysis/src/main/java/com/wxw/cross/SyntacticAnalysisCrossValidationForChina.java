@@ -14,6 +14,7 @@ import com.wxw.model.bystep.SyntacticAnalysisMEForPos;
 import com.wxw.model.bystep.SyntacticAnalysisModelForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisModelForChunk;
 import com.wxw.stream.SyntacticAnalysisSample;
+import com.wxw.tree.HeadTreeNode;
 import com.wxw.wordsegandpos.feature.WordSegAndPosContextGenerator;
 import com.wxw.wordsegandpos.feature.WordSegAndPosContextGeneratorConfExtend;
 import com.wxw.wordsegandpos.model.WordSegAndPosME;
@@ -56,14 +57,14 @@ public class SyntacticAnalysisCrossValidationForChina {
 	 * @param contextGenerator 上下文
 	 * @throws IOException io异常
 	 */
-	public void evaluate(File file,ObjectStream<SyntacticAnalysisSample> sample, int nFolds,
-			SyntacticAnalysisContextGenerator contextGenerator) throws IOException{
-		CrossValidationPartitioner<SyntacticAnalysisSample> partitioner = new CrossValidationPartitioner<SyntacticAnalysisSample>(sample, nFolds);
+	public void evaluate(File file,ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sample, int nFolds,
+			SyntacticAnalysisContextGenerator<HeadTreeNode> contextGenerator) throws IOException{
+		CrossValidationPartitioner<SyntacticAnalysisSample<HeadTreeNode>> partitioner = new CrossValidationPartitioner<SyntacticAnalysisSample<HeadTreeNode>>(sample, nFolds);
 		int run = 1;
 		//小于折数的时候
 		while(partitioner.hasNext()){
 			System.out.println("Run"+run+"...");
-			CrossValidationPartitioner.TrainingSampleStream<SyntacticAnalysisSample> trainingSampleStream = partitioner.next();
+			CrossValidationPartitioner.TrainingSampleStream<SyntacticAnalysisSample<HeadTreeNode>> trainingSampleStream = partitioner.next();
 			WordSegAndPosModel posmodel = new WordSegAndPosModelLoader().load(file);
 			WordSegAndPosContextGenerator generator = new WordSegAndPosContextGeneratorConfExtend();
 			WordSegAndPosME postagger = new WordSegAndPosME(posmodel, generator);

@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.wxw.actions.HeadTreeToActions;
+import com.wxw.constituent.ConstituentTree;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.sequence.DefaultSyntacticAnalysisSequenceValidator;
 import com.wxw.sequence.SyntacticAnalysisBeamSearch;
@@ -20,9 +22,8 @@ import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
 import com.wxw.syntacticanalysis.SyntacticAnalysis;
 import com.wxw.tree.GenerateHeadWords;
-import com.wxw.tree.PhraseGenerateTree;
-import com.wxw.tree.TreeNode;
-import com.wxw.tree.TreeToActions;
+import com.wxw.tree.HeadTreeNode;
+import com.wxw.tree.PhraseGenerateHeadTree;
 
 import opennlp.tools.ml.EventTrainer;
 import opennlp.tools.ml.TrainerFactory;
@@ -41,22 +42,22 @@ import opennlp.tools.util.TrainingParameters;
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
+public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<HeadTreeNode>{
 	public static final int DEFAULT_BEAM_SIZE = 20;
-	private SyntacticAnalysisContextGenerator contextGenerator;
+	private SyntacticAnalysisContextGenerator<HeadTreeNode> contextGenerator;
 	private int size;
 	private Sequence bestSequence;
-	private SyntacticAnalysisSequenceClassificationModel model;
+	private SyntacticAnalysisSequenceClassificationModel<HeadTreeNode> model;
 	private SyntacticAnalysisModelForBuildAndCheck modelPackage;
 
-    private SyntacticAnalysisSequenceValidator sequenceValidator;
+    private SyntacticAnalysisSequenceValidator<HeadTreeNode> sequenceValidator;
 	
 	/**
 	 * 构造函数，初始化工作
 	 * @param model 模型
 	 * @param contextGen 特征
 	 */
-	public SyntacticAnalysisMEForBuildAndCheck(SyntacticAnalysisModelForBuildAndCheck model, SyntacticAnalysisContextGenerator contextGen) {
+	public SyntacticAnalysisMEForBuildAndCheck(SyntacticAnalysisModelForBuildAndCheck model, SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen) {
 		init(model , contextGen);
 	}
     /**
@@ -64,7 +65,7 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
      * @param model 模型
      * @param contextGen 特征
      */
-	private void init(SyntacticAnalysisModelForBuildAndCheck model, SyntacticAnalysisContextGenerator contextGen) {
+	private void init(SyntacticAnalysisModelForBuildAndCheck model, SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen) {
 		int beamSize = SyntacticAnalysisMEForBuildAndCheck.DEFAULT_BEAM_SIZE;
 
         String beamSizeString = model.getManifestProperty(SyntacticAnalysisBeamSearch.BEAM_SIZE_PARAMETER);
@@ -93,12 +94,12 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	public static SyntacticAnalysisModelForBuildAndCheck train(File file, TrainingParameters params, SyntacticAnalysisContextGenerator contextGen,
+	public static SyntacticAnalysisModelForBuildAndCheck train(File file, TrainingParameters params, SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen,
 			String encoding){
 		SyntacticAnalysisModelForBuildAndCheck model = null;
 		try {
 			ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(file), encoding);
-			ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
+			ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
 			model = SyntacticAnalysisMEForBuildAndCheck.train("zh", sampleStream, params, contextGen);
 			return model;
 		} catch (FileNotFoundException e) {
@@ -119,8 +120,8 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	public static SyntacticAnalysisModelForBuildAndCheck train(String languageCode, ObjectStream<SyntacticAnalysisSample> sampleStream, TrainingParameters params,
-			SyntacticAnalysisContextGenerator contextGen) throws IOException {
+	public static SyntacticAnalysisModelForBuildAndCheck train(String languageCode, ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream, TrainingParameters params,
+			SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen) throws IOException {
 		String beamSizeString = params.getSettings().get(SyntacticAnalysisBeamSearch.BEAM_SIZE_PARAMETER);
 		int beamSize = SyntacticAnalysisMEForBuildAndCheck.DEFAULT_BEAM_SIZE;
         if (beamSizeString != null) {
@@ -165,12 +166,12 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	 */
 	public static SyntacticAnalysisModelForBuildAndCheck train(File file, File buildmodeltxtFile, 
 			File checkmodeltxtFile,TrainingParameters params,
-			SyntacticAnalysisContextGenerator contextGen, String encoding) {
+			SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, String encoding) {
 		PlainTextGISModelWriter modelWriter = null;
 		SyntacticAnalysisModelForBuildAndCheck model = null;
 		try {
 			ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(file), encoding);
-			ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
+			ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
 			model = SyntacticAnalysisMEForBuildAndCheck.train("zh", sampleStream, params, contextGen);
 			
             modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getBuildTreeModel(), buildmodeltxtFile);
@@ -237,9 +238,9 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	 * @param ac
 	 * @return
 	 */
-	public List<TreeNode> tagBuildAndCheck(int k, List<List<TreeNode>> chunkTree, Object[] ac){
-		List<TreeNode> buildAndCheckTree = new ArrayList<>();
-		SyntacticAnalysisSequenceForBuildAndCheck[] sequences = this.model.bestSequencesForBuildAndCheck(k, chunkTree, ac, contextGenerator, sequenceValidator);
+	public List<HeadTreeNode> tagBuildAndCheck(int k, List<List<HeadTreeNode>> chunkTree, Object[] ac){
+		List<HeadTreeNode> buildAndCheckTree = new ArrayList<>();
+		SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>[] sequences = this.model.bestSequencesForBuildAndCheck(k, chunkTree, ac, contextGenerator, sequenceValidator);
 		if(sequences == null){
 			return null;
 		}else{
@@ -258,17 +259,17 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	 * @return
 	 * @throws CloneNotSupportedException 
 	 */
-	public List<List<String>> tagKactions(int k, List<List<TreeNode>> chunkTree, Object[] ac) throws CloneNotSupportedException{
+	public List<List<String>> tagKactions(int k, List<List<HeadTreeNode>> chunkTree, Object[] ac) throws CloneNotSupportedException{
 		List<List<String>> kActions = new ArrayList<>();
-		List<TreeNode> alltree= tagBuildAndCheck(k,chunkTree,null);
+		List<HeadTreeNode> alltree= tagBuildAndCheck(k,chunkTree,null);
 		if(alltree == null){
 			return null;
 		}else{
 			for (int i = 0; i < alltree.size(); i++) {
-				TreeToActions tta = new TreeToActions();
-				PhraseGenerateTree pgt = new PhraseGenerateTree();
-				TreeNode node = pgt.generateTree("("+alltree.get(i).toBracket()+")");
-				SyntacticAnalysisSample sample = tta.treeToAction(node);
+				HeadTreeToActions tta = new HeadTreeToActions();
+				PhraseGenerateHeadTree pgt = new PhraseGenerateHeadTree();
+				HeadTreeNode node = pgt.generateTree("("+alltree.get(i).toBracket()+")");
+				SyntacticAnalysisSample<HeadTreeNode> sample = tta.treeToAction(node);
 				kActions.add(sample.getActions());	
 			}
 			return kActions;
@@ -283,7 +284,7 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	 * @return
 	 * @throws CloneNotSupportedException 
 	 */
-	public List<String> tagActions(int k, List<List<TreeNode>> chunkTree, Object[] ac) throws CloneNotSupportedException{
+	public List<String> tagActions(int k, List<List<HeadTreeNode>> chunkTree, Object[] ac) throws CloneNotSupportedException{
 		List<List<String>> kActions = tagKactions(1,chunkTree,null);
 		
 		return kActions.get(0);
@@ -295,8 +296,8 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	 * @param ac
 	 * @return
 	 */
-	public TreeNode tagBuildAndCheck(List<List<TreeNode>> chunkTree, Object[] ac){
-		List<TreeNode> buildAndCheckTree = tagBuildAndCheck(1,chunkTree, ac);
+	public HeadTreeNode tagBuildAndCheck(List<List<HeadTreeNode>> chunkTree, Object[] ac){
+		List<HeadTreeNode> buildAndCheckTree = tagBuildAndCheck(1,chunkTree, ac);
 		if(buildAndCheckTree == null){
 			return null;
 		}else{
@@ -309,10 +310,13 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	 * @return
 	 */
 	@Override
-	public TreeNode syntacticTree(List<TreeNode> chunkTree) {
-		List<List<TreeNode>> allTree = new ArrayList<>();
+	public ConstituentTree<HeadTreeNode> syntacticTree(List<HeadTreeNode> chunkTree) {
+		List<List<HeadTreeNode>> allTree = new ArrayList<>();
 		allTree.add(chunkTree);
-		return tagBuildAndCheck(allTree,null);
+		HeadTreeNode headTreeNode = tagBuildAndCheck(allTree,null);
+		ConstituentTree<HeadTreeNode> constituent = new ConstituentTree<>();
+		constituent.setTreeNode(headTreeNode);
+		return constituent;
 	}
 	/**
 	 * 得到句法树
@@ -322,25 +326,25 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	 * @return
 	 */
 	@Override
-	public TreeNode syntacticTree(String[] words, String[] poses, String[] chunkTag) {
-		List<TreeNode> chunkTree = toChunkTreeList(words,poses,chunkTag);
+	public ConstituentTree<HeadTreeNode> syntacticTree(String[] words, String[] poses, String[] chunkTag) {
+		List<HeadTreeNode> chunkTree = toChunkTreeList(words,poses,chunkTag);
 		return syntacticTree(chunkTree);
 	}
 	
-	public List<TreeNode> toChunkTreeList(String[] words, String[] poses, String[] chunkTag){
-		List<TreeNode> chunkTree = new ArrayList<>();
+	public List<HeadTreeNode> toChunkTreeList(String[] words, String[] poses, String[] chunkTag){
+		List<HeadTreeNode> chunkTree = new ArrayList<>();
 		for (int i = 0; i < chunkTag.length; i++) {
 			if(chunkTag[i].equals("O")){
-				TreeNode pos = new TreeNode(poses[i]);
-				pos.addChild(new TreeNode(words[i]));
+				HeadTreeNode pos = new HeadTreeNode(poses[i]);
+				pos.addChild(new HeadTreeNode(words[i]));
 				pos.setHeadWords(words[i]);
 				chunkTree.add(pos);
 			}else if(chunkTag[i].endsWith("B")){
-				TreeNode node = new TreeNode(chunkTag[i].split("_")[0]);
+				HeadTreeNode node = new HeadTreeNode(chunkTag[i].split("_")[0]);
 				int j ;
 				for (j = i; j < chunkTag.length; j++) {
-					TreeNode pos = new TreeNode(poses[j]);
-					pos.addChild(new TreeNode(words[j]));
+					HeadTreeNode pos = new HeadTreeNode(poses[j]);
+					pos.addChild(new HeadTreeNode(words[j]));
 					pos.setHeadWords(words[j]);
 					node.addChild(pos);
 					if(chunkTag[j].endsWith("E")){
@@ -361,7 +365,62 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 	 * @return
 	 */
 	@Override
-	public TreeNode syntacticTree(String sentence) {
+	public ConstituentTree<HeadTreeNode> syntacticTree(String sentence) {	
+		return syntacticTree(1,sentence)[0];
+	}
+	/**
+	 * 得到句法树的括号表达式
+	 * @param chunkTree chunk子树序列
+	 * @return
+	 */
+	@Override
+	public String syntacticBracket(List<HeadTreeNode> chunkTree) {
+		HeadTreeNode node = syntacticTree(chunkTree).getTreeNode();
+		return HeadTreeNode.printTree(node, 1);
+	}
+	/**
+	 * 得到句法树的括号表达式
+	 * @param words 词语
+	 * @param poses 词性标记
+	 * @param chunkTag chunk标记
+	 * @return
+	 */
+	@Override
+	public String syntacticBracket(String[] words,String[] poses, String[] chunkTag) {
+		HeadTreeNode node = syntacticTree(words,poses,chunkTag).getTreeNode();
+		return HeadTreeNode.printTree(node, 1);
+	}
+	/**
+	 * 得到句法树的括号表达式
+	 * @param sentence 由词语词性标记和chunk标记组成的句子
+	 * @return
+	 */
+	@Override
+	public String syntacticBracket(String sentence) {
+		HeadTreeNode node = syntacticTree(sentence).getTreeNode();
+		return HeadTreeNode.printTree(node, 1);
+	}
+	@SuppressWarnings("unchecked")
+	@Override
+	public ConstituentTree<HeadTreeNode>[] syntacticTree(int k, List<HeadTreeNode> chunkTree) {
+		List<List<HeadTreeNode>> allTree = new ArrayList<>();
+		allTree.add(chunkTree);
+		List<HeadTreeNode> headTreeNode = tagBuildAndCheck(k,allTree,null);
+		List<ConstituentTree<HeadTreeNode>> constituent = new ArrayList<>();
+		for (int i = 0; i < headTreeNode.size(); i++) {
+			ConstituentTree<HeadTreeNode> con = new ConstituentTree<>();
+			con.setTreeNode(headTreeNode.get(i));
+			constituent.add(con);
+		}
+		return constituent.toArray(new ConstituentTree[constituent.size()]);
+	}
+	@Override
+	public ConstituentTree<HeadTreeNode>[] syntacticTree(int k, String[] words, String[] poses, String[] chunkTag) {
+		List<HeadTreeNode> chunkTree = toChunkTreeList(words,poses,chunkTag);
+		return syntacticTree(k,chunkTree);
+	}
+	@Override
+	public ConstituentTree<HeadTreeNode>[] syntacticTree(int k, String sentence) {
 		List<String> chunkTags = new ArrayList<>();
 		List<String> words = new ArrayList<>();
 		List<String> poses = new ArrayList<>();
@@ -448,40 +507,8 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis{
 			poses.add(wordTag[1]);
 			chunkTags.add(chunk + "_E");
 		}
-		return syntacticTree(words.toArray(new String[words.size()]),poses.toArray(new String[poses.size()]),
+		return syntacticTree(k,words.toArray(new String[words.size()]),poses.toArray(new String[poses.size()]),
 				chunkTags.toArray(new String[chunkTags.size()]));
-	}
-	/**
-	 * 得到句法树的括号表达式
-	 * @param chunkTree chunk子树序列
-	 * @return
-	 */
-	@Override
-	public String syntacticBracket(List<TreeNode> chunkTree) {
-		TreeNode node = syntacticTree(chunkTree);
-		return TreeNode.printTree(node, 1);
-	}
-	/**
-	 * 得到句法树的括号表达式
-	 * @param words 词语
-	 * @param poses 词性标记
-	 * @param chunkTag chunk标记
-	 * @return
-	 */
-	@Override
-	public String syntacticBracket(String[] words,String[] poses, String[] chunkTag) {
-		TreeNode node = syntacticTree(words,poses,chunkTag);
-		return TreeNode.printTree(node, 1);
-	}
-	/**
-	 * 得到句法树的括号表达式
-	 * @param sentence 由词语词性标记和chunk标记组成的句子
-	 * @return
-	 */
-	@Override
-	public String syntacticBracket(String sentence) {
-		TreeNode node = syntacticTree(sentence);
-		return TreeNode.printTree(node, 1);
 	}
 }
 

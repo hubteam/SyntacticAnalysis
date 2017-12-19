@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.stream.SyntacticAnalysisSample;
+import com.wxw.tree.HeadTreeNode;
 import com.wxw.tree.TreeNode;
 
 import opennlp.tools.ml.model.Event;
@@ -17,16 +18,16 @@ import opennlp.tools.util.ObjectStream;
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisSampleEventForBuild extends AbstractEventStream<SyntacticAnalysisSample>{
+public class SyntacticAnalysisSampleEventForBuild extends AbstractEventStream<SyntacticAnalysisSample<HeadTreeNode>>{
 
-	private SyntacticAnalysisContextGenerator generator;
+	private SyntacticAnalysisContextGenerator<HeadTreeNode> generator;
 	
 	/**
 	 * 构造
 	 * @param samples 样本流
 	 * @param generator 上下文产生器
 	 */
-	public SyntacticAnalysisSampleEventForBuild(ObjectStream<SyntacticAnalysisSample> samples,SyntacticAnalysisContextGenerator generator) {
+	public SyntacticAnalysisSampleEventForBuild(ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> samples,SyntacticAnalysisContextGenerator<HeadTreeNode> generator) {
 		super(samples);
 		this.generator = generator;
 	}
@@ -35,10 +36,10 @@ public class SyntacticAnalysisSampleEventForBuild extends AbstractEventStream<Sy
 	 * 生成事件
 	 */
 	@Override
-	protected Iterator<Event> createEvents(SyntacticAnalysisSample sample) {
+	protected Iterator<Event> createEvents(SyntacticAnalysisSample<HeadTreeNode> sample) {
 		List<String> words = sample.getWords();
 		List<String> actions = sample.getActions();
-		List<List<TreeNode>> buildAndCheckTree = sample.getBuildAndCheckTree();
+		List<List<HeadTreeNode>> buildAndCheckTree = sample.getBuildAndCheckTree();
 		String[][] ac = sample.getAdditionalContext();
 		List<Event> events = generateEvents(words, buildAndCheckTree,actions,ac);
         return events.iterator();
@@ -55,7 +56,7 @@ public class SyntacticAnalysisSampleEventForBuild extends AbstractEventStream<Sy
 	 * @return
 	 */
 	private List<Event> generateEvents( List<String> words, 
-			List<List<TreeNode>> buildAndCheckTree, List<String> actions, String[][] ac) {
+			List<List<HeadTreeNode>> buildAndCheckTree, List<String> actions, String[][] ac) {
 		List<Event> events = new ArrayList<Event>(actions.size());		
 		//buildAndCheck
 		//两个变量i j   i控制第几个list  j控制list中的第几个

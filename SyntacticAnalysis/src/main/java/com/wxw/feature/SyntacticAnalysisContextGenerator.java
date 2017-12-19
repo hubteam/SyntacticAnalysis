@@ -9,7 +9,7 @@ import com.wxw.tree.TreeNode;
  * @author 王馨苇
  *
  */
-public interface SyntacticAnalysisContextGenerator {
+public interface SyntacticAnalysisContextGenerator<T extends TreeNode> {
 	
 	/**
 	 * chunk步的上下文特征
@@ -19,9 +19,9 @@ public interface SyntacticAnalysisContextGenerator {
 	 * @param ac 
 	 * @return
 	 */
-	public String[] getContextForChunk(int index,List<TreeNode> chunkTree,List<String> actions, Object[] ac);
+	public String[] getContextForChunk(int index,List<T> chunkTree,List<String> actions, Object[] ac);
 	
-	/**
+	/**  
 	 * build步的上下文特征
 	 * @param index 当前位置
 	 * @param buildAndCheckTree 子树序列
@@ -29,7 +29,7 @@ public interface SyntacticAnalysisContextGenerator {
 	 * @param ac 
 	 * @return
 	 */
-	public String[] getContextForBuild(int index,List<TreeNode> buildAndCheckTree, List<String> actions, Object[] ac);
+	public String[] getContextForBuild(int index,List<T> buildAndCheckTree, List<String> actions, Object[] ac);
 	
 	/**
 	 * check步的上下文特征
@@ -39,7 +39,7 @@ public interface SyntacticAnalysisContextGenerator {
 	 * @param ac 
 	 * @return
 	 */
-	public String[] getContextForCheck(int index,List<TreeNode> buildAndCheckTree, List<String> actions, Object[] ac);
+	public String[] getContextForCheck(int index,List<T> buildAndCheckTree, List<String> actions, Object[] ac);
 	
 	/**
 	 * 为测试语料的chunk步骤生成上下文特征
@@ -49,7 +49,7 @@ public interface SyntacticAnalysisContextGenerator {
 	 * @param ac
 	 * @return
 	 */
-	public String[] getContextForChunkForTest(int index, List<TreeNode> posTree, List<String> actions, Object[] ac);
+	public String[] getContextForChunkForTest(int index, List<T> posTree, List<String> actions, Object[] ac);
 	
 	/**
 	 * 为测试语料的build步的上下文特征
@@ -58,7 +58,7 @@ public interface SyntacticAnalysisContextGenerator {
 	 * @param ac 
 	 * @return
 	 */
-	public String[] getContextForBuildForTest(int index,List<TreeNode> chunkTree, Object[] ac);
+	public String[] getContextForBuildForTest(int index,List<T> chunkTree, Object[] ac);
 	
 	/**
 	 * 为测试语料的check步的上下文特征
@@ -68,5 +68,5 @@ public interface SyntacticAnalysisContextGenerator {
 	 * @param ac 
 	 * @return
 	 */
-	public String[] getContextForCheckForTest(int index,List<TreeNode> chunkTree, String out, Object[] ac);	
+	public String[] getContextForCheckForTest(int index,List<T> chunkTree, String out, Object[] ac);	
 }

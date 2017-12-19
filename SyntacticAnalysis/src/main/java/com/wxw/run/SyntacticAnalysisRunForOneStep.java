@@ -27,10 +27,10 @@ import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
+import com.wxw.tree.HeadTreeNode;
 
 import opennlp.tools.cmdline.postag.POSModelLoader;
 import opennlp.tools.postag.POSModel;
-import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.TrainingParameters;
 
@@ -118,7 +118,7 @@ public class SyntacticAnalysisRunForOneStep {
 	 * @param config 配置文件
 	 * @return
 	 */
-	private static SyntacticAnalysisContextGenerator getContextGenerator(Properties config) {
+	private static SyntacticAnalysisContextGenerator<HeadTreeNode> getContextGenerator(Properties config) {
 		String featureClass = config.getProperty("feature.class");
 		if(featureClass.equals("com.wxw.feature.SyntacticAnalysisContextGeneratorConf")){
         	return  new SyntacticAnalysisContextGeneratorConf(config);
@@ -175,10 +175,10 @@ public class SyntacticAnalysisRunForOneStep {
 		Corpus[] corpora = getCorporaFromConf(config);
         //定位到某一语料
         Corpus corpus = getCorpus(corpora, corpusName);
-        SyntacticAnalysisContextGenerator contextGen = getContextGenerator(config);
+        SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen = getContextGenerator(config);
         ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.trainFile)), corpus.encoding);
         
-        ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
+        ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
 
         //默认参数
         TrainingParameters params = TrainingParameters.defaultParams();
@@ -203,10 +203,10 @@ public class SyntacticAnalysisRunForOneStep {
 		Corpus[] corpora = getCorporaFromConf(config);
         //定位到某一语料
         Corpus corpus = getCorpus(corpora, corpusName);
-        SyntacticAnalysisContextGenerator contextGen = getContextGenerator(config);
+        SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen = getContextGenerator(config);
         ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.trainFile)), corpus.encoding);
         
-        ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
+        ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
 
         //默认参数
         TrainingParameters params = TrainingParameters.defaultParams();
@@ -236,7 +236,7 @@ public class SyntacticAnalysisRunForOneStep {
         config.load(configStream);
         Corpus[] corpora = getCorporaFromConf(config);//获取语料
 
-        SyntacticAnalysisContextGenerator contextGen = getContextGenerator(config);
+        SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen = getContextGenerator(config);
         SyntacticAnalysisContextGeneratorContainsPos contextGenForPos = new SyntacticAnalysisContextGeneratorConfContainsPos();
         runFeatureOnCorpora(contextGen, contextGenForPos,corpora, params);
 	}
@@ -252,7 +252,7 @@ public class SyntacticAnalysisRunForOneStep {
 	 * @throws FileNotFoundException 
 	 * @throws UnsupportedOperationException 
 	 */
-	private static void runFeatureOnCorpora(SyntacticAnalysisContextGenerator contextGen,
+	private static void runFeatureOnCorpora(SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen,
 			SyntacticAnalysisContextGeneratorContainsPos contextGenForPos, Corpus[] corpora, TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		if(flag == "trainpt" || flag.equals("trainpt")){
 			for (int i = 0; i < corpora.length; i++) {
@@ -279,7 +279,7 @@ public class SyntacticAnalysisRunForOneStep {
 	 * @throws IOException
 	 * @throws CloneNotSupportedException
 	 */
-	private static void evaluateOnCorpusContainPos(SyntacticAnalysisContextGenerator contextGen,
+	private static void evaluateOnCorpusContainPos(SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen,
 			SyntacticAnalysisContextGeneratorContainsPos contextGenForPos, Corpus corpus, TrainingParameters params) throws IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);
 
@@ -300,7 +300,7 @@ public class SyntacticAnalysisRunForOneStep {
       }
       evaluator.setMeasure(measure);
       ObjectStream<String> linesStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.testFile)), corpus.encoding);
-      ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(linesStream);
+      ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(linesStream);
       evaluator.evaluate(sampleStream);
       SyntacticAnalysisMeasure measureRes = evaluator.getMeasure();
       System.out.println("--------结果--------");
@@ -318,7 +318,7 @@ public class SyntacticAnalysisRunForOneStep {
 	 * @throws IOException
 	 * @throws CloneNotSupportedException
 	 */
-	private static void modelOutOnCorpusContainPos(SyntacticAnalysisContextGenerator contextGen,
+	private static void modelOutOnCorpusContainPos(SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen,
 			SyntacticAnalysisContextGeneratorContainsPos contextGenForPos, Corpus corpus, TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
 		//根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数【为训练词性标注的模型准备】
@@ -341,7 +341,7 @@ public class SyntacticAnalysisRunForOneStep {
 	 * @throws IOException
 	 * @throws CloneNotSupportedException
 	 */
-	private static void trainOnCorpusContainPos(SyntacticAnalysisContextGenerator contextGen,
+	private static void trainOnCorpusContainPos(SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen,
 			SyntacticAnalysisContextGeneratorContainsPos contextGenForPos, Corpus corpus, TrainingParameters params) throws IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
 		//根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数【为训练词性标注的模型准备】
@@ -371,7 +371,7 @@ public class SyntacticAnalysisRunForOneStep {
         config.load(configStream);
         Corpus[] corpora = getCorporaFromConf(config);//获取语料
 
-        SyntacticAnalysisContextGenerator contextGen = getContextGenerator(config);
+        SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen = getContextGenerator(config);
 
         runFeatureOnCorporaByFlag(contextGen, corpora, params);
 	}
@@ -386,7 +386,7 @@ public class SyntacticAnalysisRunForOneStep {
 	 * @throws FileNotFoundException 
 	 * @throws UnsupportedOperationException 
 	 */
-	private static void runFeatureOnCorporaByFlag(SyntacticAnalysisContextGenerator contextGen, Corpus[] corpora,
+	private static void runFeatureOnCorporaByFlag(SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, Corpus[] corpora,
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		if(flag == "train" || flag.equals("train")){
 			for (int i = 0; i < corpora.length; i++) {
@@ -411,7 +411,7 @@ public class SyntacticAnalysisRunForOneStep {
 	 * @throws CloneNotSupportedException 
 	 * @throws IOException 
 	 */
-	private static void evaluateOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
+	private static void evaluateOnCorpus(SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, Corpus corpus,
 			TrainingParameters params) throws IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);
 
@@ -432,7 +432,7 @@ public class SyntacticAnalysisRunForOneStep {
         }
         evaluator.setMeasure(measure);
         ObjectStream<String> linesStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(corpus.testFile)), corpus.encoding);
-        ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(linesStream);
+        ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(linesStream);
         evaluator.evaluate(sampleStream);
         SyntacticAnalysisMeasure measureRes = evaluator.getMeasure();
         System.out.println("--------结果--------");
@@ -449,7 +449,7 @@ public class SyntacticAnalysisRunForOneStep {
 	 * @throws UnsupportedOperationException 
 	 * @throws CloneNotSupportedException 
 	 */
-	private static void modelOutOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
+	private static void modelOutOnCorpus(SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, Corpus corpus,
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
 		SyntacticAnalysisME.train(new File(corpus.trainFile), new File(corpus.treemodelbinaryFile),new File(corpus.treemodeltxtFile),params, contextGen, corpus.encoding);
@@ -465,7 +465,7 @@ public class SyntacticAnalysisRunForOneStep {
 	 * @throws UnsupportedOperationException 
 	 * @throws CloneNotSupportedException 
 	 */
-	private static void trainOnCorpus(SyntacticAnalysisContextGenerator contextGen, Corpus corpus,
+	private static void trainOnCorpus(SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, Corpus corpus,
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
 		SyntacticAnalysisME.train(new File(corpus.trainFile), params, contextGen, corpus.encoding);

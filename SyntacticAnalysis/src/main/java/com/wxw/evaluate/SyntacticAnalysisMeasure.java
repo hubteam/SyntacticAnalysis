@@ -2,8 +2,9 @@ package com.wxw.evaluate;
 
 import java.util.List;
 
-import com.wxw.tool.EvaluationTools;
+import com.wxw.evalstructure.EvalStructure;
 import com.wxw.tree.TreeNode;
+import com.wxw.tree.TreeToEvalStructure;
 
 /**
  * 句法分析指标计算
@@ -29,10 +30,14 @@ public class SyntacticAnalysisMeasure {
 	
 	/**
 	 * 更新指标的计数
-	 * @param etRef 参考的树
-	 * @param etPre 预测的树
+	 * @param treeRef 参考的树
+	 * @param treePre 预测的树
 	 */
-	public void update(List<EvaluationTools> etRef,List<EvaluationTools> etPre){
+	public void update(TreeNode treeRef,TreeNode treePre){
+		TreeToEvalStructure ttn1 = new TreeToEvalStructure();
+		List<EvalStructure> etRef = ttn1.getTreeToNonterminal(treeRef);
+		TreeToEvalStructure ttn2 = new TreeToEvalStructure();
+		List<EvalStructure> etPre = ttn2.getTreeToNonterminal(treePre);
 		for (int i = 0; i < etPre.size(); i++) {
 			if(etRef.contains(etPre.get(i))){
 				truePositive++;

@@ -41,7 +41,7 @@ public class GenerateHeadWords {
 	 * @param node 当前的子树,此时的node肯定不是叶子,也不是词性标记
 	 * @return
 	 */
-	public static String getHeadWords(TreeNode node){
+	public static String getHeadWords(HeadTreeNode node){
 		//有些非终端节点需要进行处理，因为它可能是NP-SBJ的格式，我只需要拿NP的部分进行匹配操作
 		String parentNonTerminal = node.getNodeName().split("-")[0];
 		//处理X-X CC X的情况
@@ -122,7 +122,7 @@ public class GenerateHeadWords {
 	 * @param direction 匹配的方向
 	 * @return
 	 */
-	public static String getHeadWordsByRules(TreeNode node,List<String> list, String direction){
+	public static String getHeadWordsByRules(HeadTreeNode node,List<String> list, String direction){
 		
 		if(direction.equals("left")){
 			//用所有的子节点从左向右匹配规则中每一个
@@ -151,7 +151,7 @@ public class GenerateHeadWords {
 	 * @param node 子树
 	 * @return
 	 */
-	public static String getHeadWordsForNp(TreeNode node){
+	public static String getHeadWordsForNp(HeadTreeNode node){
 		//如果最后一个是POS，返回最后一个
 		//即当前节点的最后一个子节点的孩子是1，最后一个子节点的孩子的孩子是0
 		if(node.getChildren().get(node.getChildren().size() - 1).getNodeName().split("-")[0].equals("POS")){

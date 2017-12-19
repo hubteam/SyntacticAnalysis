@@ -11,13 +11,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.wxw.actions.HeadTreeToActions;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
-import com.wxw.tree.PhraseGenerateTree;
+import com.wxw.tree.HeadTreeNode;
+import com.wxw.tree.PhraseGenerateHeadTree;
 import com.wxw.tree.TreeNode;
-import com.wxw.tree.TreeToActions;
 import com.wxw.wordsegandpos.samplestream.WordSegAndPosSample;
 
 import opennlp.tools.ml.BeamSearch;
@@ -102,7 +103,7 @@ public class SyntacticAnalysisMEContainsPos {
 		SyntacticAnalysisModelContainsPos model = null;
 		try {
 			ObjectStream<String> lineStream = new PlainTextByLineStream(new FileInputStreamFactory(file), encoding);
-			ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
+			ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
 			model = SyntacticAnalysisMEContainsPos.train("zh", sampleStream, params, contextGen);
 			return model;
 		} catch (FileNotFoundException e) {
@@ -123,7 +124,7 @@ public class SyntacticAnalysisMEContainsPos {
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	public static SyntacticAnalysisModelContainsPos train(String languageCode, ObjectStream<SyntacticAnalysisSample> sampleStream, TrainingParameters params,
+	public static SyntacticAnalysisModelContainsPos train(String languageCode, ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream, TrainingParameters params,
 			SyntacticAnalysisContextGeneratorContainsPos contextGen) throws IOException {
 		String beamSizeString = params.getSettings().get(BeamSearch.BEAM_SIZE_PARAMETER);
 		int beamSize = SyntacticAnalysisMEContainsPos.DEFAULT_BEAM_SIZE;
@@ -167,7 +168,7 @@ public class SyntacticAnalysisMEContainsPos {
 		SyntacticAnalysisModelContainsPos model = null;
 		try {
 			ObjectStream<String> lineStream = new PlainTextByLineStream(new FileInputStreamFactory(file), encoding);
-			ObjectStream<SyntacticAnalysisSample> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
+			ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
 			model = SyntacticAnalysisMEContainsPos.train("zh", sampleStream, params, contextGen);
 			 //模型的持久化，写出的为二进制文件
             modelOut = new BufferedOutputStream(new FileOutputStream(modelbinaryFile));           
@@ -261,7 +262,7 @@ public class SyntacticAnalysisMEContainsPos {
 	 * @param words 词语序列
 	 * @return
 	 */
-	public List<TreeNode> tagPos(String[] words){
+	public List<HeadTreeNode> tagPos(String[] words){
 		return tagKpos(1,words).get(0);
 	}
 	/**
@@ -270,15 +271,15 @@ public class SyntacticAnalysisMEContainsPos {
 	 * @param words 词语
 	 * @return
 	 */
-	public List<List<TreeNode>> tagKpos(int k, String[] words){
-		List<List<TreeNode>> allposTree = new ArrayList<>();
+	public List<List<HeadTreeNode>> tagKpos(int k, String[] words){
+		List<List<HeadTreeNode>> allposTree = new ArrayList<>();
 		
 		String[][] poses = tag(k, words);
 		for (int i = 0; i < poses.length; i++) {
-			List<TreeNode> posTree = new ArrayList<>();
+			List<HeadTreeNode> posTree = new ArrayList<>();
 			for (int j = 0; j < poses[i].length; j++) {
-				TreeNode pos = new TreeNode(poses[i][j]);
-				pos.addChild(new TreeNode(words[j]));
+				HeadTreeNode pos = new HeadTreeNode(poses[i][j]);
+				pos.addChild(new HeadTreeNode(words[j]));
 				pos.setHeadWords(words[j]);
 				posTree.add(pos);
 			}
@@ -298,12 +299,12 @@ public class SyntacticAnalysisMEContainsPos {
 	public static HashMap<String,Integer> buildDictionary(File file, String encoding) throws IOException, CloneNotSupportedException{
 		HashMap<String,Integer> dict = new HashMap<String,Integer>();
 		PlainTextByTreeStream lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(file), "utf8");
-		PhraseGenerateTree pgt = new PhraseGenerateTree();
-		TreeToActions tta = new TreeToActions();
+		PhraseGenerateHeadTree pgt = new PhraseGenerateHeadTree();
+		HeadTreeToActions tta = new HeadTreeToActions();
 		String txt = "";
 		while((txt = lineStream.read())!= null){
-			TreeNode tree = pgt.generateTree(txt);
-			SyntacticAnalysisSample sample = tta.treeToAction(tree);
+			HeadTreeNode tree = pgt.generateTree(txt);
+			SyntacticAnalysisSample<HeadTreeNode> sample = tta.treeToAction(tree);
 			List<String> words = sample.getWords();
 			for (int i = 0; i < words.size(); i++) {
 				if(dict.containsKey(words.get(i))){
@@ -324,9 +325,9 @@ public class SyntacticAnalysisMEContainsPos {
 	 * @return
 	 * @throws IOException
 	 */
-    public static HashMap<String,Integer> buildDictionary(ObjectStream<SyntacticAnalysisSample> samples) throws IOException{
+    public static HashMap<String,Integer> buildDictionary(ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> samples) throws IOException{
     	HashMap<String,Integer> dict = new HashMap<String,Integer>();
-    	SyntacticAnalysisSample sample = null;
+    	SyntacticAnalysisSample<HeadTreeNode> sample = null;
     	while((sample = samples.read()) != null){
     		List<String> words = sample.getWords();
 			for (int i = 0; i < words.size(); i++) {

@@ -1,11 +1,13 @@
 package com.wxw.evalstructure;
 
+import java.util.Comparator;
+
 /**
  * 评估需要的工具类
  * @author 王馨苇
  *
  */
-public class EvalStructure {
+public class EvalStructure implements Comparable<EvalStructure>{
 
 	private String nonterminal;
 	private int begin;
@@ -17,6 +19,10 @@ public class EvalStructure {
 		this.end = end;
 	}
 
+	public void setNonterminal(String nonterminal){
+		this.nonterminal = nonterminal;
+	}
+	
 	/**
 	 * 获得非终结符
 	 * @return
@@ -41,24 +47,51 @@ public class EvalStructure {
 		return this.end;
 	}
 	
+	
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + begin;
+		result = prime * result + end;
+		result = prime * result + ((nonterminal == null) ? 0 : nonterminal.hashCode());
+		return result;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
-            return true;
-        } else if (obj instanceof EvalStructure) {
-        	EvalStructure et = (EvalStructure) obj;
-        	if(getNonTerminal().equals(et.getNonTerminal()) && getBegin()== et.getBegin() && getEnd() == et.getEnd()){
-    			return true;
-    		}else{
-    			return false;
-    		}
-        } else {
-            return false;
-        }
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		EvalStructure other = (EvalStructure) obj;
+		if (begin != other.begin)
+			return false;
+		if (end != other.end)
+			return false;
+		if (nonterminal == null) {
+			if (other.nonterminal != null)
+				return false;
+		} else if (!nonterminal.equals(other.nonterminal))
+			return false;
+		return true;
 	}
 
 	@Override
 	public String toString() {
 		return this.nonterminal+"-("+this.begin+":"+this.end+")";
+	}
+	
+	@Override
+	public int compareTo(EvalStructure o) {
+		if(o.begin > this.begin && o.begin < this.end){
+			if(o.end > this.end){
+				return 0;
+			}
+		}
+		return -1;
 	}
 }

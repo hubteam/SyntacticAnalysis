@@ -36,8 +36,14 @@ public class TestEvaluateCount {
 	
 	@Test
 	public void test(){
+		System.out.println(measure.getCBs());
+		System.out.println(measure.getCBs_0());
+		System.out.println(measure.getCBs_2());
 		assertEquals(measure.getPrecisionScore(),0.8181,0.001);
 		assertEquals(measure.getRecallScore(),0.9,0.001);
 		assertEquals(measure.getMeasure(),0.8570,0.001);
+		assertEquals(measure.getCBs(),1);
+		assertEquals(measure.getCBs_0(),0,0.001);
+		assertEquals(measure.getCBs_2(),1,0.001);
 	}
 }

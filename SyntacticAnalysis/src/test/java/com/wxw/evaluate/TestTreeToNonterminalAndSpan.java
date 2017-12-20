@@ -20,7 +20,7 @@ import com.wxw.tree.TreeToEvalStructure;
  * @author 王馨苇
  *
  */
-public class TestTreeToNonterminal {
+public class TestTreeToNonterminalAndSpan {
 
 	private PhraseGenerateHeadTree pgt;
 	private TreeNode tree1;
@@ -41,8 +41,8 @@ public class TestTreeToNonterminal {
 		result2 = new ArrayList<>();
 		tree1 = pgt.generateTree("((S(NP(PRP I))(VP(VP(VBD saw)(NP(DT the)(NN man)))(PP(IN with)(NP(DT the)(NN telescope))))))");
 		tree2 = pgt.generateTree("((S(NP(EX There))(VP(VBZ is)(NP(DT no)(NN box))(PP(IN in)(NP(PRP$ our)(NNS box)))(ADVP (RB now)))(. .)('' '') ))");
-		pre1 = ttn1.getTreeToNonterminal(tree1);
-		pre2 = ttn2.getTreeToNonterminal(tree2);
+		pre1 = ttn1.getNonterminalAndSpan(tree1);
+		pre2 = ttn2.getNonterminalAndSpan(tree2);
 		result1.add(new EvalStructure("NP", 0, 1));
 		result1.add(new EvalStructure("NP", 2, 4));
 		result1.add(new EvalStructure("VP", 1, 4));

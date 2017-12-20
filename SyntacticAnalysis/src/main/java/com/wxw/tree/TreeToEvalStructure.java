@@ -19,11 +19,11 @@ public class TreeToEvalStructure {
 	 * @param node 一颗完整的树
 	 * @return
 	 */
-	public List<EvalStructure> getTreeToNonterminal(TreeNode node){
+	public List<EvalStructure> getNonterminalAndSpan(TreeNode node){
 		
 		List<EvalStructure> list = new ArrayList<>();
 		for (int i = 0; i < node.getChildren().size(); i++) {
-			list.addAll(getTreeToNonterminal(node.getChildren().get(i)));
+			list.addAll(getNonterminalAndSpan(node.getChildren().get(i)));
 		}
 		if(node.getChildren().size() != 0){	
 			int begin = Integer.parseInt(node.getChildren().get(0).getNodeName().split("_")[1]);			

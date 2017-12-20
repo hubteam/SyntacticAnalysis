@@ -17,6 +17,10 @@ public class SyntacticAnalysisMeasure {
     private long selected;
     private long target;
     private long truePositive;
+    private long sentences;
+    private long CBs_0;
+    private long CBs_2;
+    private long CBs;
     
 	/**
 	 * 统计不能解析成一颗完整的树的个数
@@ -35,16 +39,36 @@ public class SyntacticAnalysisMeasure {
 	 */
 	public void update(TreeNode treeRef,TreeNode treePre){
 		TreeToEvalStructure ttn1 = new TreeToEvalStructure();
-		List<EvalStructure> etRef = ttn1.getTreeToNonterminal(treeRef);
+		List<EvalStructure> etRef = ttn1.getNonterminalAndSpan(treeRef);
 		TreeToEvalStructure ttn2 = new TreeToEvalStructure();
-		List<EvalStructure> etPre = ttn2.getTreeToNonterminal(treePre);
-		for (int i = 0; i < etPre.size(); i++) {
-			if(etRef.contains(etPre.get(i))){
+		List<EvalStructure> etPre = ttn2.getNonterminalAndSpan(treePre);
+		int CBs_0_temp = 0;	
+		int CBs_2_temp = 0;
+		for (int j = 0; j < etPre.size(); j++) {
+			if(etRef.contains(etPre.get(j))){
 				truePositive++;
+				CBs_0_temp++;
 			}
+		}
+		
+		for (int i = 0; i < etRef.size(); i++) {
+			for (int j = 0; j < etPre.size(); j++) {
+				if(etRef.get(i).compareTo(etPre.get(j)) == 0){
+					CBs_2_temp++;
+					CBs++;
+				}
+			}
+		}
+
+		if(CBs_0_temp == etPre.size()){
+			CBs_0++;
+		}
+		if(CBs_2_temp <= 2){
+			CBs_2++;
 		}
 		selected += etPre.size();
         target += etRef.size();
+        sentences++;
 	}
 
 	@Override
@@ -53,7 +77,10 @@ public class SyntacticAnalysisMeasure {
 				+"Precision: " + Double.toString(getPrecisionScore()) + "\n"
                 + "Recall: " + Double.toString(getRecallScore()) + "\n" 
         		+ "F-Measure: "
-                + Double.toString(getMeasure()) + "\n";
+                + Double.toString(getMeasure()) + "\n"
+                + "CBs:" + getCBs() + "\n"
+                + "CBs_0" + getCBs_0() + "\n"
+                + "CBs_2" + getCBs_2() + "\n";
 	}
 	
 	/**
@@ -70,6 +97,18 @@ public class SyntacticAnalysisMeasure {
      */
     public double getRecallScore() {
         return target > 0 ? (double) truePositive / (double) target : 0;
+    }
+    
+    public long getCBs(){
+    	return CBs;
+    }
+    
+    public double getCBs_0(){
+    	return sentences > 0 ? (double) CBs_0 / (double) sentences : 0;
+    }
+    
+    public double getCBs_2(){
+    	return sentences > 0 ? (double) CBs_2 / (double) sentences : 0;
     }
     
     /**

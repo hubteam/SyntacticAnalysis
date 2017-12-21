@@ -3,11 +3,14 @@ package com.wxw.actions;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.wxw.tree.GenerateHeadWords;
+import com.wxw.headwords.AbsractGenerateHeadWords;
+import com.wxw.headwords.ConcreteGenerateHeadWords;
+import com.wxw.headwords.HeadWordsRuleSet;
 import com.wxw.tree.HeadTreeNode;
 
 public class ActionsToHeadTree {
 
+	private AbsractGenerateHeadWords aghw = new ConcreteGenerateHeadWords(); 
 	/**
 	 * 第一步pos
 	 * @param words 词语
@@ -66,7 +69,7 @@ public class ActionsToHeadTree {
 				//所以遇到start就生成新的子树
 				HeadTreeNode node = new HeadTreeNode(chunktree.get(i).getNodeName().split("_")[1]);			
 				node.addChild(chunktree.get(i).getChildren().get(0));	
-				node.setHeadWords(GenerateHeadWords.getHeadWords(node));
+				node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
 				chunktree.get(i).getChildren().get(0).setParent(node);			
 				for (int j = i+1; j < chunktree.size(); j++) {			
 					//判断start后是否有join如果有，就和之前的start合并				
@@ -79,7 +82,7 @@ public class ActionsToHeadTree {
 					}			
 				}
 				//头结点
-				node.setHeadWords(GenerateHeadWords.getHeadWords(node));
+				node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
 				//将一颗合并过的完整子树加入列表
 				combine.add(node);
 				//标记为other的，去掉other		 
@@ -130,7 +133,7 @@ public class ActionsToHeadTree {
 					combine.get(k).getChildren().get(0).setParent(combineNode);
 				}
 				//设置头结点
-				combineNode.setHeadWords(GenerateHeadWords.getHeadWords(combineNode));
+				combineNode.setHeadWords(aghw.extractHeadWords(combineNode, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
 				combine.set(preIndex, combineNode);
 				//删除那些用于合并的join
 				for (int k = currentIndex; k >= preIndex+1; k--) {

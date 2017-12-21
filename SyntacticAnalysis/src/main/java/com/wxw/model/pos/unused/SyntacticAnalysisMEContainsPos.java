@@ -17,8 +17,9 @@ import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
 import com.wxw.tree.HeadTreeNode;
-import com.wxw.tree.PhraseGenerateHeadTree;
+import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
+import com.wxw.tree.TreeToHeadTree;
 import com.wxw.wordsegandpos.samplestream.WordSegAndPosSample;
 
 import opennlp.tools.ml.BeamSearch;
@@ -299,12 +300,14 @@ public class SyntacticAnalysisMEContainsPos {
 	public static HashMap<String,Integer> buildDictionary(File file, String encoding) throws IOException, CloneNotSupportedException{
 		HashMap<String,Integer> dict = new HashMap<String,Integer>();
 		PlainTextByTreeStream lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(file), "utf8");
-		PhraseGenerateHeadTree pgt = new PhraseGenerateHeadTree();
+		PhraseGenerateTree pgt = new PhraseGenerateTree();
+		TreeToHeadTree ttht = new TreeToHeadTree();
 		HeadTreeToActions tta = new HeadTreeToActions();
 		String txt = "";
 		while((txt = lineStream.read())!= null){
-			HeadTreeNode tree = pgt.generateTree(txt);
-			SyntacticAnalysisSample<HeadTreeNode> sample = tta.treeToAction(tree);
+			TreeNode tree = pgt.generateTree(txt);
+			HeadTreeNode headTree = ttht.treeToHeadTree(tree);
+			SyntacticAnalysisSample<HeadTreeNode> sample = tta.treeToAction(headTree);
 			List<String> words = sample.getWords();
 			for (int i = 0; i < words.size(); i++) {
 				if(dict.containsKey(words.get(i))){

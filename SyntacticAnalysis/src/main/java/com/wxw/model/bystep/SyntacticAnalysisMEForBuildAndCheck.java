@@ -11,6 +11,9 @@ import java.util.Map;
 import com.wxw.actions.HeadTreeToActions;
 import com.wxw.constituent.ConstituentTree;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
+import com.wxw.headwords.AbsractGenerateHeadWords;
+import com.wxw.headwords.ConcreteGenerateHeadWords;
+import com.wxw.headwords.HeadWordsRuleSet;
 import com.wxw.sequence.DefaultSyntacticAnalysisSequenceValidator;
 import com.wxw.sequence.SyntacticAnalysisBeamSearch;
 import com.wxw.sequence.SyntacticAnalysisSequenceClassificationModel;
@@ -21,9 +24,10 @@ import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
 import com.wxw.syntacticanalysis.SyntacticAnalysis;
-import com.wxw.tree.GenerateHeadWords;
 import com.wxw.tree.HeadTreeNode;
-import com.wxw.tree.PhraseGenerateHeadTree;
+import com.wxw.tree.PhraseGenerateTree;
+import com.wxw.tree.TreeNode;
+import com.wxw.tree.TreeToHeadTree;
 
 import opennlp.tools.ml.EventTrainer;
 import opennlp.tools.ml.TrainerFactory;
@@ -51,6 +55,8 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 	private SyntacticAnalysisModelForBuildAndCheck modelPackage;
 
     private SyntacticAnalysisSequenceValidator<HeadTreeNode> sequenceValidator;
+    
+    private AbsractGenerateHeadWords aghw = new ConcreteGenerateHeadWords(); 
 	
 	/**
 	 * 构造函数，初始化工作
@@ -267,9 +273,11 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 		}else{
 			for (int i = 0; i < alltree.size(); i++) {
 				HeadTreeToActions tta = new HeadTreeToActions();
-				PhraseGenerateHeadTree pgt = new PhraseGenerateHeadTree();
-				HeadTreeNode node = pgt.generateTree("("+alltree.get(i).toBracket()+")");
-				SyntacticAnalysisSample<HeadTreeNode> sample = tta.treeToAction(node);
+				PhraseGenerateTree pgt = new PhraseGenerateTree();
+				TreeToHeadTree ttht = new TreeToHeadTree();
+				TreeNode node = pgt.generateTree("("+alltree.get(i).toBracket()+")");
+				HeadTreeNode headTree = ttht.treeToHeadTree(node);
+				SyntacticAnalysisSample<HeadTreeNode> sample = tta.treeToAction(headTree);
 				kActions.add(sample.getActions());	
 			}
 			return kActions;
@@ -310,11 +318,11 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 	 * @return
 	 */
 	@Override
-	public ConstituentTree<HeadTreeNode> syntacticTree(List<HeadTreeNode> chunkTree) {
+	public ConstituentTree syntacticTree(List<HeadTreeNode> chunkTree) {
 		List<List<HeadTreeNode>> allTree = new ArrayList<>();
 		allTree.add(chunkTree);
 		HeadTreeNode headTreeNode = tagBuildAndCheck(allTree,null);
-		ConstituentTree<HeadTreeNode> constituent = new ConstituentTree<>();
+		ConstituentTree constituent = new ConstituentTree();
 		constituent.setTreeNode(headTreeNode);
 		return constituent;
 	}
@@ -326,7 +334,7 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 	 * @return
 	 */
 	@Override
-	public ConstituentTree<HeadTreeNode> syntacticTree(String[] words, String[] poses, String[] chunkTag) {
+	public ConstituentTree syntacticTree(String[] words, String[] poses, String[] chunkTag) {
 		List<HeadTreeNode> chunkTree = toChunkTreeList(words,poses,chunkTag);
 		return syntacticTree(chunkTree);
 	}
@@ -351,7 +359,7 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 						break;
 					}
 				}
-				node.setHeadWords(GenerateHeadWords.getHeadWords(node));
+				node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
 				chunkTree.add(node);
 				i = j;
 			}
@@ -365,7 +373,7 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 	 * @return
 	 */
 	@Override
-	public ConstituentTree<HeadTreeNode> syntacticTree(String sentence) {	
+	public ConstituentTree syntacticTree(String sentence) {	
 		return syntacticTree(1,sentence)[0];
 	}
 	/**
@@ -375,7 +383,7 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 	 */
 	@Override
 	public String syntacticBracket(List<HeadTreeNode> chunkTree) {
-		HeadTreeNode node = syntacticTree(chunkTree).getTreeNode();
+		HeadTreeNode node = (HeadTreeNode) syntacticTree(chunkTree).getTreeNode();
 		return HeadTreeNode.printTree(node, 1);
 	}
 	/**
@@ -387,7 +395,7 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 	 */
 	@Override
 	public String syntacticBracket(String[] words,String[] poses, String[] chunkTag) {
-		HeadTreeNode node = syntacticTree(words,poses,chunkTag).getTreeNode();
+		HeadTreeNode node = (HeadTreeNode) syntacticTree(words,poses,chunkTag).getTreeNode();
 		return HeadTreeNode.printTree(node, 1);
 	}
 	/**
@@ -397,30 +405,30 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 	 */
 	@Override
 	public String syntacticBracket(String sentence) {
-		HeadTreeNode node = syntacticTree(sentence).getTreeNode();
+		HeadTreeNode node = (HeadTreeNode) syntacticTree(sentence).getTreeNode();
 		return HeadTreeNode.printTree(node, 1);
 	}
 	@SuppressWarnings("unchecked")
 	@Override
-	public ConstituentTree<HeadTreeNode>[] syntacticTree(int k, List<HeadTreeNode> chunkTree) {
+	public ConstituentTree[] syntacticTree(int k, List<HeadTreeNode> chunkTree) {
 		List<List<HeadTreeNode>> allTree = new ArrayList<>();
 		allTree.add(chunkTree);
 		List<HeadTreeNode> headTreeNode = tagBuildAndCheck(k,allTree,null);
-		List<ConstituentTree<HeadTreeNode>> constituent = new ArrayList<>();
+		List<ConstituentTree> constituent = new ArrayList<>();
 		for (int i = 0; i < headTreeNode.size(); i++) {
-			ConstituentTree<HeadTreeNode> con = new ConstituentTree<>();
+			ConstituentTree con = new ConstituentTree();
 			con.setTreeNode(headTreeNode.get(i));
 			constituent.add(con);
 		}
 		return constituent.toArray(new ConstituentTree[constituent.size()]);
 	}
 	@Override
-	public ConstituentTree<HeadTreeNode>[] syntacticTree(int k, String[] words, String[] poses, String[] chunkTag) {
+	public ConstituentTree[] syntacticTree(int k, String[] words, String[] poses, String[] chunkTag) {
 		List<HeadTreeNode> chunkTree = toChunkTreeList(words,poses,chunkTag);
 		return syntacticTree(k,chunkTree);
 	}
 	@Override
-	public ConstituentTree<HeadTreeNode>[] syntacticTree(int k, String sentence) {
+	public ConstituentTree[] syntacticTree(int k, String sentence) {
 		List<String> chunkTags = new ArrayList<>();
 		List<String> words = new ArrayList<>();
 		List<String> poses = new ArrayList<>();

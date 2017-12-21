@@ -18,6 +18,7 @@ public class SyntacticAnalysisMeasure {
     private long target;
     private long truePositive;
     private long sentences;
+    private long trueSentence;
     private long CBs_0;
     private long CBs_2;
     private long CBs;
@@ -42,12 +43,12 @@ public class SyntacticAnalysisMeasure {
 		List<EvalStructure> etRef = ttn1.getNonterminalAndSpan(treeRef);
 		TreeToEvalStructure ttn2 = new TreeToEvalStructure();
 		List<EvalStructure> etPre = ttn2.getNonterminalAndSpan(treePre);
-		int CBs_0_temp = 0;	
+		int trueSentencetemp = 0;	
 		int CBs_2_temp = 0;
 		for (int j = 0; j < etPre.size(); j++) {
 			if(etRef.contains(etPre.get(j))){
 				truePositive++;
-				CBs_0_temp++;
+				trueSentencetemp++;
 			}
 		}
 		
@@ -60,7 +61,10 @@ public class SyntacticAnalysisMeasure {
 			}
 		}
 
-		if(CBs_0_temp == etPre.size()){
+		if(trueSentencetemp == etPre.size()){
+			trueSentence++;
+		}
+		if(CBs_2_temp == 0){
 			CBs_0++;
 		}
 		if(CBs_2_temp <= 2){
@@ -78,9 +82,10 @@ public class SyntacticAnalysisMeasure {
                 + "Recall: " + Double.toString(getRecallScore()) + "\n" 
         		+ "F-Measure: "
                 + Double.toString(getMeasure()) + "\n"
-                + "CBs:" + getCBs() + "\n"
-                + "CBs_0" + getCBs_0() + "\n"
-                + "CBs_2" + getCBs_2() + "\n";
+                + "CBs:" + Double.toString(getCBs()) + "\n"
+                + "CBs_0:" + Double.toString(getCBs_0()) + "\n"
+                + "CBs_2:" + Double.toString(getCBs_2()) + "\n"
+                + "sentenceAccuracy:" + Double.toString(getSentenceAccuracy()) + "\n";
 	}
 	
 	/**
@@ -99,8 +104,8 @@ public class SyntacticAnalysisMeasure {
         return target > 0 ? (double) truePositive / (double) target : 0;
     }
     
-    public long getCBs(){
-    	return CBs;
+    public double getCBs(){
+    	return sentences > 0 ? (double) CBs / (double) sentences : 0;
     }
     
     public double getCBs_0(){
@@ -109,6 +114,10 @@ public class SyntacticAnalysisMeasure {
     
     public double getCBs_2(){
     	return sentences > 0 ? (double) CBs_2 / (double) sentences : 0;
+    }
+    
+    public double getSentenceAccuracy(){
+    	return trueSentence > 0 ? (double) trueSentence / (double) sentences : 0;
     }
     
     /**

@@ -3,15 +3,13 @@ package com.wxw.evaluate;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.wxw.evalstructure.EvalStructure;
-import com.wxw.stream.SyntacticAnalysisSample;
-import com.wxw.tree.PhraseGenerateHeadTree;
+import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
 import com.wxw.tree.TreeToEvalStructure;
 
@@ -22,7 +20,7 @@ import com.wxw.tree.TreeToEvalStructure;
  */
 public class TestTreeToNonterminalAndSpan {
 
-	private PhraseGenerateHeadTree pgt;
+	private PhraseGenerateTree pgt;
 	private TreeNode tree1;
 	private List<EvalStructure> pre1;
 	private List<EvalStructure> result1;
@@ -34,7 +32,7 @@ public class TestTreeToNonterminalAndSpan {
 
 	@Before
 	public void setUp(){
-		pgt = new PhraseGenerateHeadTree();
+		pgt = new PhraseGenerateTree();
 		ttn1 = new TreeToEvalStructure();
 		ttn2 = new TreeToEvalStructure();
 		result1 = new ArrayList<>();

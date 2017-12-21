@@ -2,14 +2,14 @@ package com.wxw.stream;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.wxw.actions.HeadTreeToActions;
 import com.wxw.tree.HeadTreeNode;
-import com.wxw.tree.PhraseGenerateHeadTree;
+import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
+import com.wxw.tree.TreeToHeadTree;
 
 import opennlp.tools.util.FilterObjectStream;
 import opennlp.tools.util.ObjectStream;
@@ -39,13 +39,15 @@ public class SyntacticAnalysisSampleStream extends FilterObjectStream<String,Syn
 	public SyntacticAnalysisSample<HeadTreeNode> read() throws IOException {
 		String sentence = samples.read();	
 		SyntacticAnalysisSample<HeadTreeNode> sample = null;
-		PhraseGenerateHeadTree pgt = new PhraseGenerateHeadTree();
+		PhraseGenerateTree pgt = new PhraseGenerateTree();
+		TreeToHeadTree ttht = new TreeToHeadTree();
 		HeadTreeToActions tta = new HeadTreeToActions();
 		if(sentence != null){
 			if(sentence.compareTo("") != 0){
 				try{
-					HeadTreeNode tree = pgt.generateTree(sentence);
-					sample = tta.treeToAction(tree);
+					TreeNode tree = pgt.generateTree(sentence);
+					HeadTreeNode headtree = ttht.treeToHeadTree(tree);
+					sample = tta.treeToAction(headtree);
 				}catch(Exception e){
 					if (logger.isLoggable(Level.WARNING)) {						
 	                    logger.warning("Error during parsing, ignoring sentence: " + sentence);

@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
-import com.wxw.tree.GenerateHeadWords;
+import com.wxw.headwords.AbsractGenerateHeadWords;
+import com.wxw.headwords.ConcreteGenerateHeadWords;
+import com.wxw.headwords.HeadWordsRuleSet;
 import com.wxw.tree.HeadTreeNode;
 
 import opennlp.tools.ml.model.MaxentModel;
@@ -19,6 +21,7 @@ import opennlp.tools.util.Cache;
  */
 public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceClassificationModel<HeadTreeNode>{
 
+	private AbsractGenerateHeadWords aghw = new ConcreteGenerateHeadWords(); 
 	public static final String BEAM_SIZE_PARAMETER = "BeamSize";
 	private static final Object[] EMPTY_ADDITIONAL_CONTEXT = new Object[0];
 	protected int size;
@@ -456,7 +459,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 												copy.get(k).getChildren().get(0).setParent(combine);
 											}
 											//设置头结点
-											combine.setHeadWords(GenerateHeadWords.getHeadWords(combine));
+											combine.setHeadWords(aghw.extractHeadWords(combine, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
 											copy.set(record,combine);
 											//删除用于合并的那些位置上的
 											for (int k = numSeq; k >= record+1; k--) {
@@ -536,7 +539,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 												copy.get(k).getChildren().get(0).setParent(combine);
 											}
 											//设置头结点
-											combine.setHeadWords(GenerateHeadWords.getHeadWords(combine));
+											combine.setHeadWords(aghw.extractHeadWords(combine, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
 											copy.set(record,combine);
 											//删除用于合并的那些位置上的
 											for (int k = numSeq; k >= record+1; k--) {

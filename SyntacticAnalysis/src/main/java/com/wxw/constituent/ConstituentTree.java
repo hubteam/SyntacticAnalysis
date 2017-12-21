@@ -7,15 +7,15 @@ import com.wxw.tree.TreeNode;
  * @author 王馨苇
  *
  */
-public class ConstituentTree<T extends TreeNode> {
+public class ConstituentTree {
 
-	private T treeNode;
+	private TreeNode treeNode;
 	
-	public void setTreeNode(T treeNode){
+	public void setTreeNode(TreeNode treeNode){
 		this.treeNode = treeNode;
 	}
 	
-	public T getTreeNode(){
+	public TreeNode getTreeNode(){
 		return this.treeNode;
 	}
 }

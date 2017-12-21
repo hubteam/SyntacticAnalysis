@@ -17,7 +17,7 @@ public interface SyntacticAnalysis<T extends TreeNode> {
 	 * @param chunkTree chunk子树序列
 	 * @return
 	 */
-	ConstituentTree<T> syntacticTree(List<T> chunkTree);
+	ConstituentTree syntacticTree(List<T> chunkTree);
 	/**
 	 * 得到句法树
 	 * @param words 词语
@@ -25,13 +25,13 @@ public interface SyntacticAnalysis<T extends TreeNode> {
 	 * @param chunkTag chunk标记
 	 * @return
 	 */
-	ConstituentTree<T> syntacticTree(String[] words,String[] poses,String[] chunkTag);
+	ConstituentTree syntacticTree(String[] words,String[] poses,String[] chunkTag);
 	/**
 	 * 得到句法树
 	 * @param sentence 由词语词性标记和chunk标记组成的句子
 	 * @return
 	 */
-	ConstituentTree<T> syntacticTree(String sentence);
+	ConstituentTree syntacticTree(String sentence);
 	/**
 	 * 得到句法树的括号表达式
 	 * @param chunkTree chunk子树序列
@@ -58,7 +58,7 @@ public interface SyntacticAnalysis<T extends TreeNode> {
 	 * @param chunkTree chunk子树序列
 	 * @return
 	 */
-	ConstituentTree<T>[] syntacticTree(int k,List<T> chunkTree);
+	ConstituentTree[] syntacticTree(int k,List<T> chunkTree);
 	/**
 	 * 得到最好的K个句法树
 	 * @param words 词语
@@ -66,11 +66,11 @@ public interface SyntacticAnalysis<T extends TreeNode> {
 	 * @param chunkTag chunk标记
 	 * @return
 	 */
-	ConstituentTree<T>[] syntacticTree(int k,String[] words,String[] poses,String[] chunkTag);
+	ConstituentTree[] syntacticTree(int k,String[] words,String[] poses,String[] chunkTag);
 	/**
 	 * 得到最好的K个句法树
 	 * @param sentence 由词语词性标记和chunk标记组成的句子
 	 * @return
 	 */
-	ConstituentTree<T>[] syntacticTree(int k,String sentence);
+	ConstituentTree[] syntacticTree(int k,String sentence);
 }

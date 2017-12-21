@@ -14,7 +14,9 @@ import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.tree.HeadTreeNode;
-import com.wxw.tree.PhraseGenerateHeadTree;
+import com.wxw.tree.PhraseGenerateTree;
+import com.wxw.tree.TreeNode;
+import com.wxw.tree.TreeToHeadTree;
 
 import opennlp.tools.ml.model.Event;
 
@@ -25,9 +27,10 @@ import opennlp.tools.ml.model.Event;
  */
 public class TestEvent {
 
-	private PhraseGenerateHeadTree pgt;
-	private HeadTreeNode tree;
-
+	private PhraseGenerateTree pgt;
+	private TreeToHeadTree ttht;
+	private TreeNode tree;
+    private HeadTreeNode headTree;
 	private HeadTreeToActions tta;
 	private SyntacticAnalysisSample<HeadTreeNode> sample;
 	private List<String> words;
@@ -142,10 +145,12 @@ public class TestEvent {
 	
 	@Before
 	public void setUp() throws CloneNotSupportedException, IOException{
-		pgt = new PhraseGenerateHeadTree();
+		pgt = new PhraseGenerateTree();
+		ttht = new TreeToHeadTree();
 		tree = pgt.generateTree("((S(NP(PRP I))(VP(VP(VBD saw)(NP(DT the)(NN man)))(PP(IN with)(NP(DT the)(NN telescope))))))");
+		headTree = ttht.treeToHeadTree(tree);
 		tta = new HeadTreeToActions();
-		sample = tta.treeToAction(tree);
+		sample = tta.treeToAction(headTree);
 		words = sample.getWords();
 		chunkTree = sample.getChunkTree();
 		buildAndCheckTree = sample.getBuildAndCheckTree();

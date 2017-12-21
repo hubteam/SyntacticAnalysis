@@ -23,8 +23,6 @@ import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.stream.SyntacticAnalysisSampleStream;
 import com.wxw.tree.HeadTreeNode;
-import com.wxw.tree.PhraseGenerateHeadTree;
-import com.wxw.tree.TreeNode;
 
 import opennlp.tools.ml.EventTrainer;
 import opennlp.tools.ml.TrainerFactory;

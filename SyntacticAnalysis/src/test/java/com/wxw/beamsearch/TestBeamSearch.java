@@ -16,8 +16,9 @@ import com.wxw.model.bystep.SyntacticAnalysisModelForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisModelForChunk;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.tree.HeadTreeNode;
-import com.wxw.tree.PhraseGenerateHeadTree;
+import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
+import com.wxw.tree.TreeToHeadTree;
 
 import junit.framework.TestCase;
 import opennlp.tools.cmdline.postag.POSModelLoader;
@@ -76,10 +77,12 @@ public class TestBeamSearch extends TestCase{
         }else{
         	System.out.println(buildAndCheckTree);
      		HeadTreeToActions tta = new HeadTreeToActions();
-     		PhraseGenerateHeadTree pgt = new PhraseGenerateHeadTree();
+     		PhraseGenerateTree pgt = new PhraseGenerateTree();
+     		TreeToHeadTree ttht = new TreeToHeadTree();
      		String bra = buildAndCheckTree.toBracket();
-     		HeadTreeNode node = pgt.generateTree("("+bra+")");
-     		SyntacticAnalysisSample<HeadTreeNode> samplePre = tta.treeToAction(node);
+     		TreeNode node = pgt.generateTree("("+bra+")");
+     		HeadTreeNode headTree = ttht.treeToHeadTree(node);
+     		SyntacticAnalysisSample<HeadTreeNode> samplePre = tta.treeToAction(headTree);
      		List<String> actionsPre = samplePre.getActions();
      		for (int i = 0; i < actionsPre.size(); i++) {
      			System.out.println(actionsPre.get(i));

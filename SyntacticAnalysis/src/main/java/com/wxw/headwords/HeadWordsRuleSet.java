@@ -1,0 +1,211 @@
+package com.wxw.headwords;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * 生成头结点的规则集
+ * @author 王馨苇
+ *
+ */
+public class HeadWordsRuleSet {
+
+	private static List<String> ADJP = new ArrayList<String>();
+	private static List<String> ADVP = new ArrayList<String>();
+	private static List<String> CONJP = new ArrayList<String>();
+	private static List<String> LST = new ArrayList<String>();
+	private static List<String> NAC = new ArrayList<String>();
+	private static List<String> PP = new ArrayList<String>();
+	private static List<String> PRT = new ArrayList<String>();
+	private static List<String> QP = new ArrayList<String>();
+	private static List<String> RRC = new ArrayList<String>();
+	private static List<String> S = new ArrayList<String>();
+	private static List<String> SBAR = new ArrayList<String>();
+	private static List<String> SBARQ = new ArrayList<String>();
+	private static List<String> SINV = new ArrayList<String>();
+	private static List<String> SQ = new ArrayList<String>();
+	private static List<String> VP = new ArrayList<String>();
+	private static List<String> WHADJP = new ArrayList<String>(); 
+	private static List<String> WHADVP = new ArrayList<String>();
+	private static List<String> WHNP = new ArrayList<String>();
+	private static List<String> WHPP = new ArrayList<String>();
+	//NP
+	private static List<String> LEFT2RIGHT = new ArrayList<String>();
+	private static List<String> RIGHT2LEFT1 = new ArrayList<String>();
+	private static List<String> RIGHT2LEFT2 = new ArrayList<String>();
+	private static List<String> RIGHT2LEFT3 = new ArrayList<String>();
+	private static List<String> RIGHT2LEFT4 = new ArrayList<String>();
+	private static HashMap<String ,Rule> normalRules = new HashMap<>();
+	private static HashMap<String,List<Rule>> specialRules = new HashMap<>();
+	//静态代码块
+	static{		
+		String[] ADJPStr = {"NNS","QP","NN","$","ADVP","JJ","VBN","VBG","ADJP","JJR","NP","JJS","DT","FW","RBR","RBS","SBAR","RB"};
+		for (int i = 0; i < ADJPStr.length; i++) {
+			ADJP.add(ADJPStr[i]);
+		}
+		normalRules.put("ADJP", new Rule(ADJP,"left"));
+		
+		String[] ADVPStr = {"RB","RBR","RBS","FW","ADVP","TO","CD","JJR","JJ","IN","NP","JJS","NN"};
+		for (int i = 0; i < ADVPStr.length; i++) {
+			ADVP.add(ADVPStr[i]);
+		}
+		normalRules.put("ADVP", new Rule(ADVP,"right"));
+		
+		String[] CONJPStr = {"CC","RB","IN"};
+		for (int i = 0; i < CONJPStr.length; i++) {
+			CONJP.add(CONJPStr[i]);
+		}
+		normalRules.put("CONJP", new Rule(CONJP,"right"));
+		
+		normalRules.put("FRAG", new Rule(new ArrayList<>(),"right"));
+		
+		normalRules.put("INTJ", new Rule(new ArrayList<>(),"left"));
+		
+		String[] LSTStr = {"LS",":"};
+		for (int i = 0; i < LSTStr.length; i++) {
+			LST.add(LSTStr[i]);
+		}
+		normalRules.put("LST", new Rule(LST,"right"));
+		
+		String[] NACStr = {"NN","NNS","NNP","NNPS","NP","NAC","EX","$","CD","QP","PRP","VBG","JJ","JJS","JJR","ADJP","FW"};
+		for (int i = 0; i < NACStr.length; i++) {
+			NAC.add(NACStr[i]);
+		}
+		normalRules.put("NAC", new Rule(NAC,"left"));
+		
+		String[] PPStr = {"IN","TO","VBG","VBN","RP","FW"};
+		for (int i = 0; i < PPStr.length; i++) {
+			PP.add(PPStr[i]);
+		}
+		normalRules.put("PP", new Rule(PP,"right"));
+		
+		normalRules.put("PRN", new Rule(new ArrayList<>(),"left"));
+		
+		String[] PRTStr = {"RP"};
+		for (int i = 0; i < PRTStr.length; i++) {
+			PRT.add(PRTStr[i]);
+		}
+		normalRules.put("PRT", new Rule(PRT,"right"));
+		
+		String[] QPStr = {"$","IN","NNS","NN","JJ","RB","DT","CD","NCD","QP","JJR","JJS"};
+		for (int i = 0; i < QPStr.length; i++) {
+			QP.add(QPStr[i]);
+		}
+		normalRules.put("QP", new Rule(QP,"left"));
+		
+		String[] RRCStr = {"VP","NP","ADVP","ADJP","PP"};
+		for (int i = 0; i < RRCStr.length; i++) {
+			RRC.add(RRCStr[i]);
+		}
+		normalRules.put("RRC", new Rule(RRC, "right"));
+		
+		String[] SStr = {"TO","IN","VP","S","SBAR","ADJP","UCP","NP"};
+		for (int i = 0; i < SStr.length; i++) {
+			S.add(SStr[i]);
+		}
+		normalRules.put("S", new Rule(S,"left"));
+		
+		String[] SBARStr = {"WHNP","WHPP","WHADVP","IN","DT","S","SQ","SINV","SBAR","FRAG"};
+		for (int i = 0; i < SBARStr.length; i++) {
+			SBAR.add(SBARStr[i]);
+		}
+		normalRules.put("SBAR", new Rule(SBAR,"left"));
+		
+		String[] SBARQStr = {"SQ","S","SINV","SBARQ","FRAG"};
+		for (int i = 0; i < SBARQStr.length; i++) {
+			SBARQ.add(SBARQStr[i]);
+		}
+		normalRules.put("SBARQ", new Rule(SBARQ,"left"));
+		
+		String[] SINVStr = {"VBZ","VBD","VBP","VB","MD","VP","S","SINV","ADJP","NP"};
+		for (int i = 0; i < SINVStr.length; i++) {
+			SINV.add(SINVStr[i]);
+		}
+		normalRules.put("SINV", new Rule(SINV,"left"));
+		
+		String[] SQStr = {"VBZ","VBD","VBP","VB","MD","VP","SQ"};
+		for (int i = 0; i < SQStr.length; i++) {
+			SQ.add(SQStr[i]);
+		}
+		normalRules.put("SQ", new Rule(SQ,"left"));
+		
+		normalRules.put("UCP", new Rule(new ArrayList<>(),"right"));
+		
+		String[] VPStr = {"TO","VBD","VBN","MD","VBZ","VB","VBG","VBP","VP","ADJP","NN","NNS","NP"};
+		for (int i = 0; i < VPStr.length; i++) {
+			VP.add(VPStr[i]);
+		}
+		normalRules.put("VP", new Rule(VP,"left"));
+		
+		String[] WHADJPStr = {"CC","WRB","JJ","ADJP"}; 
+		for (int i = 0; i < WHADJPStr.length; i++) {
+			WHADJP.add(WHADJPStr[i]);
+		}
+		normalRules.put("WHADJP", new Rule(WHADJP,"left"));
+		
+		String[] WHADVPStr = {"CC","WRB"};
+		for (int i = 0; i < WHADVPStr.length; i++) {
+			WHADVP.add(WHADVPStr[i]);
+		}
+		normalRules.put("WHADVP", new Rule(WHADVP,"right"));
+		
+		String[] WHNPStr = {"WDT","WP","WP$","WHADJP","WHPP","WHNP"};
+		for (int i = 0; i < WHNPStr.length; i++) {
+			WHNP.add(WHNPStr[i]);
+		}
+		normalRules.put("WHNP", new Rule(WHNP,"left"));
+		
+		String[] WHPPStr = {"IN","TO","FW"};
+		for (int i = 0; i < WHPPStr.length; i++) {
+			WHPP.add(WHPPStr[i]);
+		}
+		normalRules.put("WHPP", new Rule(WHPP, "right"));
+		
+		//下面是NP的部分
+		String[] NPStr1 = {"NN","NNP","NNPS","NNS","NX","POS","JJR"};
+		for (int i = 0; i < NPStr1.length; i++) {
+			RIGHT2LEFT1.add(NPStr1[i]);
+		}
+		String[] NPStr2 = {"NP"};
+		for (int i = 0; i < NPStr2.length; i++) {
+			LEFT2RIGHT.add(NPStr2[i]);
+		}
+		String[] NPStr3 = {"$","ADJP","PRN"};
+		for (int i = 0; i < NPStr3.length; i++) {
+			RIGHT2LEFT2.add(NPStr3[i]);
+		}
+		String[] NPStr4 = {"CD"};
+		for (int i = 0; i < NPStr4.length; i++) {
+			RIGHT2LEFT3.add(NPStr4[i]);
+		}
+		String[] NPStr5 = {"JJ","JJS","RB","QP"};
+		for (int i = 0; i < NPStr5.length; i++) {
+			RIGHT2LEFT4.add(NPStr5[i]);
+		}
+		List<Rule> NPRule = new ArrayList<>();
+		NPRule.add(new Rule(RIGHT2LEFT1, "right"));
+		NPRule.add(new Rule(LEFT2RIGHT,"left"));
+		NPRule.add(new Rule(RIGHT2LEFT2,"right"));
+		NPRule.add(new Rule(RIGHT2LEFT3,"right"));
+		NPRule.add(new Rule(RIGHT2LEFT4, "right"));
+		specialRules.put("NP", NPRule);
+	}
+	
+	/**
+	 * 获取常规的规则
+	 * @return
+	 */
+	public static HashMap<String ,Rule> getNormalRuleSet(){
+		return normalRules;
+	}
+	
+	/**
+	 * 获取特殊的规则
+	 * @return
+	 */
+	public static HashMap<String,List<Rule>> getSpecialRuleSet(){
+		return specialRules;
+	}
+	
+}

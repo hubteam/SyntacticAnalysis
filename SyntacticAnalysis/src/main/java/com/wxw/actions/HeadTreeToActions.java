@@ -3,8 +3,10 @@ package com.wxw.actions;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.wxw.headwords.AbsractGenerateHeadWords;
+import com.wxw.headwords.ConcreteGenerateHeadWords;
+import com.wxw.headwords.HeadWordsRuleSet;
 import com.wxw.stream.SyntacticAnalysisSample;
-import com.wxw.tree.GenerateHeadWords;
 import com.wxw.tree.HeadTreeNode;
 
 /**
@@ -14,7 +16,7 @@ import com.wxw.tree.HeadTreeNode;
  */
 public class HeadTreeToActions {
 
-	
+	private AbsractGenerateHeadWords aghw = new ConcreteGenerateHeadWords(); 
 	//动作序列
 	private List<String> actions = new ArrayList<String>();
 	//第一步POS后得到的n颗子树
@@ -125,7 +127,7 @@ public class HeadTreeToActions {
 				//所以遇到start就生成新的子树
 				HeadTreeNode node = new HeadTreeNode(subTree.get(i).getNodeName().split("_")[1]);
 				node.addChild(subTree.get(i).getChildren().get(0));
-				node.setHeadWords(GenerateHeadWords.getHeadWords(node));
+				node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
 				subTree.get(i).getChildren().get(0).setParent(node);
 				for (int j = i+1; j < subTree.size(); j++) {
 					//判断start后是否有join如果有，就和之前的start合并
@@ -136,7 +138,7 @@ public class HeadTreeToActions {
 							subTree.get(j).getNodeName().split("_")[0].equals("other")){
 						break;
 					}
-					node.setHeadWords(GenerateHeadWords.getHeadWords(node));
+					node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
 				}
 				//将一颗合并过的完整子树加入列表
 				combineChunk.add(node);

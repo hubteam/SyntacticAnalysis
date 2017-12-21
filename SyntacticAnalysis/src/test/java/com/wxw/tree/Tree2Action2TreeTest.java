@@ -27,9 +27,10 @@ public class Tree2Action2TreeTest{
 	private URL is;
 	private PlainTextByTreeStream lineStream ;
 	private String txt ;
-	private PhraseGenerateHeadTree pgt ;
-	private HeadTreeNode tree ;
-
+	private PhraseGenerateTree pgt ;
+	private TreeToHeadTree ttht;
+	private TreeNode tree ;
+    private HeadTreeNode headTree;
 	private HeadTreeToActions tta ;
 	private SyntacticAnalysisSample<HeadTreeNode> sample ;
 	private List<String> words ;
@@ -43,11 +44,12 @@ public class Tree2Action2TreeTest{
 		is = Tree2Action2TreeTest.class.getClassLoader().getResource("com/wxw/test/wsj_0076.mrg");
 		lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(is.getFile())), "utf8");
 		txt = lineStream.read();
-		pgt = new PhraseGenerateHeadTree();
+		pgt = new PhraseGenerateTree();
+		ttht = new TreeToHeadTree();
 		tree = pgt.generateTree(txt);
-
+        headTree = ttht.treeToHeadTree(tree);
 		tta = new HeadTreeToActions();
-		sample = tta.treeToAction(tree);
+		sample = tta.treeToAction(headTree);
 		words = sample.getWords();
 		actions = sample.getActions();
 
@@ -63,7 +65,7 @@ public class Tree2Action2TreeTest{
 	 */
 	@Test
 	public void testLoadTree() throws FileNotFoundException, IOException, CloneNotSupportedException{
-		assertEquals(tree, newTree);
+		assertEquals(headTree, newTree);
 	}	
 	
 }

@@ -1,7 +1,9 @@
-package com.wxw.pretreattools;
+package com.wxw.pretreat.run;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
+import com.wxw.tree.TreePreTreatment;
 
 /**
  * 树预处理运行工具类

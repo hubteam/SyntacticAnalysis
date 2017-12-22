@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
-import com.wxw.model.all.SyntacticAnalysisME;
+import com.wxw.model.all.unused.SyntacticAnalysisME;
 import com.wxw.sequence.SyntacticAnalysisBeamSearch;
 import com.wxw.sequence.SyntacticAnalysisSequenceClassificationModel;
 

@@ -1,4 +1,4 @@
-package com.wxw.model.all;
+package com.wxw.model.all.unused;
 
 import java.util.ArrayList;
 import java.util.List;

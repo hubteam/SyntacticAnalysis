@@ -1,4 +1,4 @@
-package com.wxw.model.all;
+package com.wxw.model.all.unused;
 
 import java.io.BufferedOutputStream;
 import java.io.File;

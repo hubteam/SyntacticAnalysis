@@ -1,4 +1,4 @@
-package com.wxw.pretreattools;
+package com.wxw.tree;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,8 +9,6 @@ import java.util.HashSet;
 
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
-import com.wxw.tree.PhraseGenerateTree;
-import com.wxw.tree.TreeNode;
 
 /**
  * 训练语料中树的初始化处理

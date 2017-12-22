@@ -7,18 +7,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import com.wxw.cross.SyntacticAnalysisCrossValidationForByStep;
 import com.wxw.cross.SyntacticAnalysisCrossValidationForChina;
 import com.wxw.evaluate.SyntacticAnalysisErrorPrinter;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
+import com.wxw.model.all.unused.SyntacticAnalysisRunForOneStep;
 import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForChina;
 import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
 import com.wxw.model.bystep.SyntacticAnalysisModelForBuildAndCheck;
-import com.wxw.model.bystep.SyntacticAnalysisModelForChunk;
-import com.wxw.run.SyntacticAnalysisRunByStep.Corpus;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;
@@ -280,7 +278,7 @@ public class SyntacticAnalysisRunForChina {
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
 		//训练句法分析模型
-		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile), new File(corpus.chunkmodelbinaryFile),new File(corpus.chunkmodeltxtFile),params, contextGen, corpus.encoding);
+		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile), new File(corpus.chunkmodeltxtFile),params, contextGen, corpus.encoding);
 		SyntacticAnalysisMEForBuildAndCheck.train(new File(corpus.trainFile), new File(corpus.buildmodeltxtFile),new File(corpus.checkmodeltxtFile),params, contextGen, corpus.encoding);
 
 	}

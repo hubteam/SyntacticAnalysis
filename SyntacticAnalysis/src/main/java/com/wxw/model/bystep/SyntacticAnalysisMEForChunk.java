@@ -163,18 +163,14 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
 	 * @param encoding 编码方式
 	 * @return
 	 */
-	public static SyntacticAnalysisModelForChunk train(File file, File modelbinaryFile, File modeltxtFile, TrainingParameters params,
+	public static SyntacticAnalysisModelForChunk train(File file, File modeltxtFile, TrainingParameters params,
 			SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, String encoding) {
-		OutputStream modelOut = null;
 		PlainTextGISModelWriter modelWriter = null;
 		SyntacticAnalysisModelForChunk model = null;
 		try {
 			ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(file), encoding);
 			ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
 			model = SyntacticAnalysisMEForChunk.train("zh", sampleStream, params, contextGen);
-			 //模型的持久化，写出的为二进制文件
-            modelOut = new BufferedOutputStream(new FileOutputStream(modelbinaryFile));           
-            model.serialize(modelOut);
             //模型的写出，文本文件
             modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getChunkTreeModel(), modeltxtFile);
             modelWriter.persist();
@@ -184,9 +180,9 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
 		} catch (IOException e) {
 			e.printStackTrace();
 		}finally {
-            if (modelOut != null) {
+            if (modelWriter != null) {
                 try {
-                    modelOut.close();
+                	modelWriter.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -213,7 +209,6 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
         if (beamSizeString != null) {
             beamSize = Integer.parseInt(beamSizeString);
         }
-
 		try {
 			Map<String, String> manifestInfoEntries = new HashMap<String, String>();
 			modelReader = new PlainTextGISModelReader(modelFile);			

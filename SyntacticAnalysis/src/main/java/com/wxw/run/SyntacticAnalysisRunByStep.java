@@ -12,6 +12,7 @@ import com.wxw.evaluate.SyntacticAnalysisErrorPrinter;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
+import com.wxw.model.all.unused.SyntacticAnalysisRunForOneStep;
 import com.wxw.model.bystep.POSTaggerMEExtend;
 import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForByStep;
 import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;

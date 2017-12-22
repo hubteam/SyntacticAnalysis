@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import com.wxw.actions.ActionsToHeadTree;
 import com.wxw.evaluate.SyntacticAnalysisEvaluateMonitor;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
-import com.wxw.model.all.SyntacticAnalysisME;
+import com.wxw.model.all.unused.SyntacticAnalysisME;
 import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForByStep;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.tree.HeadTreeNode;

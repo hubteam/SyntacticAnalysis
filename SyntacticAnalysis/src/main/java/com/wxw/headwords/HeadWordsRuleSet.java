@@ -184,11 +184,11 @@ public class HeadWordsRuleSet {
 			RIGHT2LEFT4.add(NPStr5[i]);
 		}
 		List<Rule> NPRule = new ArrayList<>();
-		NPRule.add(new Rule(RIGHT2LEFT1, "right"));
-		NPRule.add(new Rule(LEFT2RIGHT,"left"));
-		NPRule.add(new Rule(RIGHT2LEFT2,"right"));
-		NPRule.add(new Rule(RIGHT2LEFT3,"right"));
-		NPRule.add(new Rule(RIGHT2LEFT4, "right"));
+		NPRule.add(new Rule(RIGHT2LEFT1, "left"));
+		NPRule.add(new Rule(LEFT2RIGHT,"right"));
+		NPRule.add(new Rule(RIGHT2LEFT2,"left"));
+		NPRule.add(new Rule(RIGHT2LEFT3,"left"));
+		NPRule.add(new Rule(RIGHT2LEFT4, "left"));
 		specialRules.put("NP", NPRule);
 	}
 	

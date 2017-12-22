@@ -1,4 +1,4 @@
-package com.wxw.run;
+package com.wxw.model.all.unused;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,9 +13,6 @@ import com.wxw.evaluate.SyntacticAnalysisErrorPrinter;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
-import com.wxw.model.all.SyntacticAnalysisEvaluatorForOneStep;
-import com.wxw.model.all.SyntacticAnalysisME;
-import com.wxw.model.all.SyntacticAnalysisModel;
 import com.wxw.model.bystep.POSTaggerMEExtend;
 import com.wxw.model.pos.unused.FeatureContainsPosTools;
 import com.wxw.model.pos.unused.SyntacticAnalysisContextGeneratorConfContainsPos;
@@ -23,6 +20,7 @@ import com.wxw.model.pos.unused.SyntacticAnalysisContextGeneratorContainsPos;
 import com.wxw.model.pos.unused.SyntacticAnalysisEvaluatorContainsPos;
 import com.wxw.model.pos.unused.SyntacticAnalysisMEContainsPos;
 import com.wxw.model.pos.unused.SyntacticAnalysisModelContainsPos;
+import com.wxw.run.SyntacticAnalysisRunByStep;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;

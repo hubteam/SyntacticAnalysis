@@ -61,7 +61,7 @@ public class SyntacticAnalysisModelForChunk extends BaseModel{
 			Map<String, String> manifestInfoEntries) {
 		super(COMPONENT_NAME, languageCode, manifestInfoEntries, null);
 		if (seqModel == null) {
-            throw new IllegalArgumentException("The maxent wordsegModel param must not be null!");
+            throw new IllegalArgumentException("The maxent chunkModel param must not be null!");
         }
 
         artifactMap.put(CHUNKTREE_MODEL_ENTRY_NAME, seqModel);

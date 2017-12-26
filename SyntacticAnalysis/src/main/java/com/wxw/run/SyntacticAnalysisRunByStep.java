@@ -169,7 +169,7 @@ public class SyntacticAnalysisRunByStep {
         TrainingParameters params = TrainingParameters.defaultParams();
         params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(1));
         params.put(TrainingParameters.ITERATIONS_PARAM, Integer.toString(50));
-        params.put(TrainingParameters.ALGORITHM_PARAM, "Perceptron");
+        params.put(TrainingParameters.ALGORITHM_PARAM, "Perceptron".toUpperCase());
 
         //把刚才属性信息封装
         SyntacticAnalysisCrossValidationForByStep crossValidator = new SyntacticAnalysisCrossValidationForByStep("zh", params);

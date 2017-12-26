@@ -168,7 +168,8 @@ public class SyntacticAnalysisRunByStep {
         //默认参数
         TrainingParameters params = TrainingParameters.defaultParams();
         params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(1));
-//        params.put(TrainingParameters.ITERATIONS_PARAM, Integer.toString(50));
+        params.put(TrainingParameters.ITERATIONS_PARAM, Integer.toString(50));
+        params.put(TrainingParameters.ALGORITHM_PARAM, "Perceptron");
 
         //把刚才属性信息封装
         SyntacticAnalysisCrossValidationForByStep crossValidator = new SyntacticAnalysisCrossValidationForByStep("zh", params);
@@ -278,7 +279,7 @@ public class SyntacticAnalysisRunByStep {
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
 		//训练句法分析模型
-		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile), new File(corpus.chunkmodelbinaryFile),new File(corpus.chunkmodeltxtFile),params, contextGen, corpus.encoding);
+		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile),new File(corpus.chunkmodeltxtFile),params, contextGen, corpus.encoding);
 		SyntacticAnalysisMEForBuildAndCheck.train(new File(corpus.trainFile), new File(corpus.buildmodeltxtFile),new File(corpus.checkmodeltxtFile),params, contextGen, corpus.encoding);
 	}
 

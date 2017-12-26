@@ -17,6 +17,7 @@ import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForChina;
 import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
 import com.wxw.model.bystep.SyntacticAnalysisModelForBuildAndCheck;
+import com.wxw.model.bystep.SyntacticAnalysisModelForChunk;
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
 import com.wxw.stream.SyntacticAnalysisSample;

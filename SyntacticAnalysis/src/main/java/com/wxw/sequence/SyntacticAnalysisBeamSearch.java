@@ -252,7 +252,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 			
 			//存在这样的情况，chunk步得到的不是子树序列，而是一棵子树，这种情况就不能用下面的方法处理了
 			//chunk得到一颗子树的时候，prev不加入任何东西，size是0,不会进入下面的那种情况进行处理
-			//此时是一颗子树，直接处理，处理完加入kRes代表最终的结果
+			//此时是一颗子树，进行build和check，处理完加入kRes代表最终的结果，如果不能build和check将chunk子树加入结果
 			if(comnineChunkTree.get(i).size() == 1){
 				SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode> top = new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(comnineChunkTree.get(i));//取出beam size个结果中的第一个
 				double temScore = top.getScore();
@@ -277,7 +277,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 				
 				int p;
 				String out;
-				SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode> ns = null;
+//				SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode> ns = null;
 				for (p = 0; p < scoresForBuild.length; ++p) {
 					if(scoresForBuild[p] >= min){
 						out = this.buildmodel.getOutcome(p);
@@ -374,6 +374,12 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 			}else{
 				prev.add(new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(comnineChunkTree.get(i)));
 			}
+			//此时kRes如果size为0，证明这一棵chunk子树没有build和check步骤，然后直接将chunk步骤加入
+			if(kRes.size() == 0 && comnineChunkTree.get(i).size() == 1){
+				SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode> top = new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(comnineChunkTree.get(i));
+				kRes.add(new SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>(top, top.getTree(), 0,0,0));
+			}
+			
 			//下面处理的情况是chunk步骤得到的是子树序列，不是一颗子树的情况
 			if (ac == null) {
 				ac = EMPTY_ADDITIONAL_CONTEXT;

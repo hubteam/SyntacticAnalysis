@@ -7,8 +7,6 @@ import com.wxw.evaluate.SyntacticAnalysisEvaluateMonitor;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
-import com.wxw.model.bystep.POSTaggerMEExtend;
-import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForByStep;
 import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForChina;
 import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
@@ -24,8 +22,6 @@ import com.wxw.wordsegandpos.model.WordSegAndPosME;
 import com.wxw.wordsegandpos.model.WordSegAndPosModel;
 import com.wxw.wordsegandpos.model.WordSegAndPosModelLoader;
 
-import opennlp.tools.cmdline.postag.POSModelLoader;
-import opennlp.tools.postag.POSModel;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.PlainTextByLineStream;
 import opennlp.tools.util.TrainingParameters;
@@ -79,7 +75,7 @@ public class SyntacticAnalysisForChinaCrossValidationRun {
     }
     
     private static void usage(){
-    	System.out.println(SyntacticAnalysisForChinaCrossValidationRun.class.getName() + " -data <corpusFile> -encoding <encoding> " + "[-cutoff <num>] [-iters <num>] [-folds <nFolds>] ");
+    	System.out.println(SyntacticAnalysisForChinaCrossValidationRun.class.getName() + " -data <corpusFile> -encoding <encoding> -type<algorithm>" + "[-cutoff <num>] [-iters <num>] [-folds <nFolds>] ");
     }
     
     public static void main(String[] args) throws IOException {
@@ -94,6 +90,7 @@ public class SyntacticAnalysisForChinaCrossValidationRun {
         int folds = 10;
         File corpusFile = null;
         String encoding = "UTF-8";
+        String type = "MAXENT";
         for (int i = 0; i < args.length; i++)
         {
             if (args[i].equals("-data"))
@@ -104,6 +101,11 @@ public class SyntacticAnalysisForChinaCrossValidationRun {
             else if (args[i].equals("-encoding"))
             {
                 encoding = args[i + 1];
+                i++;
+            }
+            else if (args[i].equals("-type"))
+            {
+                type = args[i + 1];
                 i++;
             }
             else if (args[i].equals("-cutoff"))
@@ -126,6 +128,7 @@ public class SyntacticAnalysisForChinaCrossValidationRun {
         TrainingParameters params = TrainingParameters.defaultParams();
         params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(cutoff));
         params.put(TrainingParameters.ITERATIONS_PARAM, Integer.toString(iters));
+        params.put(TrainingParameters.ALGORITHM_PARAM, type.toUpperCase());
         
         SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen = new SyntacticAnalysisContextGeneratorConf();
         System.out.println(contextGen);

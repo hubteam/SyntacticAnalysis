@@ -34,7 +34,7 @@ public class SyntacticAnalysisEvalRun {
 
 	private static void usage(){
 		System.out.println(SyntacticAnalysisEvalRun.class.getName() + 
-				"-data <corpusFile>"
+				"-data <corpusFile> -type <algorithom>"
 				+ "-gold <goldFile> -error <errorFile> -encoding <encoding>" + " [-cutoff <num>] [-iters <num>]");
 	}
 	
@@ -78,7 +78,8 @@ public class SyntacticAnalysisEvalRun {
         String trainFile = null;
         String goldFile = null;
         String errorFile = null;
-        String encoding = null;
+        String encoding = "UTF-8";
+        String type = "MAXENT";
         int cutoff = 3;
         int iters = 100;
         for (int i = 0; i < args.length; i++)
@@ -86,6 +87,11 @@ public class SyntacticAnalysisEvalRun {
             if (args[i].equals("-data"))
             {
                 trainFile = args[i + 1];
+                i++;
+            }
+            else if (args[i].equals("-type"))
+            {
+                type = args[i + 1];
                 i++;
             }
             else if (args[i].equals("-gold"))
@@ -118,6 +124,7 @@ public class SyntacticAnalysisEvalRun {
         TrainingParameters params = TrainingParameters.defaultParams();
         params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(cutoff));
         params.put(TrainingParameters.ITERATIONS_PARAM, Integer.toString(iters));
+        params.put(TrainingParameters.ALGORITHM_PARAM, type.toUpperCase());
         if (errorFile != null)
         {
             eval(new File(trainFile), params, new File(goldFile), encoding, new File(errorFile));

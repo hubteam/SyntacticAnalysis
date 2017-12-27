@@ -19,7 +19,7 @@ import opennlp.tools.util.TrainingParameters;
 public class SyntacticAnalysisTrainerTool {
 
 	private static void usage(){
-		System.out.println(SyntacticAnalysisTrainerTool.class.getName()+"-data <corpusFile> -chunkmodel <chunkmodelFile> -buildmodel <buildmodelFile> -checkmodel <checkmodelFile>"
+		System.out.println(SyntacticAnalysisTrainerTool.class.getName()+"-data <corpusFile> -chunkmodel <chunkmodelFile> -buildandcheckmodel <buildandcheckmodelFile> -type <algorithom>"
 				+ "-encoding"+"[-cutoff <num>] [-iters <num>]");
 	}
 	
@@ -32,9 +32,9 @@ public class SyntacticAnalysisTrainerTool {
 		int iters = 100;
         File corpusFile = null;
         File chunkmodelFile = null;
-        File buildmodelFile = null;
-        File checkmodelFile = null;
+        File buildandcheckmodelFile = null;
         String encoding = "UTF-8";
+        String type = "MAXENT";
         for (int i = 0; i < args.length; i++)
         {
             if (args[i].equals("-data"))
@@ -47,14 +47,14 @@ public class SyntacticAnalysisTrainerTool {
                 chunkmodelFile = new File(args[i + 1]);
                 i++;
             }
-            else if (args[i].equals("-buildmodel"))
+            else if (args[i].equals("-buildandcheckmodel"))
             {
-            	buildmodelFile = new File(args[i + 1]);
+            	buildandcheckmodelFile = new File(args[i + 1]);
                 i++;
             }
-            else if (args[i].equals("-checkmodel"))
+            else if (args[i].equals("-type"))
             {
-                checkmodelFile = new File(args[i + 1]);
+                type = args[i + 1];
                 i++;
             }
             else if (args[i].equals("-encoding"))
@@ -78,8 +78,9 @@ public class SyntacticAnalysisTrainerTool {
         TrainingParameters params = TrainingParameters.defaultParams();
         params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(cutoff));
         params.put(TrainingParameters.ITERATIONS_PARAM, Integer.toString(iters));
+        params.put(TrainingParameters.ALGORITHM_PARAM, type.toUpperCase());
         
         SyntacticAnalysisMEForChunk.train(corpusFile, chunkmodelFile,params, contextGen, encoding);
-		SyntacticAnalysisMEForBuildAndCheck.train(corpusFile, buildmodelFile,checkmodelFile,params, contextGen, encoding);
+		SyntacticAnalysisMEForBuildAndCheck.train(corpusFile, buildandcheckmodelFile, params, contextGen, encoding);
 	}
 }

@@ -25,13 +25,11 @@ public class SyntacticAnalysisModelForChunk extends BaseModel{
 	
 	/**
 	 * 构造
-	 * @param componentName 训练模型的类
 	 * @param modelFile 模型文件
 	 * @throws IOException IO异常
 	 */
-	protected SyntacticAnalysisModelForChunk(String componentName, File modelFile) throws IOException {
+	public SyntacticAnalysisModelForChunk(File modelFile) throws IOException {
 		super(COMPONENT_NAME, modelFile);
-		
 	}
 
 	/**

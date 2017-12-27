@@ -163,26 +163,31 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
 	 * @param encoding 编码方式
 	 * @return
 	 */
-	public static SyntacticAnalysisModelForChunk train(File file, File modeltxtFile, TrainingParameters params,
+	public static SyntacticAnalysisModelForChunk train(File file, File modelFile, TrainingParameters params,
 			SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, String encoding) {
-		PlainTextGISModelWriter modelWriter = null;
+//		PlainTextGISModelWriter modelWriter = null;
+		OutputStream modelOut = null;
 		SyntacticAnalysisModelForChunk model = null;
 		try {
 			ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(file), encoding);
 			ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
 			model = SyntacticAnalysisMEForChunk.train("zh", sampleStream, params, contextGen);
             //模型的写出，文本文件
-            modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getChunkTreeModel(), modeltxtFile);
-            modelWriter.persist();
+//            modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getChunkTreeModel(), modeltxtFile);
+//            modelWriter.persist();
+            modelOut = new BufferedOutputStream(new FileOutputStream(modelFile));           
+            model.serialize(modelOut);
             return model;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}finally {
-            if (modelWriter != null) {
+			
+            if (modelOut != null) {
                 try {
-                	modelWriter.close();
+                	modelOut.close();
+//                	modelWriter.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -249,10 +254,7 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
 			List<String> outcomes = sequences[i].getOutcomes();
 			for (int j = 0; j < outcomes.size(); j++) {
 				HeadTreeNode outNode = new HeadTreeNode(outcomes.get(j));
-//				outNode.setFlag(true);
 				outNode.addChild(tempTree.get(j));
-//				tempTree.get(j).setParent(outNode);
-//				outNode.setHeadWords(tempTree.get(j).getHeadWords());
 				tree.add(outNode);
 			}
 			chunkTree.add(tree);

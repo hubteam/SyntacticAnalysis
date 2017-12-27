@@ -72,7 +72,7 @@ public class SyntacticAnalysisCrossValidationRun {
     }
     
     private static void usage(){
-    	System.out.println(SyntacticAnalysisCrossValidationRun.class.getName() + " -data <corpusFile> -encoding <encoding> " + "[-cutoff <num>] [-iters <num>] [-folds <nFolds>] ");
+    	System.out.println(SyntacticAnalysisCrossValidationRun.class.getName() + " -data <corpusFile> -encoding <encoding> -type<algorithm>" + "[-cutoff <num>] [-iters <num>] [-folds <nFolds>] ");
     }
     
     public static void main(String[] args) throws IOException {
@@ -87,6 +87,7 @@ public class SyntacticAnalysisCrossValidationRun {
         int folds = 10;
         File corpusFile = null;
         String encoding = "UTF-8";
+        String type = "MAXENT";
         for (int i = 0; i < args.length; i++)
         {
             if (args[i].equals("-data"))
@@ -97,6 +98,11 @@ public class SyntacticAnalysisCrossValidationRun {
             else if (args[i].equals("-encoding"))
             {
                 encoding = args[i + 1];
+                i++;
+            }
+            else if (args[i].equals("-type"))
+            {
+                type = args[i + 1];
                 i++;
             }
             else if (args[i].equals("-cutoff"))
@@ -119,6 +125,7 @@ public class SyntacticAnalysisCrossValidationRun {
         TrainingParameters params = TrainingParameters.defaultParams();
         params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(cutoff));
         params.put(TrainingParameters.ITERATIONS_PARAM, Integer.toString(iters));
+        params.put(TrainingParameters.ALGORITHM_PARAM, type.toUpperCase());
         
         SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen = new SyntacticAnalysisContextGeneratorConf();
         System.out.println(contextGen);

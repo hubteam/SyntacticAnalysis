@@ -17,7 +17,6 @@ import com.wxw.model.bystep.POSTaggerMEExtend;
 import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForByStep;
 import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
-import com.wxw.model.bystep.SyntacticAnalysisMEForPos;
 import com.wxw.model.bystep.SyntacticAnalysisModelForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisModelForChunk;
 import com.wxw.stream.FileInputStreamFactory;
@@ -46,12 +45,8 @@ public class SyntacticAnalysisRunByStep {
 		public String trainFile;
 		public String testFile;
 		public String posenglish;
-		public String chunkmodelbinaryFile;
-		public String chunkmodeltxtFile;
-		public String buildmodelbinaryFile;
-		public String buildmodeltxtFile;
-		public String checkmodelbinaryFile;
-		public String checkmodeltxtFile;
+		public String chunkmodelFile;
+		public String buildAndCheckmodelFile;
 		public String errorFile;
 	}
 	
@@ -85,25 +80,17 @@ public class SyntacticAnalysisRunByStep {
 			String trainFile = config.getProperty(name + "." + "corpus.train.file");
 			String testFile = config.getProperty(name+"."+"corpus.test.file");
 			String posenglish = config.getProperty(name + "." + "corpus.posenglish.file");
-			String chunkmodelbinaryFile = config.getProperty(name + "." + "corpus.chunkmodelbinary.file");
-			String chunkmodeltxtFile = config.getProperty(name + "." + "corpus.chunkmodeltxt.file");
-			String buildmodelbinaryFile = config.getProperty(name + "." + "corpus.buildmodelbinary.file");
-			String buildmodeltxtFile = config.getProperty(name + "." + "corpus.buildmodeltxt.file");
-			String checkmodelbinaryFile = config.getProperty(name + "." + "corpus.checkmodelbinary.file");
-			String checkmodeltxtFile = config.getProperty(name + "." + "corpus.checkmodeltxt.file");
+			String chunkmodelFile = config.getProperty(name + "." + "corpus.chunkmodel.file");
+			String buildAndCheckmodelFile = config.getProperty(name + "." + "corpus.buildAndCheckmodel.file");
 			String errorFile = config.getProperty(name + "." + "corpus.error.file");
 			Corpus corpus = new Corpus();
 			corpus.name = name;
 			corpus.encoding = encoding;
 			corpus.trainFile = trainFile;
 			corpus.testFile = testFile;
-			corpus.chunkmodeltxtFile = chunkmodeltxtFile;
-			corpus.chunkmodelbinaryFile = chunkmodelbinaryFile;
+			corpus.chunkmodelFile = chunkmodelFile;
 			corpus.posenglish = posenglish;
-			corpus.buildmodeltxtFile = buildmodeltxtFile;
-			corpus.buildmodelbinaryFile = buildmodelbinaryFile;
-			corpus.checkmodeltxtFile = checkmodeltxtFile;
-			corpus.checkmodelbinaryFile = checkmodelbinaryFile;
+			corpus.buildAndCheckmodelFile = buildAndCheckmodelFile;
 			corpus.errorFile = errorFile;
 			corpuses[i] = corpus;			
 		}
@@ -239,11 +226,10 @@ public class SyntacticAnalysisRunByStep {
 		System.out.println("ContextGenerator: " + contextGen);
 		POSModel posmodel = new POSModelLoader().load(new File(corpus.posenglish));
 		POSTaggerMEExtend postagger = new POSTaggerMEExtend(posmodel);
-		
-        SyntacticAnalysisModelForChunk chunkmodel = SyntacticAnalysisMEForChunk.readModel(new File(corpus.chunkmodeltxtFile), params, contextGen, corpus.encoding);	
+		SyntacticAnalysisModelForChunk chunkmodel = new SyntacticAnalysisModelForChunk(new File(corpus.chunkmodelFile));
         SyntacticAnalysisMEForChunk chunktagger = new SyntacticAnalysisMEForChunk(chunkmodel,contextGen);
       
-        SyntacticAnalysisModelForBuildAndCheck buildandcheckmodel = SyntacticAnalysisMEForBuildAndCheck.readModel(new File(corpus.buildmodeltxtFile), new File(corpus.checkmodeltxtFile),params, contextGen, corpus.encoding);	
+        SyntacticAnalysisModelForBuildAndCheck buildandcheckmodel = new SyntacticAnalysisModelForBuildAndCheck(new File(corpus.buildAndCheckmodelFile));
         SyntacticAnalysisMEForBuildAndCheck buildandchecktagger = new SyntacticAnalysisMEForBuildAndCheck(buildandcheckmodel,contextGen);
         
         SyntacticAnalysisMeasure measure = new SyntacticAnalysisMeasure();
@@ -277,10 +263,11 @@ public class SyntacticAnalysisRunByStep {
 	 */
 	private static void modelOutOnCorpus(SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, Corpus corpus,
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
-		System.out.println("ContextGenerator: " + contextGen);       
+		System.out.println("ContextGenerator: " + contextGen);    
+		params.put(TrainingParameters.ALGORITHM_PARAM, "perceptron".toUpperCase());
 		//训练句法分析模型
-		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile),new File(corpus.chunkmodeltxtFile),params, contextGen, corpus.encoding);
-		SyntacticAnalysisMEForBuildAndCheck.train(new File(corpus.trainFile), new File(corpus.buildmodeltxtFile),new File(corpus.checkmodeltxtFile),params, contextGen, corpus.encoding);
+		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile),new File(corpus.chunkmodelFile),params, contextGen, corpus.encoding);
+		SyntacticAnalysisMEForBuildAndCheck.train(new File(corpus.trainFile), new File(corpus.buildAndCheckmodelFile),params, contextGen, corpus.encoding);
 	}
 
 	/**

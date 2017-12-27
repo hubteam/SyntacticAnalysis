@@ -48,12 +48,8 @@ public class SyntacticAnalysisRunForChina {
 		public String trainFile;
 		public String testFile;
 		public String posChina;
-		public String chunkmodelbinaryFile;
-		public String chunkmodeltxtFile;
-		public String buildmodelbinaryFile;
-		public String buildmodeltxtFile;
-		public String checkmodelbinaryFile;
-		public String checkmodeltxtFile;
+		public String chunkmodelFile;
+		public String buildAndCheckmodelFile;
 		public String errorFile;
 	}
 	
@@ -87,25 +83,17 @@ public class SyntacticAnalysisRunForChina {
 			String trainFile = config.getProperty(name + "." + "corpus.train.file");
 			String testFile = config.getProperty(name+"."+"corpus.test.file");
 			String posChina = config.getProperty(name + "." + "corpus.poschina.file");
-			String chunkmodelbinaryFile = config.getProperty(name + "." + "corpus.chunkmodelbinary.file");
-			String chunkmodeltxtFile = config.getProperty(name + "." + "corpus.chunkmodeltxt.file");
-			String buildmodelbinaryFile = config.getProperty(name + "." + "corpus.buildmodelbinary.file");
-			String buildmodeltxtFile = config.getProperty(name + "." + "corpus.buildmodeltxt.file");
-			String checkmodelbinaryFile = config.getProperty(name + "." + "corpus.checkmodelbinary.file");
-			String checkmodeltxtFile = config.getProperty(name + "." + "corpus.checkmodeltxt.file");
+			String chunkmodelFile = config.getProperty(name + "." + "corpus.chunkmodel.file");
+			String buildAndCheckmodelFile = config.getProperty(name + "." + "corpus.buildAndCheckmodel.file");
 			String errorFile = config.getProperty(name + "." + "corpus.error.file");
 			Corpus corpus = new Corpus();
 			corpus.name = name;
 			corpus.encoding = encoding;
 			corpus.trainFile = trainFile;
 			corpus.testFile = testFile;
-			corpus.chunkmodeltxtFile = chunkmodeltxtFile;
-			corpus.chunkmodelbinaryFile = chunkmodelbinaryFile;
+			corpus.chunkmodelFile = chunkmodelFile;
 			corpus.posChina = posChina;
-			corpus.buildmodeltxtFile = buildmodeltxtFile;
-			corpus.buildmodelbinaryFile = buildmodelbinaryFile;
-			corpus.checkmodeltxtFile = checkmodeltxtFile;
-			corpus.checkmodelbinaryFile = checkmodelbinaryFile;
+			corpus.buildAndCheckmodelFile = buildAndCheckmodelFile;
 			corpus.errorFile = errorFile;
 			corpuses[i] = corpus;			
 		}
@@ -240,10 +228,10 @@ public class SyntacticAnalysisRunForChina {
 		WordSegAndPosModel posmodel = new WordSegAndPosModelLoader().load(new File(corpus.posChina));
 		WordSegAndPosContextGenerator generator = new WordSegAndPosContextGeneratorConfExtend();
 		WordSegAndPosME postagger = new WordSegAndPosME(posmodel, generator);
-        SyntacticAnalysisModelForChunk chunkmodel = SyntacticAnalysisMEForChunk.readModel(new File(corpus.chunkmodeltxtFile), params, contextGen, corpus.encoding);	
+		SyntacticAnalysisModelForChunk chunkmodel = new SyntacticAnalysisModelForChunk(new File(corpus.chunkmodelFile));
         SyntacticAnalysisMEForChunk chunktagger = new SyntacticAnalysisMEForChunk(chunkmodel,contextGen);
       
-        SyntacticAnalysisModelForBuildAndCheck buildandcheckmodel = SyntacticAnalysisMEForBuildAndCheck.readModel(new File(corpus.buildmodeltxtFile), new File(corpus.checkmodeltxtFile),params, contextGen, corpus.encoding);	
+        SyntacticAnalysisModelForBuildAndCheck buildandcheckmodel = new SyntacticAnalysisModelForBuildAndCheck(new File(corpus.buildAndCheckmodelFile));
         SyntacticAnalysisMEForBuildAndCheck buildandchecktagger = new SyntacticAnalysisMEForBuildAndCheck(buildandcheckmodel,contextGen);
         
         SyntacticAnalysisMeasure measure = new SyntacticAnalysisMeasure();
@@ -279,8 +267,8 @@ public class SyntacticAnalysisRunForChina {
 			TrainingParameters params) throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException {
 		System.out.println("ContextGenerator: " + contextGen);       
 		//训练句法分析模型
-		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile), new File(corpus.chunkmodeltxtFile),params, contextGen, corpus.encoding);
-		SyntacticAnalysisMEForBuildAndCheck.train(new File(corpus.trainFile), new File(corpus.buildmodeltxtFile),new File(corpus.checkmodeltxtFile),params, contextGen, corpus.encoding);
+		SyntacticAnalysisMEForChunk.train(new File(corpus.trainFile), new File(corpus.chunkmodelFile),params, contextGen, corpus.encoding);
+		SyntacticAnalysisMEForBuildAndCheck.train(new File(corpus.trainFile), new File(corpus.buildAndCheckmodelFile),params, contextGen, corpus.encoding);
 
 	}
 

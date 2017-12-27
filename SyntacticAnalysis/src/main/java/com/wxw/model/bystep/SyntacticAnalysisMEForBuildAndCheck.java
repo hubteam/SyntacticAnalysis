@@ -1,8 +1,11 @@
 package com.wxw.model.bystep;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +36,6 @@ import opennlp.tools.ml.EventTrainer;
 import opennlp.tools.ml.TrainerFactory;
 import opennlp.tools.ml.TrainerFactory.TrainerType;
 import opennlp.tools.ml.maxent.io.PlainTextGISModelReader;
-import opennlp.tools.ml.maxent.io.PlainTextGISModelWriter;
 import opennlp.tools.ml.model.AbstractModel;
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.ml.model.MaxentModel;
@@ -170,26 +172,38 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 	 * @param encoding 编码方式
 	 * @return
 	 */
-	public static SyntacticAnalysisModelForBuildAndCheck train(File file, File buildmodeltxtFile, 
-			File checkmodeltxtFile,TrainingParameters params,
+	public static SyntacticAnalysisModelForBuildAndCheck train(File file, File buildAndCheckmodelFile, 
+			TrainingParameters params,
 			SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, String encoding) {
-		PlainTextGISModelWriter modelWriter = null;
+//		PlainTextGISModelWriter modelWriter = null;
+		OutputStream modelOut = null;
 		SyntacticAnalysisModelForBuildAndCheck model = null;
 		try {
 			ObjectStream<String> lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(file), encoding);
 			ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
 			model = SyntacticAnalysisMEForBuildAndCheck.train("zh", sampleStream, params, contextGen);
-			
-            modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getBuildTreeModel(), buildmodeltxtFile);
-            modelWriter.persist();
-            modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getCheckTreeModel(), checkmodeltxtFile);
-            modelWriter.persist();
+			modelOut = new BufferedOutputStream(new FileOutputStream(buildAndCheckmodelFile));           
+            model.serialize(modelOut);
+//            modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getBuildTreeModel(), buildmodeltxtFile);
+//            modelWriter.persist();
+//            modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getCheckTreeModel(), checkmodeltxtFile);
+//            modelWriter.persist();
             return model;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}finally {
+			
+            if (modelOut != null) {
+                try {
+                	modelOut.close();
+//                	modelWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 		return null;
 	}
 	

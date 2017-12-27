@@ -44,7 +44,7 @@ public class TestBeamSearch extends TestCase{
 		InputStream is = TestBeamSearch.class.getClassLoader().getResourceAsStream("com/wxw/run/corpus.properties");
 		prop.load(is);
 		SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen = new SyntacticAnalysisContextGeneratorConf();
-		SyntacticAnalysisModelForChunk chunkmodel = SyntacticAnalysisMEForChunk.readModel(new File(prop.getProperty("tree.corpus.chunkmodeltxt.file")), params, contextGen, "utf8");	
+		SyntacticAnalysisModelForChunk chunkmodel = new SyntacticAnalysisModelForChunk(new File(prop.getProperty("tree.corpus.chunkmodeltxt.file")));
         SyntacticAnalysisMEForChunk chunktagger = new SyntacticAnalysisMEForChunk(chunkmodel,contextGen);
 		POSModel model = new POSModelLoader().load(new File(prop.getProperty("tree.corpus.posenglish.file")));
 		POSTaggerMEExtend postagger = new POSTaggerMEExtend(model);		
@@ -68,8 +68,7 @@ public class TestBeamSearch extends TestCase{
 //      String[] words = {"We","must","be","very","cautious","about","labeling","investors","as","``","long-term","''","or","``","short-term",".","''"};
 		List<List<HeadTreeNode>> posTree = postagger.tagKpos(20,words);
 		List<List<HeadTreeNode>> chunkTree = chunktagger.tagKChunk(20,posTree, null);
-		SyntacticAnalysisModelForBuildAndCheck buildandcheckmodel = SyntacticAnalysisMEForBuildAndCheck.readModel(new File(prop.getProperty("tree.corpus.buildmodeltxt.file")), 
-				new File(prop.getProperty("tree.corpus.checkmodeltxt.file")), params, contextGen, "utf8");	
+		SyntacticAnalysisModelForBuildAndCheck buildandcheckmodel = new SyntacticAnalysisModelForBuildAndCheck(new File(prop.getProperty("tree.corpus.buildmodeltxt.file")));
         SyntacticAnalysisMEForBuildAndCheck buildandchecktagger = new SyntacticAnalysisMEForBuildAndCheck(buildandcheckmodel,contextGen);
         HeadTreeNode buildAndCheckTree = buildandchecktagger.tagBuildAndCheck(chunkTree, null);
         if(buildAndCheckTree == null){

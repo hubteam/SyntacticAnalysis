@@ -8,8 +8,6 @@ import com.wxw.evaluate.SyntacticAnalysisErrorPrinter;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.feature.SyntacticAnalysisContextGeneratorConf;
-import com.wxw.model.bystep.POSTaggerMEExtend;
-import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForByStep;
 import com.wxw.model.bystep.SyntacticAnalysisEvaluatorForChina;
 import com.wxw.model.bystep.SyntacticAnalysisMEForBuildAndCheck;
 import com.wxw.model.bystep.SyntacticAnalysisMEForChunk;
@@ -25,8 +23,6 @@ import com.wxw.wordsegandpos.model.WordSegAndPosME;
 import com.wxw.wordsegandpos.model.WordSegAndPosModel;
 import com.wxw.wordsegandpos.model.WordSegAndPosModelLoader;
 
-import opennlp.tools.cmdline.postag.POSModelLoader;
-import opennlp.tools.postag.POSModel;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.PlainTextByLineStream;
 import opennlp.tools.util.TrainingParameters;
@@ -40,7 +36,7 @@ public class SyntacticAnalysisForChinaEvalRun {
 
 	private static void usage(){
 		System.out.println(SyntacticAnalysisForChinaEvalRun.class.getName() + 
-				"-data <corpusFile>"
+				"-data <corpusFile> -type <algorithom>"
 				+ "-gold <goldFile> -error <errorFile> -encoding <encoding>" + " [-cutoff <num>] [-iters <num>]");
 	}
 	
@@ -86,7 +82,8 @@ public class SyntacticAnalysisForChinaEvalRun {
         String trainFile = null;
         String goldFile = null;
         String errorFile = null;
-        String encoding = null;
+        String encoding = "UTF-8";
+        String type = "MAXENT";
         int cutoff = 3;
         int iters = 100;
         for (int i = 0; i < args.length; i++)
@@ -94,6 +91,11 @@ public class SyntacticAnalysisForChinaEvalRun {
             if (args[i].equals("-data"))
             {
                 trainFile = args[i + 1];
+                i++;
+            }
+            else if (args[i].equals("-type"))
+            {
+                type = args[i + 1];
                 i++;
             }
             else if (args[i].equals("-gold"))
@@ -126,6 +128,7 @@ public class SyntacticAnalysisForChinaEvalRun {
         TrainingParameters params = TrainingParameters.defaultParams();
         params.put(TrainingParameters.CUTOFF_PARAM, Integer.toString(cutoff));
         params.put(TrainingParameters.ITERATIONS_PARAM, Integer.toString(iters));
+        params.put(TrainingParameters.ALGORITHM_PARAM, type.toUpperCase());
         if (errorFile != null)
         {
             eval(new File(trainFile), params, new File(goldFile), encoding, new File(errorFile));

@@ -27,7 +27,7 @@ public class SyntacticAnalysisModelForBuildAndCheck extends BaseModel{
 	 * @param modelFile 模型文件
 	 * @throws IOException IO异常
 	 */
-	protected SyntacticAnalysisModelForBuildAndCheck(String componentName, File modelFile) throws IOException {
+	public SyntacticAnalysisModelForBuildAndCheck(File modelFile) throws IOException {
 		super(COMPONENT_NAME, modelFile);
 		
 	}

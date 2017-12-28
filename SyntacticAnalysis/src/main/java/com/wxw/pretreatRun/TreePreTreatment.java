@@ -1,4 +1,4 @@
-package com.wxw.tree;
+package com.wxw.pretreatRun;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,6 +9,8 @@ import java.util.HashSet;
 
 import com.wxw.stream.FileInputStreamFactory;
 import com.wxw.stream.PlainTextByTreeStream;
+import com.wxw.tree.PhraseGenerateTree;
+import com.wxw.tree.TreeNode;
 
 /**
  * 训练语料中树的初始化处理
@@ -30,37 +32,28 @@ public class TreePreTreatment{
 	
 	/**
 	 * 预处理
-	 * @param path 路径
+	 * @param frompath 要进行处理的文档路径
+	 * @param topath 预处理之后的文档路径
 	 * @throws UnsupportedOperationException
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public static void pretreatment(String path) throws UnsupportedOperationException, FileNotFoundException, IOException{
+	public static void pretreatment(String frompath,String topath) throws UnsupportedOperationException, FileNotFoundException, IOException{
 		//读取一颗树
-		String filename = "";
 		PlainTextByTreeStream lineStream = null;
 		PhraseGenerateTree pgt = new PhraseGenerateTree();		
 		//创建输出流
-		BufferedWriter bw = new BufferedWriter(new FileWriter("data\\tree\\"+path+".txt"));
-		for (int i = 1; i < 200; i++) {
-			if(i < 10){
-				filename = "000" + i;
-			}else if(i < 100){
-				filename = "00" + i;
-			}else{
-				filename = "0" + i;
-			}
-			lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File("data\\"+path+"\\wsj_"+filename+".mrg")), "utf8");
-			String tree = "";
-			while((tree = lineStream.read()) != ""){
-				TreeNode node = pgt.generateTree(tree);
-				//对树进行遍历
-				travelTree(node);	
-				String newTreeStr = node.toNoNoneSample();
-				TreeNode newTree = pgt.generateTree("("+newTreeStr+")");
-				bw.write("("+TreeNode.printTree(newTree, 1)+")");
-				bw.newLine();
-			}
+		BufferedWriter bw = new BufferedWriter(new FileWriter(new File(topath)));
+		lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(frompath)), "utf8");
+		String tree = "";
+		while((tree = lineStream.read()) != ""){
+			TreeNode node = pgt.generateTree(tree);
+			//对树进行遍历
+			travelTree(node);	
+			String newTreeStr = node.toNoNoneSample();
+			TreeNode newTree = pgt.generateTree("("+newTreeStr+")");
+			bw.write("("+TreeNode.printTree(newTree, 1)+")");
+			bw.newLine();
 		}
 		bw.close();
 		lineStream.close();

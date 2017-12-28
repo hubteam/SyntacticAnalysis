@@ -1,9 +1,7 @@
-package com.wxw.pretreat.run;
+package com.wxw.pretreatRun;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
-import com.wxw.tree.TreePreTreatment;
 
 /**
  * 树预处理运行工具类
@@ -15,8 +13,9 @@ public class TreePreTreatmentTools {
 	public static void main(String[] args) throws UnsupportedOperationException, FileNotFoundException, IOException {
 		String cmd = args[0];
 		if(cmd.equals("-pretrain")){
-			String path = args[1];
-			TreePreTreatment.pretreatment(path);
+			String frompath = args[1];
+			String topath = args[2];
+			TreePreTreatment.pretreatment(frompath,topath);
 			System.out.println("success");
 		}
 	}

@@ -8,9 +8,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.wxw.actions.HeadTreeToActions;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.tree.HeadTreeNode;
+import com.wxw.tree.HeadTreeToActions;
 import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
 import com.wxw.tree.TreeToHeadTree;

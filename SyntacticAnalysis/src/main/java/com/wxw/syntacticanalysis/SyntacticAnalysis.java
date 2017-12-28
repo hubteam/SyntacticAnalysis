@@ -2,7 +2,6 @@ package com.wxw.syntacticanalysis;
 
 import java.util.List;
 
-import com.wxw.constituent.ConstituentTree;
 import com.wxw.tree.TreeNode;
 
 /**

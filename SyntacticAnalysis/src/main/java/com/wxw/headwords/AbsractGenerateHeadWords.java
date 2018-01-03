@@ -15,56 +15,32 @@ public abstract class AbsractGenerateHeadWords<T extends TreeNode>{
 	
 	/**
 	 * 为并列结构生成头结点
-	 * @param node
+	 * @param node 子节点带头结点，父节点不带头结点的树
 	 * @return
 	 */
 	public abstract String generateHeadWordsForCordinator(T node);
 
 	/**
 	 * 为特殊规则生成头结点
-	 * @param node
-	 * @param specialRules
+	 * @param node 子节点带头结点，父节点不带头结点的树
+	 * @param specialRules 生成头结点的特殊规则
 	 * @return
 	 */
 	public abstract String generateHeadWordsForSpecialRules(T node,HashMap<String,List<Rule>> specialRules);
 	
 	/**
 	 * 为一般规则生成头结点
-	 * @param node
-	 * @param normalRules
+	 * @param node 子节点带头结点，父节点不带头结点的树
+	 * @param normalRules 生成头结点的一般规则
 	 * @return
 	 */
 	public abstract String generateHeadWordsForNormalRules(T node,HashMap<String,Rule> normalRules);
-//		String currentNodeName = node.getNodeName();
-//		if(normalRules.containsKey(currentNodeName)){
-//			if(normalRules.get(currentNodeName).getDirection().equals("left")){
-//				//用所有的子节点从左向右匹配规则中每一个
-//				for (int i = 0; i < normalRules.get(currentNodeName).getRightRules().size(); i++) {
-//					for (int j = 0; j < node.getChildren().size(); j++) {
-//						if(node.getChildren().get(j).getNodeName().equals(normalRules.get(currentNodeName).getRightRules().get(i))){
-//							return node.getChildren().get(j).getHeadWords();
-//						}
-//					}
-//				}
-//			}else if(normalRules.get(currentNodeName).getDirection().equals("right")){
-//				for (int i = normalRules.get(currentNodeName).getRightRules().size() -1 ; i >= 0; i--) {
-//					for (int j = 0; j < node.getChildren().size(); j++) {
-//						if(node.getChildren().get(j).getNodeName().equals(normalRules.get(currentNodeName).getRightRules().get(i))){
-//							return node.getChildren().get(j).getHeadWords();
-//						}
-//					}
-//				}
-//			}
-//			//如果所有的规则都没有匹配，返回最左边的第一个
-//			return node.getChildren().get(0).getHeadWords();
-//		}else{
-//			return null;
-//		}
 
 	/**
 	 * 提取头结点【自底向上生成头结点】
-	 * @param node 带头结点的树【树的子树都是有头结点的，给根节点生成头结点】
-	 * @param rules
+	 * @param node 子节点带头结点，父节点不带头结点的树
+	 * @param normalRules 生成头结点的一般规则
+	 * @param specialRules 生成头结点的特殊规则
 	 * @return
 	 */
 	public String extractHeadWords(T node, HashMap<String,Rule> normalRules,HashMap<String,List<Rule>> specialRules){

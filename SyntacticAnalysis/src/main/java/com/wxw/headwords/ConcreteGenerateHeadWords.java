@@ -14,6 +14,11 @@ import com.wxw.tree.HeadTreeNode;
  */
 public class ConcreteGenerateHeadWords extends AbsractGenerateHeadWords<HeadTreeNode>{
 
+	/**
+	 * 为并列结构生成头结点
+	 * @param node 子节点带头结点，父节点不带头结点的树
+	 * @return
+	 */
 	@Override
 	public String generateHeadWordsForCordinator(HeadTreeNode node) {
 		//有些非终端节点需要进行处理，因为它可能是NP-SBJ的格式，我只需要拿NP的部分进行匹配操作
@@ -37,6 +42,12 @@ public class ConcreteGenerateHeadWords extends AbsractGenerateHeadWords<HeadTree
 		return null;
 	}
 
+	/**
+	 * 为特殊规则生成头结点
+	 * @param node 子节点带头结点，父节点不带头结点的树
+	 * @param specialRules 生成头结点的特殊规则
+	 * @return
+	 */
 	@Override
 	public String generateHeadWordsForSpecialRules(HeadTreeNode node, HashMap<String, List<Rule>> specialRules) {
 		String currNodeName = node.getNodeName();
@@ -72,6 +83,12 @@ public class ConcreteGenerateHeadWords extends AbsractGenerateHeadWords<HeadTree
 		}
 	}
 
+	/**
+	 * 为一般规则生成头结点
+	 * @param node 子节点带头结点，父节点不带头结点的树
+	 * @param normalRules 生成头结点的一般规则
+	 * @return
+	 */
 	@Override
 	public String generateHeadWordsForNormalRules(HeadTreeNode node, HashMap<String, Rule> normalRules) {
 		String currentNodeName = node.getNodeName();

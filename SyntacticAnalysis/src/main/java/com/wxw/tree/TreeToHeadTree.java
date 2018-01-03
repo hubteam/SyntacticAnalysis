@@ -14,7 +14,7 @@ import com.wxw.headwords.HeadWordsRuleSet;
  */
 public class TreeToHeadTree {
 
-	private AbsractGenerateHeadWords aghw = new ConcreteGenerateHeadWords(); 
+	private AbsractGenerateHeadWords<HeadTreeNode> aghw = new ConcreteGenerateHeadWords(); 
 	/**
 	 * 将一颗无头结点的树转成带头结点的树
 	 * @param treeNode

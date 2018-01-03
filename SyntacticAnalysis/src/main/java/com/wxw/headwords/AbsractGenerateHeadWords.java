@@ -3,21 +3,22 @@ package com.wxw.headwords;
 import java.util.HashMap;
 import java.util.List;
 
-import com.wxw.tree.HeadTreeNode;
+import com.wxw.headwords.Rule;
+import com.wxw.tree.TreeNode;
 
 /**
  * 生成头结点的模板类【模板设计模式】
  * @author 王馨苇
  *
  */
-public abstract class AbsractGenerateHeadWords {
+public abstract class AbsractGenerateHeadWords<T extends TreeNode>{
 	
 	/**
 	 * 为并列结构生成头结点
 	 * @param node
 	 * @return
 	 */
-	public abstract String generateHeadWordsForCordinator(HeadTreeNode node);
+	public abstract String generateHeadWordsForCordinator(T node);
 
 	/**
 	 * 为特殊规则生成头结点
@@ -25,7 +26,7 @@ public abstract class AbsractGenerateHeadWords {
 	 * @param specialRules
 	 * @return
 	 */
-	public abstract String generateHeadWordsForSpecialRules(HeadTreeNode node,HashMap<String,List<Rule>> specialRules);
+	public abstract String generateHeadWordsForSpecialRules(T node,HashMap<String,List<Rule>> specialRules);
 	
 	/**
 	 * 为一般规则生成头结点
@@ -33,33 +34,32 @@ public abstract class AbsractGenerateHeadWords {
 	 * @param normalRules
 	 * @return
 	 */
-	public String generateHeadWordsForNormalRules(HeadTreeNode node,HashMap<String,Rule> normalRules){
-		String currentNodeName = node.getNodeName();
-		if(normalRules.containsKey(currentNodeName)){
-			if(normalRules.get(currentNodeName).getDirection().equals("left")){
-				//用所有的子节点从左向右匹配规则中每一个
-				for (int i = 0; i < normalRules.get(currentNodeName).getRightRules().size(); i++) {
-					for (int j = 0; j < node.getChildren().size(); j++) {
-						if(node.getChildren().get(j).getNodeName().equals(normalRules.get(currentNodeName).getRightRules().get(i))){
-							return node.getChildren().get(j).getHeadWords();
-						}
-					}
-				}
-			}else if(normalRules.get(currentNodeName).getDirection().equals("right")){
-				for (int i = normalRules.get(currentNodeName).getRightRules().size() -1 ; i >= 0; i--) {
-					for (int j = 0; j < node.getChildren().size(); j++) {
-						if(node.getChildren().get(j).getNodeName().equals(normalRules.get(currentNodeName).getRightRules().get(i))){
-							return node.getChildren().get(j).getHeadWords();
-						}
-					}
-				}
-			}
-			//如果所有的规则都没有匹配，返回最左边的第一个
-			return node.getChildren().get(0).getHeadWords();
-		}else{
-			return null;
-		}
-	}
+	public abstract String generateHeadWordsForNormalRules(T node,HashMap<String,Rule> normalRules);
+//		String currentNodeName = node.getNodeName();
+//		if(normalRules.containsKey(currentNodeName)){
+//			if(normalRules.get(currentNodeName).getDirection().equals("left")){
+//				//用所有的子节点从左向右匹配规则中每一个
+//				for (int i = 0; i < normalRules.get(currentNodeName).getRightRules().size(); i++) {
+//					for (int j = 0; j < node.getChildren().size(); j++) {
+//						if(node.getChildren().get(j).getNodeName().equals(normalRules.get(currentNodeName).getRightRules().get(i))){
+//							return node.getChildren().get(j).getHeadWords();
+//						}
+//					}
+//				}
+//			}else if(normalRules.get(currentNodeName).getDirection().equals("right")){
+//				for (int i = normalRules.get(currentNodeName).getRightRules().size() -1 ; i >= 0; i--) {
+//					for (int j = 0; j < node.getChildren().size(); j++) {
+//						if(node.getChildren().get(j).getNodeName().equals(normalRules.get(currentNodeName).getRightRules().get(i))){
+//							return node.getChildren().get(j).getHeadWords();
+//						}
+//					}
+//				}
+//			}
+//			//如果所有的规则都没有匹配，返回最左边的第一个
+//			return node.getChildren().get(0).getHeadWords();
+//		}else{
+//			return null;
+//		}
 
 	/**
 	 * 提取头结点【自底向上生成头结点】
@@ -67,7 +67,7 @@ public abstract class AbsractGenerateHeadWords {
 	 * @param rules
 	 * @return
 	 */
-	public String extractHeadWords(HeadTreeNode node, HashMap<String,Rule> normalRules,HashMap<String,List<Rule>> specialRules){
+	public String extractHeadWords(T node, HashMap<String,Rule> normalRules,HashMap<String,List<Rule>> specialRules){
 		String headWords = null;
 		headWords = generateHeadWordsForCordinator(node);
 		

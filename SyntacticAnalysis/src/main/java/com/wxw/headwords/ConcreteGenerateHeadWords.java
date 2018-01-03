@@ -3,6 +3,8 @@ package com.wxw.headwords;
 import java.util.HashMap;
 import java.util.List;
 
+import com.wxw.headwords.AbsractGenerateHeadWords;
+import com.wxw.headwords.Rule;
 import com.wxw.tree.HeadTreeNode;
 
 /**
@@ -10,9 +12,8 @@ import com.wxw.tree.HeadTreeNode;
  * @author 王馨苇
  *
  */
-public class ConcreteGenerateHeadWords extends AbsractGenerateHeadWords{
+public class ConcreteGenerateHeadWords extends AbsractGenerateHeadWords<HeadTreeNode>{
 
-	
 	@Override
 	public String generateHeadWordsForCordinator(HeadTreeNode node) {
 		//有些非终端节点需要进行处理，因为它可能是NP-SBJ的格式，我只需要拿NP的部分进行匹配操作
@@ -66,6 +67,35 @@ public class ConcreteGenerateHeadWords extends AbsractGenerateHeadWords{
 			}
 			//否则返回最后一个		
 			return node.getChildren().get(node.getChildren().size() - 1).getHeadWords();
+		}else{
+			return null;
+		}
+	}
+
+	@Override
+	public String generateHeadWordsForNormalRules(HeadTreeNode node, HashMap<String, Rule> normalRules) {
+		String currentNodeName = node.getNodeName();
+		if(normalRules.containsKey(currentNodeName)){
+			if(normalRules.get(currentNodeName).getDirection().equals("left")){
+				//用所有的子节点从左向右匹配规则中每一个
+				for (int i = 0; i < normalRules.get(currentNodeName).getRightRules().size(); i++) {
+					for (int j = 0; j < node.getChildren().size(); j++) {
+						if(node.getChildren().get(j).getNodeName().equals(normalRules.get(currentNodeName).getRightRules().get(i))){
+							return node.getChildren().get(j).getHeadWords();
+						}
+					}
+				}
+			}else if(normalRules.get(currentNodeName).getDirection().equals("right")){
+				for (int i = normalRules.get(currentNodeName).getRightRules().size() -1 ; i >= 0; i--) {
+					for (int j = 0; j < node.getChildren().size(); j++) {
+						if(node.getChildren().get(j).getNodeName().equals(normalRules.get(currentNodeName).getRightRules().get(i))){
+							return node.getChildren().get(j).getHeadWords();
+						}
+					}
+				}
+			}
+			//如果所有的规则都没有匹配，返回最左边的第一个
+			return node.getChildren().get(0).getHeadWords();
 		}else{
 			return null;
 		}

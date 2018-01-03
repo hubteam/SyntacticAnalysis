@@ -27,6 +27,7 @@ public class TreeNode implements Cloneable{
 	
 	public TreeNode(String nodename){
 		this.nodename = nodename;
+		this.flag = true;
 	}
 	
 	public void setNewName(String name){
@@ -92,6 +93,11 @@ public class TreeNode implements Cloneable{
 	public int getIndex(){
 		return this.index;
 	}
+	
+	public boolean getFlag(){
+		return this.flag;
+	}
+	
 	/**
 	 * 输出为一行的括号表达式
 	 */

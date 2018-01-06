@@ -21,6 +21,8 @@ public class TreeNode implements Cloneable{
 	//为预处理步骤所用，标记当前节点是否要用
 	private boolean flag;
 	
+	private int wordindex;
+	
 	public TreeNode(){
 		
 	}
@@ -66,6 +68,14 @@ public class TreeNode implements Cloneable{
 		}
 	}
 	
+	public void setWordIndex(int wordindex){
+		this.wordindex = wordindex;
+	}
+	
+	public int getWordIndex(){
+		return this.wordindex;
+	}
+	
 	//判断是否为叶子节点
 	public boolean isLeaf(){
 		return this.children.size() == 0;
@@ -104,7 +114,7 @@ public class TreeNode implements Cloneable{
 	@Override
 	public String toString() {
 		if(this.children.size() == 0){
-			return " "+this.nodename;
+			return " "+this.nodename+"["+this.wordindex+"]";
 		}else{
 			String treestr = "";
 			treestr = "("+this.nodename;

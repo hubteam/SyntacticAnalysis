@@ -24,6 +24,7 @@ public class TreeToHeadTree {
 		String treeStr = "("+treeNode.toString()+")";
 		treeStr = format(treeStr);
 		int indexTree;//记录当前是第几颗子树
+		int wordindex = 0;
 		List<String> parts = stringToList(treeStr); 
         Stack<HeadTreeNode> tree = new Stack<HeadTreeNode>();
         for (int i = 0; i < parts.size(); i++) {
@@ -44,7 +45,16 @@ public class TreeToHeadTree {
 				while(!temp.isEmpty()){		
 					temp.peek().setParent(node);
 					temp.peek().setIndex(indexTree++);
-					node.addChild(temp.pop());
+					if(temp.peek().getChildren().size() == 0){
+						HeadTreeNode wordindexnode = temp.peek();
+						String[] str = temp.peek().getNodeName().split("\\[");
+						wordindexnode.setNewName(str[0]);
+						wordindexnode.setWordIndex(Integer.parseInt(str[1].substring(0, str[1].length()-1)));
+						node.addChild(wordindexnode);
+					}else{
+						node.addChild(temp.peek());
+					}
+					temp.pop();
 				}
 				//设置头节点的部分
 				//为每一个非终结符，且不是词性标记的设置头节点
@@ -52,9 +62,11 @@ public class TreeToHeadTree {
 				//(1)为词性标记的时候，头节点为词性标记下的词语
 				if(node.getChildren().size() == 1 && node.getChildren().get(0).getChildren().size() == 0){
 					node.setHeadWords(node.getChildren().get(0).getNodeName());
+					node.setHeadWordsPos(node.getNodeName());
 				//(2)为非终结符，且不是词性标记的时候，由规则推出
 				}else if(!node.isLeaf()){
-					node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
+					node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[0]);
+					node.setHeadWordsPos(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[1]);
 				}
 				tree.push(node);
 			}

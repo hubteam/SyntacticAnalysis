@@ -37,7 +37,7 @@ public class ConcreteGenerateHeadWords extends AbsractGenerateHeadWords<HeadTree
 			}
 		}
 		if(flag == true && record != -1){
-			return node.getChildren().get(record).getHeadWords();
+			return node.getChildren().get(record).getHeadWords()+"_"+node.getChildren().get(record).getHeadWordsPos();
 		}
 		return null;
 	}
@@ -62,7 +62,7 @@ public class ConcreteGenerateHeadWords extends AbsractGenerateHeadWords<HeadTree
 					for (int i = 0; i < specialRules.get(currNodeName).get(k).getRightRules().size(); i++) {
 						for (int j = 0; j < node.getChildren().size(); j++) {
 							if(node.getChildren().get(j).getNodeName().equals(specialRules.get(currNodeName).get(k).getRightRules().get(i))){
-								return node.getChildren().get(j).getHeadWords();
+								return node.getChildren().get(j).getHeadWords()+"_"+node.getChildren().get(j).getHeadWordsPos();
 							}
 						}
 					}
@@ -70,14 +70,14 @@ public class ConcreteGenerateHeadWords extends AbsractGenerateHeadWords<HeadTree
 					for (int i = specialRules.get(currNodeName).get(k).getRightRules().size() -1 ; i >= 0; i--) {
 						for (int j = 0; j < node.getChildren().size(); j++) {
 							if(node.getChildren().get(j).getNodeName().equals(specialRules.get(currNodeName).get(k).getRightRules().get(i))){
-								return node.getChildren().get(j).getHeadWords();
+								return node.getChildren().get(j).getHeadWords()+"_"+node.getChildren().get(j).getHeadWordsPos();
 							}
 						}
 					}
 				}
 			}
 			//否则返回最后一个		
-			return node.getChildren().get(node.getChildren().size() - 1).getHeadWords();
+			return node.getChildren().get(node.getChildren().size() - 1).getHeadWords()+"_"+node.getChildren().get(node.getChildren().size() - 1).getHeadWordsPos();
 		}else{
 			return null;
 		}
@@ -98,7 +98,7 @@ public class ConcreteGenerateHeadWords extends AbsractGenerateHeadWords<HeadTree
 				for (int i = 0; i < normalRules.get(currentNodeName).getRightRules().size(); i++) {
 					for (int j = 0; j < node.getChildren().size(); j++) {
 						if(node.getChildren().get(j).getNodeName().equals(normalRules.get(currentNodeName).getRightRules().get(i))){
-							return node.getChildren().get(j).getHeadWords();
+							return node.getChildren().get(j).getHeadWords()+"_"+node.getChildren().get(j).getHeadWordsPos();
 						}
 					}
 				}
@@ -106,13 +106,13 @@ public class ConcreteGenerateHeadWords extends AbsractGenerateHeadWords<HeadTree
 				for (int i = normalRules.get(currentNodeName).getRightRules().size() -1 ; i >= 0; i--) {
 					for (int j = 0; j < node.getChildren().size(); j++) {
 						if(node.getChildren().get(j).getNodeName().equals(normalRules.get(currentNodeName).getRightRules().get(i))){
-							return node.getChildren().get(j).getHeadWords();
+							return node.getChildren().get(j).getHeadWords()+"_"+node.getChildren().get(j).getHeadWordsPos();
 						}
 					}
 				}
 			}
 			//如果所有的规则都没有匹配，返回最左边的第一个
-			return node.getChildren().get(0).getHeadWords();
+			return node.getChildren().get(0).getHeadWords()+"_"+node.getChildren().get(0).getHeadWordsPos();
 		}else{
 			return null;
 		}

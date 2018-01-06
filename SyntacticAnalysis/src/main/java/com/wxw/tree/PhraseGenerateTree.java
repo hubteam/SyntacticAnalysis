@@ -20,6 +20,7 @@ public class PhraseGenerateTree {
 		treeStr = format(treeStr);
 		List<String> parts = stringToList(treeStr);
         Stack<TreeNode> tree = new Stack<TreeNode>();
+        int wordindex = 0;
         for (int i = 0; i < parts.size(); i++) {
 			if(!parts.get(i).equals(")") && !parts.get(i).equals(" ")){
 				TreeNode tn = new TreeNode(parts.get(i));
@@ -38,7 +39,13 @@ public class PhraseGenerateTree {
 				TreeNode node = temp.pop();
 				while(!temp.isEmpty()){		
 					temp.peek().setParent(node);
-					node.addChild(temp.pop());
+					if(temp.peek().getChildren().size() == 0){
+						TreeNode wordindexnode = temp.pop();
+						wordindexnode.setWordIndex(wordindex++);
+						node.addChild(wordindexnode);
+					}else{
+						node.addChild(temp.pop());
+					}
 				}
 				tree.push(node);
 			}

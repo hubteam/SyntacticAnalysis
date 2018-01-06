@@ -6,6 +6,7 @@ import java.util.List;
 public class HeadTreeNode extends TreeNode{
 
 	private String headWords;
+	private String headWordsPos;
 
 	public HeadTreeNode(String nodename){
 		super(nodename);
@@ -19,6 +20,14 @@ public class HeadTreeNode extends TreeNode{
 		return this.headWords;
 	}
 
+	public void setHeadWordsPos(String headWordsPos){
+		this.headWordsPos = headWordsPos;
+	}
+	
+	public String getHeadWordsPos(){
+		return this.headWordsPos;
+	}
+	
 	//返回父节点
 	public HeadTreeNode getParent(){
 		return (HeadTreeNode) parent;
@@ -40,14 +49,10 @@ public class HeadTreeNode extends TreeNode{
 	@Override
 	public String toString() {
 		if(super.children.size() == 0){
-			return " "+this.nodename;
+			return " "+this.nodename+"_["+this.getWordIndex()+"]";
 		}else{
 			String treestr = "";
-			if(this.headWords != null){
-				treestr = "("+this.nodename+"{"+this.headWords+"}";
-			}else{
-				treestr = "("+this.nodename;
-			}
+			treestr = "("+this.nodename+"{"+this.headWords+"["+this.headWordsPos+"]}";
 			
 			for (HeadTreeNode node:getChildren()) {
 				treestr += node.toString();

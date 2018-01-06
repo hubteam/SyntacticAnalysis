@@ -147,7 +147,7 @@ public class TreeNode implements Cloneable{
 	 */
 	public String toNoNoneSample(){
 		if(this.children.size() == 0 && this.flag == true){
-			return " "+this.nodename;
+			return " "+this.nodename+"["+this.wordindex+"]";
 		}else{
 			String treestr = "";
 			if(this.flag == true){

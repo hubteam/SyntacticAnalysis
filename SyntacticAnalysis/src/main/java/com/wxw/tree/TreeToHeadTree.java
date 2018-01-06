@@ -21,10 +21,9 @@ public class TreeToHeadTree {
 	 * @return
 	 */
 	public HeadTreeNode treeToHeadTree(TreeNode treeNode){
-		String treeStr = "("+treeNode.toString()+")";
+		String treeStr = "("+treeNode.toNoNoneSample()+")";
 		treeStr = format(treeStr);
 		int indexTree;//记录当前是第几颗子树
-		int wordindex = 0;
 		List<String> parts = stringToList(treeStr); 
         Stack<HeadTreeNode> tree = new Stack<HeadTreeNode>();
         for (int i = 0; i < parts.size(); i++) {

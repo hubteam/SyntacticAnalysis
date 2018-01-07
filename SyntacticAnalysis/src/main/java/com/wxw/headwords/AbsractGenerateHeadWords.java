@@ -47,12 +47,12 @@ public abstract class AbsractGenerateHeadWords<T extends TreeNode>{
 		String headWords = null;
 		headWords = generateHeadWordsForCordinator(node);
 		
-		if(headWords == null && normalRules != null){			
-			headWords = generateHeadWordsForNormalRules(node,normalRules);
+		if(headWords == null && specialRules != null){			
+			headWords = generateHeadWordsForSpecialRules(node,specialRules);	
 		}
 		
-		if(headWords == null && specialRules != null){
-			headWords = generateHeadWordsForSpecialRules(node,specialRules);
+		if(headWords == null && normalRules != null){
+			headWords = generateHeadWordsForNormalRules(node,normalRules);
 		}
 		return headWords;
 	}

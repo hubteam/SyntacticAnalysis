@@ -41,18 +41,6 @@ public class TestGenerateHeadWords {
 				+ "(NP{asbestos[NN]}(DT{no[DT]} no[2])(NN{asbestos[NN]} asbestos[3]))(PP{in[IN]}"
 				+ "(IN{in[IN]} in[4])(NP{products[NNS]}(PRP${our[PRP$]} our[5])(NNS{products[NNS]} products[6])))"
 				+ "(ADVP{now[RB]}(RB{now[RB]} now[7])))(.{.[.]} .[8])(''{''['']} ''[9]))";
-		
-		tree1 = pgt.generateTree(""
-				+ "((S(S(NP-SBJ(NNP Mr.)(NNP Spoon))(VP(VBD said)(SBAR (-NONE- 0)(S(NP-SBJ(DT the)(NN plan))"
-				+ "(VP(VBZ is)(RB not)(NP-PRD(DT an)(NN attempt)(S(NP-SBJ(-NONE- *))(VP(TO to)(VP(VB shore)"
-				+ "(PRT(RP up))(NP(NP(DT a)(NN decline))(PP-LOC(IN in)(NP(NN ad)(NNS pages)))(PP-TMP(IN in)"
-				+ "(NP(NP(DT the)(JJ first)(CD nine)(NNS months))(PP(IN of)(NP(CD 1989)))))))))))))))"
-				+ "(: ;)(S(NP-SBJ(NP(NNP Newsweek)(POS 's))(NN ad)(NNS pages))(VP(VBD totaled)(NP"
-				+ "(NP(CD 1,620))(, ,)(NP(NP(DT a)(NN drop))(PP(IN of)(NP (CD 3.2)(NN %)))"
-				+ "(PP-DIR(IN from)(NP(JJ last)(NN year)))))(, ,)(PP(VBG according)(PP(TO to)"
-				+ "(NP(NNP Publishers)(NNP Information)(NNP Bureau))))))(. .)))");		
-		TreePreTreatment.travelTree(tree1);
-		headTree2 = ttht.treeToHeadTree(tree2);
 	}
 	
 	@Test

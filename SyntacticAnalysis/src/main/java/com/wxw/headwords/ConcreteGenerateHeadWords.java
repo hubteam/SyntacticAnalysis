@@ -53,7 +53,7 @@ public class ConcreteGenerateHeadWords extends AbsractGenerateHeadWords<HeadTree
 		String currNodeName = node.getNodeName();
 		//如果最后一个是POS，返回最后一个
 		if(node.getChildren().get(node.getChildren().size() - 1).getNodeName().equals("POS")){
-			return node.getChildren().get(node.getChildren().size() - 1).getHeadWords();
+			return node.getChildren().get(node.getChildren().size() - 1).getHeadWords()+"_"+node.getChildren().get(node.getChildren().size() - 1).getHeadWordsPos();
 		}
 		if(specialRules.containsKey(currNodeName)){
 			for (int k = 0; k < specialRules.get(currNodeName).size(); k++) {

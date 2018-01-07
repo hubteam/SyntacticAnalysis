@@ -49,7 +49,7 @@ public class HeadTreeNode extends TreeNode{
 	@Override
 	public String toString() {
 		if(super.children.size() == 0){
-			return " "+this.nodename+"_["+this.getWordIndex()+"]";
+			return " "+this.nodename+"["+this.getWordIndex()+"]";
 		}else{
 			String treestr = "";
 			treestr = "("+this.nodename+"{"+this.headWords+"["+this.headWordsPos+"]}";

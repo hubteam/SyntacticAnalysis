@@ -15,7 +15,7 @@ import com.wxw.stream.SyntacticAnalysisSample;
  */
 public class HeadTreeToActions {
 
-	private AbsractGenerateHeadWords aghw = new ConcreteGenerateHeadWords(); 
+	private AbsractGenerateHeadWords<HeadTreeNode> aghw = new ConcreteGenerateHeadWords(); 
 	//动作序列
 	private List<String> actions = new ArrayList<String>();
 	//第一步POS后得到的n颗子树
@@ -126,7 +126,8 @@ public class HeadTreeToActions {
 				//所以遇到start就生成新的子树
 				HeadTreeNode node = new HeadTreeNode(subTree.get(i).getNodeName().split("_")[1]);
 				node.addChild(subTree.get(i).getChildren().get(0));
-				node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
+				node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[0]);
+				node.setHeadWordsPos(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[1]);
 				subTree.get(i).getChildren().get(0).setParent(node);
 				for (int j = i+1; j < subTree.size(); j++) {
 					//判断start后是否有join如果有，就和之前的start合并
@@ -137,7 +138,8 @@ public class HeadTreeToActions {
 							subTree.get(j).getNodeName().split("_")[0].equals("other")){
 						break;
 					}
-					node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
+					node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[0]);
+					node.setHeadWordsPos(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[1]);
 				}
 				//将一颗合并过的完整子树加入列表
 				combineChunk.add(node);
@@ -145,6 +147,7 @@ public class HeadTreeToActions {
 			}else if(subTree.get(i).getNodeName().equals("other")){
 				subTree.get(i).getChildren().get(0).setParent(null);
 				subTree.get(i).getChildren().get(0).setHeadWords(subTree.get(i).getChildren().get(0).getHeadWords());
+				subTree.get(i).getChildren().get(0).setHeadWordsPos(subTree.get(i).getChildren().get(0).getHeadWordsPos());
 				combineChunk.add(subTree.get(i).getChildren().get(0));
 			}
 		}
@@ -184,6 +187,7 @@ public class HeadTreeToActions {
 				HeadTreeNode tempnode = new HeadTreeNode(tree.getParent().getNodeName());
 				tempnode.setParent(tree.getParent().getParent());
 				tempnode.setHeadWords(tree.getParent().getHeadWords());
+				tempnode.setHeadWordsPos(tree.getParent().getHeadWordsPos());
 				tempnode.addChild(tree.getParent().getChildren().get(0));
 				tree.getParent().getChildren().get(0).setParent(tempnode);
 				subTree.set(i, tree.getParent());			
@@ -226,6 +230,7 @@ public class HeadTreeToActions {
 					HeadTreeNode node = new HeadTreeNode(tree.getParent().getNodeName());
 					node.setParent(tree.getParent().getParent());
 					node.setHeadWords(tree.getParent().getHeadWords());
+					node.setHeadWordsPos(tree.getParent().getHeadWordsPos());
 					for (int j = 0; j < tree.getParent().getChildren().size(); j++) {								
 						node.addChild(tree.getParent().getChildren().get(j));
 						tree.getParent().getChildren().get(j).setParent(node);						

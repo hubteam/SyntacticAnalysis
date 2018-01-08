@@ -3,28 +3,30 @@ package com.wxw.tree;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.wxw.headwords.AbsractGenerateHeadWords;
-import com.wxw.headwords.ConcreteGenerateHeadWords;
-import com.wxw.headwords.HeadWordsRuleSet;
-
-public class ActionsToHeadTree {
-
-	private AbsractGenerateHeadWords aghw = new ConcreteGenerateHeadWords(); 
+/**
+ * 将动作序列转成一棵树
+ * @author 王馨苇
+ *
+ */
+public class ActionsToTree {
+	
 	/**
 	 * 第一步pos
 	 * @param words 词语
 	 * @param actions 动作序列
 	 * @return
 	 */
-	public List<HeadTreeNode> getPosTree(List<String> words,List<String> actions){
+	public List<TreeNode> getPosTree(List<String> words,List<String> actions){
 		//第一步pos
-		List<HeadTreeNode> postree = new ArrayList<HeadTreeNode>();
+		List<TreeNode> postree = new ArrayList<TreeNode>();
 		for (int i = 0; i < words.size(); i++) {
-			HeadTreeNode node = new HeadTreeNode(words.get(i));
-			HeadTreeNode actionsNode = new HeadTreeNode(actions.get(i));
+			TreeNode node = new TreeNode(words.get(i));
+			TreeNode actionsNode = new TreeNode(actions.get(i));
 			actionsNode.addChild(node);
 			node.setParent(actionsNode);
-			actionsNode.setHeadWords(node.getNodeName());//需要设置头结点
+			node.setWordIndex(i);
+//			actionsNode.setHeadWords(node.getNodeName());//需要设置头结点
+//			actionsNode.setHeadWordsPos(actionsNode.getNodeName());
 			postree.add(actionsNode);
 		}
 		return postree;
@@ -36,13 +38,13 @@ public class ActionsToHeadTree {
 	 * @param actions 动作序列
 	 * @return
 	 */
-	public List<HeadTreeNode> getChunkTree(List<HeadTreeNode> postree,List<String> actions){
+	public List<TreeNode> getChunkTree(List<TreeNode> postree,List<String> actions){
 		//第二部chunk
 		//不用在这里设置头结点
-		List<HeadTreeNode> chunktree = new ArrayList<HeadTreeNode>();
+		List<TreeNode> chunktree = new ArrayList<TreeNode>();
 		int len = postree.size();
 		for (int i = 0; i < len; i++) {
-			HeadTreeNode chunk = new HeadTreeNode(actions.get(i+len));
+			TreeNode chunk = new TreeNode(actions.get(i+len));
 			chunk.addChild(postree.get(i));
 			postree.get(i).setParent(chunk);
 			chunktree.add(chunk);
@@ -55,10 +57,10 @@ public class ActionsToHeadTree {
 	 * @param chunktree chunk子树
 	 * @return
 	 */
-	public List<HeadTreeNode> combine(List<HeadTreeNode> chunktree){
+	public List<TreeNode> combine(List<TreeNode> chunktree){
 		//第三部合并
 		//需要为合并后的结点设置头结点
-		List<HeadTreeNode> combine = new ArrayList<HeadTreeNode>();
+		List<TreeNode> combine = new ArrayList<TreeNode>();
 		//遍历所有子树
 		for (int i = 0; i < chunktree.size(); i++) {		
 			//当前子树的根节点是start标记的		
@@ -66,9 +68,10 @@ public class ActionsToHeadTree {
 				//只要是start标记的就去掉root中的start，生成一颗新的子树，		
 				//因为有些结构，如（NP(NN chairman)），只有start没有join部分，
 				//所以遇到start就生成新的子树
-				HeadTreeNode node = new HeadTreeNode(chunktree.get(i).getNodeName().split("_")[1]);			
+				TreeNode node = new TreeNode(chunktree.get(i).getNodeName().split("_")[1]);			
 				node.addChild(chunktree.get(i).getChildren().get(0));	
-				node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
+//				node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[0]);
+//				node.setHeadWordsPos(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[1]);
 				chunktree.get(i).getChildren().get(0).setParent(node);			
 				for (int j = i+1; j < chunktree.size(); j++) {			
 					//判断start后是否有join如果有，就和之前的start合并				
@@ -80,15 +83,17 @@ public class ActionsToHeadTree {
 						break;				
 					}			
 				}
-				//头结点
-				node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
+//				//头结点
+//				node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[0]);
+//				node.setHeadWordsPos(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[1]);
 				//将一颗合并过的完整子树加入列表
 				combine.add(node);
 				//标记为other的，去掉other		 
 			}else if(chunktree.get(i).getNodeName().equals("other")){										
 				chunktree.get(i).getChildren().get(0).setParent(null);	
-				//其实这里的头结点就是在pos步骤中设置的头结点
-				chunktree.get(i).getChildren().get(0).setHeadWords(chunktree.get(i).getChildren().get(0).getHeadWords());
+//				//其实这里的头结点就是在pos步骤中设置的头结点
+//				chunktree.get(i).getChildren().get(0).setHeadWords(chunktree.get(i).getChildren().get(0).getHeadWords());
+//				chunktree.get(i).getChildren().get(0).setHeadWordsPos(chunktree.get(i).getChildren().get(0).getHeadWordsPos());
 				combine.add(chunktree.get(i).getChildren().get(0));		
 			}
 		}
@@ -102,12 +107,12 @@ public class ActionsToHeadTree {
 	 * @param actions 动作序列
 	 * @return
 	 */
-	public HeadTreeNode getTree(int len,List<HeadTreeNode> combine,List<String> actions){
+	public TreeNode getTree(int len,List<TreeNode> combine,List<String> actions){
 		//第四部build和check
 		int j = 0;
 		//遍历上一步得到的combine，根据action进行操作
 		for (int i = 0; i < combine.size(); i++) {
-			HeadTreeNode node = new HeadTreeNode(actions.get(j+2*len));
+			TreeNode node = new TreeNode(actions.get(j+2*len));
 			node.addChild(combine.get(i));
 			combine.get(i).setParent(node);
 			combine.set(i, node);
@@ -126,13 +131,14 @@ public class ActionsToHeadTree {
 				preIndex = i+1;
 				//进行合并
 				//建立合并后的父节点
-				HeadTreeNode combineNode = new HeadTreeNode(combine.get(preIndex).getNodeName().split("_")[1]);
+				TreeNode combineNode = new TreeNode(combine.get(preIndex).getNodeName().split("_")[1]);
 				for (int k = preIndex; k <= currentIndex; k++) {
 					combineNode.addChild(combine.get(k).getChildren().get(0));
 					combine.get(k).getChildren().get(0).setParent(combineNode);
 				}
-				//设置头结点
-				combineNode.setHeadWords(aghw.extractHeadWords(combineNode, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()));
+//				//设置头结点
+//				combineNode.setHeadWords(aghw.extractHeadWords(combineNode, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[0]);
+//				combineNode.setHeadWordsPos(aghw.extractHeadWords(combineNode, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[1]);
 				combine.set(preIndex, combineNode);
 				//删除那些用于合并的join
 				for (int k = currentIndex; k >= preIndex+1; k--) {
@@ -156,16 +162,16 @@ public class ActionsToHeadTree {
 	 * @param actions 动作序列
 	 * @return
 	 */
-	public HeadTreeNode actionsToTree(List<String> words,List<String> actions){
+	public TreeNode actionsToTree(List<String> words,List<String> actions){
 		//第一步pos
-		List<HeadTreeNode> postree = getPosTree(words,actions);
+		List<TreeNode> postree = getPosTree(words,actions);
 		//第二部chunk
-		List<HeadTreeNode> chunktree = getChunkTree(postree,actions);
+		List<TreeNode> chunktree = getChunkTree(postree,actions);
 		//第三部合并
 		//需要为合并后的结点设置头结点
-		List<HeadTreeNode> combine = combine(chunktree);
+		List<TreeNode> combine = combine(chunktree);
 		//第四部build和check
-		HeadTreeNode tree = getTree(words.size(),combine,actions);
+		TreeNode tree = getTree(words.size(),combine,actions);
 		return tree;
 	}
 }

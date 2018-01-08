@@ -126,6 +126,24 @@ public class TreeNode implements Cloneable{
 		}
 	}
 	
+	/**
+	 * 输出没有换行的括号表达式形式
+	 * @return
+	 */
+	public String toBracket() {
+		if(this.children.size() == 0){
+			return " "+this.nodename;
+		}else{
+			String treestr = "";
+			treestr = "("+this.nodename;
+			for (TreeNode node:this.children) {
+				treestr += node.toString();
+			}
+			treestr += ")";
+			return treestr;
+		}
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 

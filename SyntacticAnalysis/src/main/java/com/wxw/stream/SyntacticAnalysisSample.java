@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.wxw.tree.ActionsToTree;
+import com.wxw.tree.HeadTreeNode;
 import com.wxw.tree.TreeNode;
 
 /**
@@ -55,8 +57,7 @@ public class SyntacticAnalysisSample<T extends TreeNode> {
     	for (int i = 0; i < posTree.size(); i++) {
     		String word = posTree.get(i).getChildren().get(0).getNodeName();
     		poses.add(posTree.get(i).getNodeName());
-			words.add(word);
-				
+			words.add(word);				
 		}
     }
     
@@ -121,10 +122,22 @@ public class SyntacticAnalysisSample<T extends TreeNode> {
 		if (this == obj) {
             return true;
         } else if (obj instanceof SyntacticAnalysisSample) {
-        	SyntacticAnalysisSample<T> a = (SyntacticAnalysisSample) obj;
+        	SyntacticAnalysisSample<T> a = (SyntacticAnalysisSample<T>) obj;
             return Arrays.equals(getActions().stream().toArray(), a.getActions().stream().toArray());
         } else {
             return false;
         }
+	}
+	
+	/**
+	 * 转成样本类
+	 * @param words 词语序列
+	 * @param actions 动作序列
+	 * @return
+	 */
+	public static TreeNode toSample(List<String> words ,List<String> actions){
+		ActionsToTree att = new ActionsToTree();
+		TreeNode tree = att.actionsToTree(words, actions);
+		return tree;
 	}
 }

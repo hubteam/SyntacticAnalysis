@@ -34,12 +34,12 @@ public class Tree2Action2TreeTest{
 	private List<String> words ;
 	private List<String> actions ;
 
-	private ActionsToHeadTree att ;
+	private ActionsToTree att ;
 	private TreeNode newTree ;
 	
 	@Before
 	public void setUP() throws UnsupportedOperationException, FileNotFoundException, IOException, CloneNotSupportedException{
-		is = Tree2Action2TreeTest.class.getClassLoader().getResource("com/wxw/test/wsj_0076.mrg");
+		is = Tree2Action2TreeTest.class.getClassLoader().getResource("com/wxw/test/wsj_0015new.mrg");
 		lineStream = new PlainTextByTreeStream(new FileInputStreamFactory(new File(is.getFile())), "utf8");
 		txt = lineStream.read();
 		pgt = new PhraseGenerateTree();
@@ -51,7 +51,7 @@ public class Tree2Action2TreeTest{
 		words = sample.getWords();
 		actions = sample.getActions();
 
-		att = new ActionsToHeadTree();
+		att = new ActionsToTree();
 		newTree = att.actionsToTree(words, actions);
 	}
 	
@@ -63,7 +63,7 @@ public class Tree2Action2TreeTest{
 	 */
 	@Test
 	public void testLoadTree() throws FileNotFoundException, IOException, CloneNotSupportedException{
-		assertEquals(headTree, newTree);
+		assertEquals(tree, newTree);
 	}	
 	
 }

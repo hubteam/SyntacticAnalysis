@@ -8,8 +8,11 @@ import java.util.logging.Logger;
 import com.wxw.evaluate.SyntacticAnalysisEvaluateMonitor;
 import com.wxw.evaluate.SyntacticAnalysisMeasure;
 import com.wxw.stream.SyntacticAnalysisSample;
-import com.wxw.tree.ActionsToHeadTree;
+import com.wxw.tree.ActionsToTree;
 import com.wxw.tree.HeadTreeNode;
+import com.wxw.tree.HeadTreeToActions;
+import com.wxw.tree.TreeNode;
+import com.wxw.tree.TreeToHeadTree;
 import com.wxw.wordsegandpos.model.WordSegAndPosME;
 
 import opennlp.tools.util.eval.Evaluator;
@@ -67,9 +70,9 @@ public class SyntacticAnalysisEvaluatorForChina extends Evaluator<SyntacticAnaly
 			try {
 				List<String> words = sample.getWords();
 				List<String> actionsRef = sample.getActions();
-				ActionsToHeadTree att = new ActionsToHeadTree();
+				ActionsToTree att = new ActionsToTree();
 				//参考样本没有保存完整的一棵树，需要将动作序列转成一颗完整的树
-				HeadTreeNode treeRef = att.actionsToTree(words, actionsRef);
+				TreeNode treeRef = att.actionsToTree(words, actionsRef);
 				String[][] poses = postagger.tag(5, words.toArray(new String[words.size()]));
 				List<List<HeadTreeNode>> posTree = toPosTree(words.toArray(new String[words.size()]), poses);
 				List<List<HeadTreeNode>> chunkTree = chunktagger.tagKChunk(20, posTree, null);	
@@ -78,6 +81,8 @@ public class SyntacticAnalysisEvaluatorForChina extends Evaluator<SyntacticAnaly
 					samplePre = new SyntacticAnalysisSample<HeadTreeNode>(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 					measure.countNodeDecodeTrees(treePre);
 				}else{
+					HeadTreeToActions tta = new HeadTreeToActions();
+					samplePre = tta.treeToAction(treePre);
 					measure.update(treeRef, treePre);
 				}	
 			} catch(Exception e){

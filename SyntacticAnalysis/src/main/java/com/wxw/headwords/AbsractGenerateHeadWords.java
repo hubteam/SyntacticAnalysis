@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.wxw.headwords.Rule;
-import com.wxw.tree.TreeNode;
+import com.wxw.tree.HeadTreeNode;
 
 /**
  * 生成头结点的模板类【模板设计模式】
  * @author 王馨苇
  *
  */
-public abstract class AbsractGenerateHeadWords<T extends TreeNode>{
+public abstract class AbsractGenerateHeadWords<T extends HeadTreeNode>{
 	
 	/**
 	 * 为并列结构生成头结点

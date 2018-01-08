@@ -5,6 +5,11 @@ import com.wxw.tree.HeadTreeNode;
 
 import opennlp.tools.util.eval.EvaluationMonitor;
 
+/**
+ * 评估的监测类
+ * @author 王馨苇
+ *
+ */
 public class SyntacticAnalysisEvaluateMonitor implements EvaluationMonitor<SyntacticAnalysisSample<HeadTreeNode>>{
 
 	/**

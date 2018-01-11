@@ -144,6 +144,30 @@ public class TreeNode implements Cloneable{
 		}
 	}
 	
+	/**
+	 * 输出没有换行没有空节点的的括号表达式形式
+	 * @return
+	 */
+	public String toNoNoneBracket() {
+		if(this.children.size() == 0 && this.flag == true){
+			return " "+this.nodename;
+		}else{
+			String treestr = "";
+			if(this.flag == true){
+				treestr = "("+this.nodename;
+			}	
+			for (TreeNode node:this.children) {
+				
+				treestr += node.toNoNoneBracket();
+			}
+			if(this.flag == true){
+				treestr += ")";
+			}
+			
+			return treestr;
+		}
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 

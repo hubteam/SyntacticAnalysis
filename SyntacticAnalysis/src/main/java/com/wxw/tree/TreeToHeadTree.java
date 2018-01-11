@@ -21,7 +21,7 @@ public class TreeToHeadTree {
 	 * @return
 	 */
 	public HeadTreeNode treeToHeadTree(TreeNode treeNode){
-		String treeStr = "("+treeNode.toBracket()+")";
+		String treeStr = "("+treeNode.toNoNoneSample()+")";
 		treeStr = format(treeStr);
 		int indexTree;//记录当前是第几颗子树
 		List<String> parts = stringToList(treeStr); 

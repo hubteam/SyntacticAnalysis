@@ -68,7 +68,7 @@ public class HeadTreeNode extends TreeNode{
 	 */
 	public String toBracket(){
 		if(this.children.size() == 0){
-			return " "+this.nodename;
+			return " "+this.nodename+"["+getWordIndex()+"]";
 		}else{
 			String treestr = "";
 			treestr = "("+this.nodename;

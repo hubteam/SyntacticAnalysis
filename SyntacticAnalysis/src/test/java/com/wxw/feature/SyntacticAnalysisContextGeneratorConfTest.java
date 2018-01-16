@@ -28,7 +28,6 @@ public class SyntacticAnalysisContextGeneratorConfTest{
     private HeadTreeNode headTree;
 	private HeadTreeToActions tta;
 	private SyntacticAnalysisSample<HeadTreeNode> sample;
-	private List<String> words;
 	private List<HeadTreeNode> chunkTree;
 	private List<List<HeadTreeNode>> buildAndCheckTree;
 	private List<String> actions;
@@ -122,7 +121,6 @@ public class SyntacticAnalysisContextGeneratorConfTest{
         headTree = ttht.treeToHeadTree(tree);
 		tta = new HeadTreeToActions();
 		sample = tta.treeToAction(headTree);
-		words = sample.getWords();
 		chunkTree = sample.getChunkTree();
 		buildAndCheckTree = sample.getBuildAndCheckTree();
 		actions = sample.getActions();

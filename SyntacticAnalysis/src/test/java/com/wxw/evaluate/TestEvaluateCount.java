@@ -2,12 +2,9 @@ package com.wxw.evaluate;
 
 import static org.junit.Assert.*;
 
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import com.wxw.evalstructure.EvalStructure;
 import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
 
@@ -20,9 +17,7 @@ public class TestEvaluateCount {
 
 	private PhraseGenerateTree pgt;
 	private TreeNode treeRef;
-	private List<EvalStructure> etRef;
 	private TreeNode treePre;
-	private List<EvalStructure> etPre;
 	private SyntacticAnalysisMeasure measure;
 	
 	@Before
@@ -36,9 +31,6 @@ public class TestEvaluateCount {
 	
 	@Test
 	public void test(){
-		System.out.println(measure.getCBs());
-		System.out.println(measure.getCBs_0());
-		System.out.println(measure.getCBs_2());
 		assertEquals(measure.getPrecisionScore(),0.8181,0.001);
 		assertEquals(measure.getRecallScore(),0.9,0.001);
 		assertEquals(measure.getMeasure(),0.8570,0.001);

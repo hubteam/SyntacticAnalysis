@@ -29,14 +29,12 @@ import opennlp.tools.ml.EventTrainer;
 import opennlp.tools.ml.TrainerFactory;
 import opennlp.tools.ml.TrainerFactory.TrainerType;
 import opennlp.tools.ml.maxent.io.PlainTextGISModelReader;
-import opennlp.tools.ml.maxent.io.PlainTextGISModelWriter;
 import opennlp.tools.ml.model.AbstractModel;
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.ml.model.SequenceClassificationModel;
 import opennlp.tools.tokenize.WhitespaceTokenizer;
 import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.Sequence;
 import opennlp.tools.util.TrainingParameters;
 /**
  * 分步骤训练chunk模型
@@ -47,10 +45,9 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
 
 	public static final int DEFAULT_BEAM_SIZE = 20;
 	private SyntacticAnalysisContextGenerator<HeadTreeNode> contextGenerator;
+	@SuppressWarnings("unused")
 	private int size;
-	private Sequence bestSequence;
 	private SyntacticAnalysisSequenceClassificationModel<HeadTreeNode> model;
-	private SyntacticAnalysisModelForChunk modelPackage;
 
     private SyntacticAnalysisSequenceValidator<HeadTreeNode> sequenceValidator;
 	
@@ -67,6 +64,7 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
      * @param model 模型
      * @param contextGen 特征
      */
+	@SuppressWarnings("unchecked")
 	private void init(SyntacticAnalysisModelForChunk model, SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen) {
 		int beamSize = SyntacticAnalysisMEForChunk.DEFAULT_BEAM_SIZE;
 
@@ -76,13 +74,11 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
             beamSize = Integer.parseInt(beamSizeString);
         }
 
-        modelPackage = model;
-
         contextGenerator = contextGen;
         size = beamSize;
         sequenceValidator = new DefaultSyntacticAnalysisSequenceValidator();
         if (model.getChunkTreeSequenceModel() != null) {
-            this.model = model.getChunkTreeSequenceModel();
+            this.model = (SyntacticAnalysisSequenceClassificationModel<HeadTreeNode>) model.getChunkTreeSequenceModel();
         } else {
             this.model = new SyntacticAnalysisBeamSearch(beamSize,
                     model.getChunkTreeModel(), 0);
@@ -133,23 +129,21 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
         if (beamSizeString != null) {
             beamSize = Integer.parseInt(beamSizeString);
         }
-        MaxentModel posModel = null;
+        MaxentModel chunkModel = null;
         Map<String, String> manifestInfoEntries = new HashMap<String, String>();
-        //event_model_trainer
         TrainerType trainerType = TrainerFactory.getTrainerType(params.getSettings());
-        SequenceClassificationModel<String> seqPosModel = null;
+        SequenceClassificationModel<String> seqChunkModel = null;
         if (TrainerType.EVENT_MODEL_TRAINER.equals(trainerType)) {
-        	//sampleStream为PhraseAnalysisSampleStream对象
             ObjectStream<Event> es = new SyntacticAnalysisSampleEventForChunk(sampleStream, contextGen);
             EventTrainer trainer = TrainerFactory.getEventTrainer(params.getSettings(),
                     manifestInfoEntries);
-            posModel = trainer.train(es);                       
+            chunkModel = trainer.train(es);                       
         }
 
-        if (posModel != null) {
-            return new SyntacticAnalysisModelForChunk(languageCode, posModel, beamSize, manifestInfoEntries);
+        if (chunkModel != null) {
+            return new SyntacticAnalysisModelForChunk(languageCode, chunkModel, beamSize, manifestInfoEntries);
         } else {
-            return new SyntacticAnalysisModelForChunk(languageCode, seqPosModel, manifestInfoEntries);
+            return new SyntacticAnalysisModelForChunk(languageCode, seqChunkModel, manifestInfoEntries);
         }
 	}
 
@@ -165,7 +159,6 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
 	 */
 	public static SyntacticAnalysisModelForChunk train(File file, File modelFile, TrainingParameters params,
 			SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, String encoding) {
-//		PlainTextGISModelWriter modelWriter = null;
 		OutputStream modelOut = null;
 		SyntacticAnalysisModelForChunk model = null;
 		try {
@@ -173,8 +166,6 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
 			ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sampleStream = new SyntacticAnalysisSampleStream(lineStream);
 			model = SyntacticAnalysisMEForChunk.train("zh", sampleStream, params, contextGen);
             //模型的写出，文本文件
-//            modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getChunkTreeModel(), modeltxtFile);
-//            modelWriter.persist();
             modelOut = new BufferedOutputStream(new FileOutputStream(modelFile));           
             model.serialize(modelOut);
             return model;
@@ -182,12 +173,10 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}finally {
-			
+		}finally {			
             if (modelOut != null) {
                 try {
                 	modelOut.close();
-//                	modelWriter.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -223,13 +212,10 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
 			System.out.println("读取模型成功");
             return model;
         } catch (UnsupportedOperationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		return null;
@@ -303,8 +289,8 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
 	 */
 	@Override
 	public List<HeadTreeNode> chunkTree(String[] wordsandposes) {
-		String[] words = null;
-		String[] poses = null;
+		String[] words = new String[wordsandposes.length];
+		String[] poses = new String[wordsandposes.length];
 		for (int i = 0; i < wordsandposes.length; i++) {
 			words[i] = wordsandposes[i].split("/")[0];
 			poses[i] = wordsandposes[i].split("/")[1];
@@ -357,8 +343,8 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
 	 */
 	@Override
 	public String[] chunk(String[] wordsandposes) {
-		String[] words = null;
-		String[] poses = null;
+		String[] words = new String[wordsandposes.length];
+		String[] poses = new String[wordsandposes.length];
 		for (int i = 0; i < wordsandposes.length; i++) {
 			words[i] = wordsandposes[i].split("/")[0];
 			poses[i] = wordsandposes[i].split("/")[1];
@@ -380,11 +366,11 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
 	 * @param posTree pos子树
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	@Override
 	public String[] chunk(List<HeadTreeNode> posTree) {
 		List<List<HeadTreeNode>> allposTree = new ArrayList<>();
 		allposTree.add(posTree);
-		HeadTreeToActions tta = new HeadTreeToActions();
 		List<HeadTreeNode> chunkTree = tagChunk(allposTree,null);
 		String[] wordandpos = null;
 		String[] chunkTag = null;

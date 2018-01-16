@@ -83,6 +83,7 @@ public class SyntacticAnalysisCrossValidationForOneStep {
 	 * @param contextGenerator 上下文
 	 * @throws IOException io异常
 	 */
+	@SuppressWarnings("unused")
 	public void evaluateContainsPos(ObjectStream<SyntacticAnalysisSample<HeadTreeNode>> sample, int nFolds,
 			SyntacticAnalysisContextGenerator<HeadTreeNode> contextGenerator,SyntacticAnalysisContextGeneratorContainsPos contextGenForPos) throws IOException{
 		CrossValidationPartitioner<SyntacticAnalysisSample<HeadTreeNode>> partitioner = new CrossValidationPartitioner<SyntacticAnalysisSample<HeadTreeNode>>(sample, nFolds);

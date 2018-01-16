@@ -21,7 +21,7 @@ import opennlp.tools.util.Cache;
  */
 public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceClassificationModel<HeadTreeNode>{
 
-	private AbsractGenerateHeadWords aghw = new ConcreteGenerateHeadWords(); 
+	private AbsractGenerateHeadWords<HeadTreeNode> aghw = new ConcreteGenerateHeadWords(); 
 	public static final String BEAM_SIZE_PARAMETER = "BeamSize";
 	private static final Object[] EMPTY_ADDITIONAL_CONTEXT = new Object[0];
 	protected int size;
@@ -32,12 +32,12 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 	private double[] buildprobs;
 	private double[] chunkprobs;
 	private Cache<String[], double[]> contextsCache;
-	private static final int zeroLog = -100000;
 
 	public SyntacticAnalysisBeamSearch(int size, MaxentModel buildmodel, MaxentModel checkmodel) {
 		this(size, buildmodel, checkmodel, 0);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SyntacticAnalysisBeamSearch(int size, MaxentModel buildmodel, MaxentModel checkmodel, int cacheSize) {
 		this.size = size;
 		this.buildmodel = buildmodel;
@@ -53,6 +53,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 		this(size, chunkmodel, 0);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SyntacticAnalysisBeamSearch(int size, MaxentModel chunkmodel, int cacheSize) {
 		this.size = size;
 		this.chunkmodel = chunkmodel;
@@ -69,6 +70,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 	 * @param cacheSize
 	 * @param flag 字符串类型的标记，证明是一步训练的句法模型
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SyntacticAnalysisBeamSearch(int size, MaxentModel model, int cacheSize,String flag) {
 		this.size = size;
 		this.chunkmodel = model;
@@ -241,6 +243,7 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 	 * @param validator 序列验证
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode>[] bestSequencesForBuildAndCheck(int num, List<List<HeadTreeNode>> comnineChunkTree,
 			Object[] ac, double minSequenceScore, SyntacticAnalysisContextGenerator<HeadTreeNode> generator,
 			SyntacticAnalysisSequenceValidator<HeadTreeNode> validator) {
@@ -277,7 +280,6 @@ public class SyntacticAnalysisBeamSearch implements SyntacticAnalysisSequenceCla
 				
 				int p;
 				String out;
-//				SyntacticAnalysisSequenceForBuildAndCheck<HeadTreeNode> ns = null;
 				for (p = 0; p < scoresForBuild.length; ++p) {
 					if(scoresForBuild[p] >= min){
 						out = this.buildmodel.getOutcome(p);

@@ -104,18 +104,34 @@ public class SyntacticAnalysisMeasure {
         return target > 0 ? (double) truePositive / (double) target : 0;
     }
     
+    /**
+     * 交叉括号数
+     * @return
+     */
     public double getCBs(){
     	return sentences > 0 ? (double) CBs / (double) sentences : 0;
     }
     
+    /**
+     * 0交叉括号数的句子占测试集句子总数的比例
+     * @return
+     */
     public double getCBs_0(){
     	return sentences > 0 ? (double) CBs_0 / (double) sentences : 0;
     }
     
+    /**
+     * 交叉括号数小于等于2的句子占测试集句子总数的比例
+     * @return
+     */
     public double getCBs_2(){
     	return sentences > 0 ? (double) CBs_2 / (double) sentences : 0;
     }
     
+    /**
+     * 句子正确率
+     * @return
+     */
     public double getSentenceAccuracy(){
     	return trueSentence > 0 ? (double) trueSentence / (double) sentences : 0;
     }
@@ -129,7 +145,6 @@ public class SyntacticAnalysisMeasure {
             return 2 * (getPrecisionScore() * getRecallScore())
                     / (getPrecisionScore() + getRecallScore());
         } else {
-            // cannot divide by zero, return error code
             return -1;
         }
     }

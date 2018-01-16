@@ -20,7 +20,6 @@ import com.wxw.tree.HeadTreeToActions;
 import com.wxw.tree.PhraseGenerateTree;
 import com.wxw.tree.TreeNode;
 import com.wxw.tree.TreeToHeadTree;
-import com.wxw.wordsegandpos.samplestream.WordSegAndPosSample;
 
 import opennlp.tools.ml.BeamSearch;
 import opennlp.tools.ml.EventTrainer;
@@ -46,10 +45,10 @@ import opennlp.tools.util.TrainingParameters;
 public class SyntacticAnalysisMEContainsPos {
 	public static final int DEFAULT_BEAM_SIZE = 20;
 	private SyntacticAnalysisContextGeneratorContainsPos contextGenerator;
+	@SuppressWarnings("unused")
 	private int size;
 	private Sequence bestSequence;
 	private SequenceClassificationModel<String> model;
-	private SyntacticAnalysisModelContainsPos modelPackage;
 
     private SequenceValidator<String> sequenceValidator;
 	
@@ -74,8 +73,6 @@ public class SyntacticAnalysisMEContainsPos {
         if (beamSizeString != null) {
             beamSize = Integer.parseInt(beamSizeString);
         }
-
-        modelPackage = model;
 
         contextGenerator = contextGen;
         size = beamSize;
@@ -198,13 +195,16 @@ public class SyntacticAnalysisMEContainsPos {
 		return this.tag(sentence, (Object[]) null);
 	}
 
+	@SuppressWarnings("unchecked")
 	public String[] tag(String[] sentence, Object[] additionaContext) {
 		this.bestSequence = this.model.bestSequence(sentence, additionaContext, this.contextGenerator,
 				this.sequenceValidator);
+		@SuppressWarnings("rawtypes")
 		List t = this.bestSequence.getOutcomes();
 		return (String[]) t.toArray(new String[t.size()]);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public String[][] tag(int numTaggings, String[] sentence) {
 		Sequence[] bestSequences = this.model.bestSequences(numTaggings, sentence, (Object[]) null, this.contextGenerator,
 				this.sequenceValidator);

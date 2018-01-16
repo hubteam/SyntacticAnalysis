@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.syntacticanalysis.SyntacticAnalysisForPos;
 import com.wxw.tree.HeadTreeNode;
 
@@ -58,6 +57,7 @@ public class POSTaggerMEExtend  implements POSTagger,SyntacticAnalysisForPos<Hea
 	private SequenceClassificationModel<String> model;
 	private SequenceValidator<String> sequenceValidator;
 
+	@SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
 	public POSTaggerMEExtend(POSModel model) {
 		POSTaggerFactory factory = model.getFactory();
 		int beamSize = POSTaggerMEExtend.DEFAULT_BEAM_SIZE;
@@ -67,11 +67,11 @@ public class POSTaggerMEExtend  implements POSTagger,SyntacticAnalysisForPos<Hea
 		this.tagDictionary = factory.getTagDictionary();
 		this.size = beamSize;
 		this.sequenceValidator = factory.getSequenceValidator();
-//		if (model.getPosSequenceModel() != null) {
-//			this.model = model.getPosSequenceModel();
-//		} else {
+		if (model.getPosSequenceModel() != null) {
+			this.model = model.getPosSequenceModel();
+		} else {
 			this.model = new BeamSearch(beamSize, model.getPosModel(), 0);
-//		}
+		}
 
 	}
 
@@ -86,7 +86,7 @@ public class POSTaggerMEExtend  implements POSTagger,SyntacticAnalysisForPos<Hea
 	public String[] tag(String[] sentence, Object[] additionaContext) {
 		this.bestSequence = this.model.bestSequence(sentence, additionaContext, this.contextGen,
 				this.sequenceValidator);
-		List t = this.bestSequence.getOutcomes();
+		List<String> t = this.bestSequence.getOutcomes();
 		return (String[]) t.toArray(new String[t.size()]);
 	}
 
@@ -96,7 +96,7 @@ public class POSTaggerMEExtend  implements POSTagger,SyntacticAnalysisForPos<Hea
 		String[][] tags = new String[bestSequences.length][];
 
 		for (int si = 0; si < tags.length; ++si) {
-			List t = bestSequences[si].getOutcomes();
+			List<String> t = bestSequences[si].getOutcomes();
 			tags[si] = (String[]) t.toArray(new String[t.size()]);
 		}
 
@@ -123,6 +123,7 @@ public class POSTaggerMEExtend  implements POSTagger,SyntacticAnalysisForPos<Hea
 		return this.getOrderedTags(words, tags, index, (double[]) null);
 	}
 
+	@SuppressWarnings("deprecation")
 	public String[] getOrderedTags(List<String> words, List<String> tags, int index, double[] tprobs) {
 		if (this.modelPackage.getPosModel() == null) {
 			throw new UnsupportedOperationException(
@@ -164,10 +165,10 @@ public class POSTaggerMEExtend  implements POSTagger,SyntacticAnalysisForPos<Hea
 		}
 
 		POSContextGenerator contextGenerator = posFactory.getPOSContextGenerator();
-		HashMap manifestInfoEntries = new HashMap();
+		HashMap<String, String> manifestInfoEntries = new HashMap<>();
 		TrainerType trainerType = TrainerFactory.getTrainerType(trainParams.getSettings());
 		MaxentModel posModel = null;
-		SequenceClassificationModel seqPosModel = null;
+		SequenceClassificationModel<String> seqPosModel = null;
 		if (TrainerType.EVENT_MODEL_TRAINER.equals(trainerType)) {
 			POSSampleEventStream trainer = new POSSampleEventStream(samples, contextGenerator);
 			EventTrainer ss = TrainerFactory.getEventTrainer(trainParams.getSettings(), manifestInfoEntries);
@@ -207,6 +208,7 @@ public class POSTaggerMEExtend  implements POSTagger,SyntacticAnalysisForPos<Hea
 		return ngramModel.toDictionary(true);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void populatePOSDictionary(ObjectStream<POSSample> samples, MutableTagDictionary dict, int cutoff)
 			throws IOException {
 		System.out.println("Expanding POS Dictionary ...");
@@ -238,7 +240,7 @@ public class POSTaggerMEExtend  implements POSTagger,SyntacticAnalysisForPos<Hea
 
 						for (int arg13 = 0; arg13 < arg12; ++arg13) {
 							String tag = arg11[arg13];
-							Map value = (Map) newEntries.get(word);
+							Map value =  (Map) newEntries.get(word);
 							if (!value.containsKey(tag)) {
 								value.put(tag, new AtomicInteger(cutoff));
 							}

@@ -12,7 +12,6 @@ import com.wxw.tree.ActionsToTree;
 import com.wxw.tree.HeadTreeNode;
 import com.wxw.tree.HeadTreeToActions;
 import com.wxw.tree.TreeNode;
-import com.wxw.tree.TreeToHeadTree;
 import com.wxw.wordsegandpos.model.WordSegAndPosME;
 
 import opennlp.tools.util.eval.Evaluator;

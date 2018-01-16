@@ -19,7 +19,6 @@ public class SyntacticAnalysisEvaluateMonitor implements EvaluationMonitor<Synta
 	 */
 	@Override
 	public void correctlyClassified(SyntacticAnalysisSample<HeadTreeNode> arg0, SyntacticAnalysisSample<HeadTreeNode> arg1) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -30,7 +29,6 @@ public class SyntacticAnalysisEvaluateMonitor implements EvaluationMonitor<Synta
 	 */
 	@Override
 	public void missclassified(SyntacticAnalysisSample<HeadTreeNode> arg0, SyntacticAnalysisSample<HeadTreeNode> arg1) {
-		// TODO Auto-generated method stub
 		
 	}
 

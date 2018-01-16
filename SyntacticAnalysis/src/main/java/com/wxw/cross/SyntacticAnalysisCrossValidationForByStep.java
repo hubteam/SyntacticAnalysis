@@ -10,7 +10,6 @@ import com.wxw.modelBystep.POSTaggerMEExtend;
 import com.wxw.modelBystep.SyntacticAnalysisEvaluatorForByStep;
 import com.wxw.modelBystep.SyntacticAnalysisMEForBuildAndCheck;
 import com.wxw.modelBystep.SyntacticAnalysisMEForChunk;
-import com.wxw.modelBystep.SyntacticAnalysisMEForPos;
 import com.wxw.modelBystep.SyntacticAnalysisModelForBuildAndCheck;
 import com.wxw.modelBystep.SyntacticAnalysisModelForChunk;
 import com.wxw.stream.SyntacticAnalysisSample;
@@ -61,7 +60,6 @@ public class SyntacticAnalysisCrossValidationForByStep {
 			System.out.println("Run"+run+"...");
 			POSModel posmodel = new POSModelLoader().load(file);
 			POSTaggerMEExtend postagger = new POSTaggerMEExtend(posmodel);
-//			SyntacticAnalysisMEForPos postagger = new SyntacticAnalysisMEForPos(posmodel);
 			CrossValidationPartitioner.TrainingSampleStream<SyntacticAnalysisSample<HeadTreeNode>> trainingSampleStream = partitioner.next();			
 			//训练句法分析模型
 			SyntacticAnalysisModelForChunk chunkModel = SyntacticAnalysisMEForChunk.train(languageCode, trainingSampleStream, params, contextGenerator);

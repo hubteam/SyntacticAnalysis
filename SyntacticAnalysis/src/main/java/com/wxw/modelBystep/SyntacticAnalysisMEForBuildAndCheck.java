@@ -41,7 +41,6 @@ import opennlp.tools.ml.model.Event;
 import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.ml.model.SequenceClassificationModel;
 import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.Sequence;
 import opennlp.tools.util.TrainingParameters;
 /**
  * 分步骤训练build check模型
@@ -51,14 +50,13 @@ import opennlp.tools.util.TrainingParameters;
 public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<HeadTreeNode>{
 	public static final int DEFAULT_BEAM_SIZE = 20;
 	private SyntacticAnalysisContextGenerator<HeadTreeNode> contextGenerator;
+	@SuppressWarnings("unused")
 	private int size;
-	private Sequence bestSequence;
 	private SyntacticAnalysisSequenceClassificationModel<HeadTreeNode> model;
-	private SyntacticAnalysisModelForBuildAndCheck modelPackage;
 
     private SyntacticAnalysisSequenceValidator<HeadTreeNode> sequenceValidator;
     
-    private AbsractGenerateHeadWords aghw = new ConcreteGenerateHeadWords(); 
+    private AbsractGenerateHeadWords<HeadTreeNode> aghw = new ConcreteGenerateHeadWords(); 
 	
 	/**
 	 * 构造函数，初始化工作
@@ -81,9 +79,6 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
         if (beamSizeString != null) {
             beamSize = Integer.parseInt(beamSizeString);
         }
-
-        modelPackage = model;
-
         contextGenerator = contextGen;
         size = beamSize;
         sequenceValidator = new DefaultSyntacticAnalysisSequenceValidator();
@@ -175,7 +170,6 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 	public static SyntacticAnalysisModelForBuildAndCheck train(File file, File buildAndCheckmodelFile, 
 			TrainingParameters params,
 			SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen, String encoding) {
-//		PlainTextGISModelWriter modelWriter = null;
 		OutputStream modelOut = null;
 		SyntacticAnalysisModelForBuildAndCheck model = null;
 		try {
@@ -184,21 +178,15 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 			model = SyntacticAnalysisMEForBuildAndCheck.train("zh", sampleStream, params, contextGen);
 			modelOut = new BufferedOutputStream(new FileOutputStream(buildAndCheckmodelFile));           
             model.serialize(modelOut);
-//            modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getBuildTreeModel(), buildmodeltxtFile);
-//            modelWriter.persist();
-//            modelWriter = new PlainTextGISModelWriter((AbstractModel) model.getCheckTreeModel(), checkmodeltxtFile);
-//            modelWriter.persist();
             return model;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}finally {
-			
+		}finally {			
             if (modelOut != null) {
                 try {
                 	modelOut.close();
-//                	modelWriter.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -215,7 +203,7 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 	 * @param encoding 编码方式
 	 * @return
 	 */
-	public static SyntacticAnalysisModelForBuildAndCheck readModel(File buildmodelFile, File checkmodelFile, TrainingParameters params, SyntacticAnalysisContextGenerator contextGen,
+	public static SyntacticAnalysisModelForBuildAndCheck readModel(File buildmodelFile, File checkmodelFile, TrainingParameters params, SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen,
 			String encoding) {
 		PlainTextGISModelReader modelReader = null;
 		AbstractModel buildModel = null;
@@ -239,13 +227,10 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 			System.out.println("读取模型成功");
             return model;
         } catch (UnsupportedOperationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		return null;
@@ -422,7 +407,6 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 		HeadTreeNode node = (HeadTreeNode) syntacticTree(sentence).getTreeNode();
 		return HeadTreeNode.printTree(node, 1);
 	}
-	@SuppressWarnings("unchecked")
 	@Override
 	public ConstituentTree[] syntacticTree(int k, List<HeadTreeNode> chunkTree) {
 		List<List<HeadTreeNode>> allTree = new ArrayList<>();

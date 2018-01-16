@@ -1,7 +1,5 @@
 package com.wxw.evalstructure;
 
-import java.util.Comparator;
-
 /**
  * 评估需要的工具类
  * @author 王馨苇

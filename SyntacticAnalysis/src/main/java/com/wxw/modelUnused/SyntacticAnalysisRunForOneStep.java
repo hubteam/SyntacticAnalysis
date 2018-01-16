@@ -320,6 +320,7 @@ public class SyntacticAnalysisRunForOneStep {
 		System.out.println("ContextGenerator: " + contextGen);       
 		//根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数【为训练词性标注的模型准备】
 		HashMap<String,Integer> dict = SyntacticAnalysisMEContainsPos.buildDictionary(new File(corpus.trainFile), "utf-8");
+		@SuppressWarnings("unused")
 		FeatureContainsPosTools tools = new FeatureContainsPosTools(dict);
 		//训练模型
 		//(1)训练词性标记模型
@@ -343,6 +344,7 @@ public class SyntacticAnalysisRunForOneStep {
 		System.out.println("ContextGenerator: " + contextGen);       
 		//根据完整的训练语料对语料中的每个词语计数，得到一hashmap，键是词语，值是出现的次数【为训练词性标注的模型准备】
 		HashMap<String,Integer> dict = SyntacticAnalysisMEContainsPos.buildDictionary(new File(corpus.trainFile), "utf-8");
+		@SuppressWarnings("unused")
 		FeatureContainsPosTools tools = new FeatureContainsPosTools(dict);
 		//训练模型
 		//(1)训练词性标记模型

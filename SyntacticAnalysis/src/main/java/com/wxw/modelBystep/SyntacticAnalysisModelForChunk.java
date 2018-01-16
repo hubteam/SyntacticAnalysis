@@ -8,6 +8,7 @@ import java.util.Properties;
 import com.wxw.modelUnused.SyntacticAnalysisME;
 import com.wxw.sequence.SyntacticAnalysisBeamSearch;
 import com.wxw.sequence.SyntacticAnalysisSequenceClassificationModel;
+import com.wxw.tree.TreeNode;
 
 import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.ml.model.SequenceClassificationModel;
@@ -63,7 +64,6 @@ public class SyntacticAnalysisModelForChunk extends BaseModel{
         }
 
         artifactMap.put(CHUNKTREE_MODEL_ENTRY_NAME, seqModel);
-		
 	}
 
 	/**
@@ -78,7 +78,8 @@ public class SyntacticAnalysisModelForChunk extends BaseModel{
         }
 	}
 	
-	public SyntacticAnalysisSequenceClassificationModel getChunkTreeSequenceModel() {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public SyntacticAnalysisSequenceClassificationModel<? extends TreeNode> getChunkTreeSequenceModel() {
 
         Properties manifest = (Properties) artifactMap.get(MANIFEST_ENTRY);
 
@@ -89,8 +90,7 @@ public class SyntacticAnalysisModelForChunk extends BaseModel{
             if (beamSizeString != null) {
                 beamSize = Integer.parseInt(beamSizeString);
             }
-
-            return new SyntacticAnalysisBeamSearch(beamSize, (MaxentModel) artifactMap.get(CHUNKTREE_MODEL_ENTRY_NAME));
+            return  new SyntacticAnalysisBeamSearch(beamSize, (MaxentModel) artifactMap.get(CHUNKTREE_MODEL_ENTRY_NAME));
         } else if (artifactMap.get(CHUNKTREE_MODEL_ENTRY_NAME) instanceof SyntacticAnalysisSequenceClassificationModel) {
             return (SyntacticAnalysisSequenceClassificationModel) artifactMap.get(CHUNKTREE_MODEL_ENTRY_NAME);
         } else {

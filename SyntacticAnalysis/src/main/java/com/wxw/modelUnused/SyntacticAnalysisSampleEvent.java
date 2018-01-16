@@ -7,7 +7,6 @@ import java.util.List;
 import com.wxw.feature.SyntacticAnalysisContextGenerator;
 import com.wxw.stream.SyntacticAnalysisSample;
 import com.wxw.tree.HeadTreeNode;
-import com.wxw.tree.TreeNode;
 
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.util.AbstractEventStream;
@@ -18,7 +17,7 @@ import opennlp.tools.util.ObjectStream;
  * @author 王馨苇
  *
  */
-public class SyntacticAnalysisSampleEvent  extends AbstractEventStream<SyntacticAnalysisSample<HeadTreeNode>>{
+public class SyntacticAnalysisSampleEvent extends AbstractEventStream<SyntacticAnalysisSample<HeadTreeNode>>{
 
 	private SyntacticAnalysisContextGenerator<HeadTreeNode> generator;
 	

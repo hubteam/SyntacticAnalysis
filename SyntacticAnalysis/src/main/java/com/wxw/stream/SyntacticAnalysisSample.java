@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.wxw.tree.ActionsToTree;
-import com.wxw.tree.HeadTreeNode;
 import com.wxw.tree.TreeNode;
 
 /**
@@ -122,7 +121,8 @@ public class SyntacticAnalysisSample<T extends TreeNode> {
 		if (this == obj) {
             return true;
         } else if (obj instanceof SyntacticAnalysisSample) {
-        	SyntacticAnalysisSample<T> a = (SyntacticAnalysisSample<T>) obj;
+        	@SuppressWarnings("unchecked")
+			SyntacticAnalysisSample<T> a = (SyntacticAnalysisSample<T>) obj;
             return Arrays.equals(getActions().stream().toArray(), a.getActions().stream().toArray());
         } else {
             return false;

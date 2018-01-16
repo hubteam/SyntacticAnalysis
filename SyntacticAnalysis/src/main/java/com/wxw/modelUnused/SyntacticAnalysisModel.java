@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import com.wxw.sequence.SyntacticAnalysisBeamSearch;
 import com.wxw.sequence.SyntacticAnalysisSequenceClassificationModel;
+import com.wxw.tree.TreeNode;
 
 import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.ml.model.SequenceClassificationModel;
@@ -79,7 +80,8 @@ public class SyntacticAnalysisModel extends BaseModel{
         }
 	}
 	
-	public SyntacticAnalysisSequenceClassificationModel getTreeSequenceModel() {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public SyntacticAnalysisSequenceClassificationModel<? extends TreeNode> getTreeSequenceModel() {
 
         Properties manifest = (Properties) artifactMap.get(MANIFEST_ENTRY);
 

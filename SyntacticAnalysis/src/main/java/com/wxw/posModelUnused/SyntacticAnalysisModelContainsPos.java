@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
-import com.wxw.sequence.SyntacticAnalysisSequenceClassificationModel;
-
 import opennlp.tools.ml.BeamSearch;
 import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.ml.model.SequenceClassificationModel;
@@ -79,6 +77,7 @@ public class SyntacticAnalysisModelContainsPos extends BaseModel{
         }
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public SequenceClassificationModel<String> getWordPosSequenceModel() {
 
         Properties manifest = (Properties) artifactMap.get(MANIFEST_ENTRY);

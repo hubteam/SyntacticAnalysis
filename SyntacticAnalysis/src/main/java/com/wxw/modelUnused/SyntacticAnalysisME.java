@@ -35,7 +35,6 @@ import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.ml.model.SequenceClassificationModel;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.PlainTextByLineStream;
-import opennlp.tools.util.Sequence;
 import opennlp.tools.util.TrainingParameters;
 
 /**
@@ -47,10 +46,7 @@ public class SyntacticAnalysisME {
 
 	public static final int DEFAULT_BEAM_SIZE = 8;
 	private SyntacticAnalysisContextGenerator<HeadTreeNode> contextGenerator;
-	private int size;
-	private Sequence bestSequence;
 	private SyntacticAnalysisSequenceClassificationModel<HeadTreeNode> model;
-	private SyntacticAnalysisModel modelPackage;
 
     private SyntacticAnalysisSequenceValidator<HeadTreeNode> sequenceValidator;
 	
@@ -67,6 +63,7 @@ public class SyntacticAnalysisME {
      * @param model 模型
      * @param contextGen 特征
      */
+	@SuppressWarnings("unchecked")
 	private void init(SyntacticAnalysisModel model, SyntacticAnalysisContextGenerator<HeadTreeNode> contextGen) {
 		int beamSize = SyntacticAnalysisME.DEFAULT_BEAM_SIZE;
 
@@ -76,13 +73,10 @@ public class SyntacticAnalysisME {
             beamSize = Integer.parseInt(beamSizeString);
         }
 
-        modelPackage = model;
-
         contextGenerator = contextGen;
-        size = beamSize;
         sequenceValidator = new DefaultSyntacticAnalysisSequenceValidator();
         if (model.getTreeSequenceModel() != null) {
-            this.model = model.getTreeSequenceModel();
+            this.model = (SyntacticAnalysisSequenceClassificationModel<HeadTreeNode>) model.getTreeSequenceModel();
         } else {
             this.model = new SyntacticAnalysisBeamSearch(beamSize,
                     model.getTreeModel(), 0,"onstep");

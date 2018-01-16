@@ -281,6 +281,10 @@ public class HeadTreeToActions {
 	 * @throws CloneNotSupportedException
 	 */
 	public SyntacticAnalysisSample<HeadTreeNode> treeToAction(HeadTreeNode tree) throws CloneNotSupportedException{
+		posTree.clear();
+		chunkTree.clear();
+		buildAndCheckTree.clear();
+		actions.clear();
 		getActionPOS(tree);		
 		getActionCHUNK(tree, posTree);
 		getActionBUILDandCHECK(tree, combine(chunkTree));

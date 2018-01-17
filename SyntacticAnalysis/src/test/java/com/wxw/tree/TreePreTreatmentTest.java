@@ -54,7 +54,7 @@ public class TreePreTreatmentTest{
 			TreeNode node = pgt.generateTree(tree);
 			//对树进行遍历
 			TreePreTreatment.travelTree(node);
-			String newStr = node.toNoNoneSample();
+			String newStr = node.toNoNoneBracket();
 			TreeNode newTree = pgt.generateTree("("+newStr+")");
 			String oneTree = "";
 			String[] str = ("("+TreeNode.printTree(newTree, 1)+")").split("\n");

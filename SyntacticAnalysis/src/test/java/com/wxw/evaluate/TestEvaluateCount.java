@@ -2,6 +2,9 @@ package com.wxw.evaluate;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +24,7 @@ public class TestEvaluateCount {
 	private SyntacticAnalysisMeasure measure;
 	
 	@Before
-	public void setUp(){
+	public void setUp() throws CloneNotSupportedException{
 		measure = new SyntacticAnalysisMeasure();
 		pgt = new PhraseGenerateTree();
 		treeRef = pgt.generateTree("((S(NP(NN Measuring)(NNS cups))(VP(MD may)(ADVP(RB soon))(VP(VB be)(VP(VBN replaced)(PP(IN by)(NP(NNS tablespoons)))(PP(IN in)(NP(DT the)(NN laundry)(NN room))))))(. .)))");

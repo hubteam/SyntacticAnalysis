@@ -33,6 +33,31 @@ public class HeadTreeNode extends TreeNode{
 		return (HeadTreeNode) parent;
 	}
 
+	/**
+	 * 第一个儿子
+	 * @return
+	 */
+	public HeadTreeNode getFirstChild(){
+		return (HeadTreeNode) this.children.get(0);
+	}
+	
+	/**
+	 * 获取最后一个儿子
+	 * @return
+	 */
+	public HeadTreeNode getLastChild(){
+		return (HeadTreeNode) this.children.get(this.children.size()-1);
+	}
+	
+	/**
+	 * 获取第i个儿子
+	 * @param i 儿子的序数
+	 * @return
+	 */
+	public HeadTreeNode getIChild(int i){
+		return (HeadTreeNode) this.children.get(i);
+	}
+	
 	//返回子节点列表
 	public List<HeadTreeNode> getChildren(){
 		List<HeadTreeNode> hnode = new ArrayList<>();

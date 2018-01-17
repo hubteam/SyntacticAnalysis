@@ -53,28 +53,27 @@ public class HeadTreeToActions {
 		//为了防止原来的tree被修改
 		HeadTreeNode treeCopy = (HeadTreeNode) tree.clone();
 		//如果当前节点只有一颗子树，这子树可能就是具体的词了，但也存在特殊：（NP(NN chairman)）
-		//subTree.contains(tree):因为第二部在第一步的基础上产生，如果当前子树和第一步得到的结果匹配，去除了（NP(NN chairman)）这样的情况
 		//这样得到的子树为1的都是具体的词性和词语组成的子树
-		if(treeCopy.getChildren().size() == 1 && treeCopy.getChildren().get(0).getChildren().size() == 0){	
+		if(treeCopy.getChildrenNum() == 1 && treeCopy.getFirstChild().getChildrenNum() == 0){	
 			//当前节点的父节点只有这一颗子树，也就是（NP(NN chairman)）这种情况
-			if(treeCopy.getParent().getChildren().size() == 1){	
+			if(treeCopy.getParent().getChildrenNum() == 1){	
 				//用start标记作为当前节点的父节点
 				actions.add("start_"+treeCopy.getParent().getNodeName());
 				HeadTreeNode node = new HeadTreeNode("start_"+treeCopy.getParent().getNodeName());
 				node.addChild(treeCopy);
 				chunkTree.add(node);
 				//当前节点的父节点不止一个，就遍历所有的子树，判断当前节点是否为flat结构
-			}else if(treeCopy.getParent().getChildren().size() > 1){
+			}else if(treeCopy.getParent().getChildrenNum() > 1){
 				
 				int record = -1;
-				for (int j = 0; j < treeCopy.getParent().getChildren().size(); j++) {
+				for (int j = 0; j < treeCopy.getParent().getChildrenNum(); j++) {
 					//如果有一颗子树破坏了flat结构，退出
-					if(treeCopy.getParent().getChildren().get(j).getChildren().size() > 1){
+					if(treeCopy.getParent().getIChild(j).getChildrenNum() > 1){
 						record = j;
 						break;
 					//(PP-CLR(TO to)(NP(PRP it)))针对这种结构
-					}else if(treeCopy.getParent().getChildren().get(j).getChildren().size() == 1
-							&& treeCopy.getParent().getChildren().get(j).getChildren().get(0).getChildren().size() != 0){
+					}else if(treeCopy.getParent().getIChild(j).getChildrenNum()  == 1
+							&& treeCopy.getParent().getIChild(j).getFirstChild().getChildrenNum() != 0){
 						record = j;
 						break;
 					}
@@ -82,7 +81,7 @@ public class HeadTreeToActions {
 				//当前节点的父节点的所有子树满足flat结构
 				if(record == -1){
 					//当前节点是是第一颗子树，
-					if(treeCopy.getParent().getChildren().get(0).equals(treeCopy)){
+					if(treeCopy.getParent().getFirstChild().equals(treeCopy)){
 						actions.add("start_"+treeCopy.getParent().getNodeName());
 						HeadTreeNode node = new HeadTreeNode("start_"+treeCopy.getParent().getNodeName());
 						node.addChild(treeCopy);
@@ -125,15 +124,15 @@ public class HeadTreeToActions {
 				//因为有些结构，如（NP(NN chairman)），只有start没有join部分，
 				//所以遇到start就生成新的子树
 				HeadTreeNode node = new HeadTreeNode(subTree.get(i).getNodeName().split("_")[1]);
-				node.addChild(subTree.get(i).getChildren().get(0));
+				node.addChild(subTree.get(i).getFirstChild());
 				node.setHeadWords(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[0]);
 				node.setHeadWordsPos(aghw.extractHeadWords(node, HeadWordsRuleSet.getNormalRuleSet(), HeadWordsRuleSet.getSpecialRuleSet()).split("_")[1]);
-				subTree.get(i).getChildren().get(0).setParent(node);
+				subTree.get(i).getFirstChild().setParent(node);
 				for (int j = i+1; j < subTree.size(); j++) {
 					//判断start后是否有join如果有，就和之前的start合并
 					if(subTree.get(j).getNodeName().split("_")[0].equals("join")){
-						node.addChild(subTree.get(j).getChildren().get(0));
-						subTree.get(j).getChildren().get(0).setParent(node);
+						node.addChild(subTree.get(j).getFirstChild());
+						subTree.get(j).getFirstChild().setParent(node);
 					}else if(subTree.get(j).getNodeName().split("_")[0].equals("start") ||
 							subTree.get(j).getNodeName().split("_")[0].equals("other")){
 						break;
@@ -145,10 +144,10 @@ public class HeadTreeToActions {
 				combineChunk.add(node);
 				//标记为other的，去掉other
 			}else if(subTree.get(i).getNodeName().equals("other")){
-				subTree.get(i).getChildren().get(0).setParent(null);
-				subTree.get(i).getChildren().get(0).setHeadWords(subTree.get(i).getChildren().get(0).getHeadWords());
-				subTree.get(i).getChildren().get(0).setHeadWordsPos(subTree.get(i).getChildren().get(0).getHeadWordsPos());
-				combineChunk.add(subTree.get(i).getChildren().get(0));
+				subTree.get(i).getFirstChild().setParent(null);
+				subTree.get(i).getFirstChild().setHeadWords(subTree.get(i).getChildren().get(0).getHeadWords());
+				subTree.get(i).getFirstChild().setHeadWordsPos(subTree.get(i).getChildren().get(0).getHeadWordsPos());
+				combineChunk.add(subTree.get(i).getFirstChild());
 			}
 		}
 		return combineChunk;
@@ -168,7 +167,7 @@ public class HeadTreeToActions {
 		//如果当前的节点子树是第二步CHUNK后合并后的一个结果
 		if(subTree.get(i).equals(tree)){	
 			
-			if(tree.getParent().getChildren().size() == 1){
+			if(tree.getParent().getChildrenNum() == 1){
 				//添加start标记
 				actions.add("start_"+tree.getParent().getNodeName());
 				//改变subTreeCopy
@@ -188,8 +187,8 @@ public class HeadTreeToActions {
 				tempnode.setParent(tree.getParent().getParent());
 				tempnode.setHeadWords(tree.getParent().getHeadWords());
 				tempnode.setHeadWordsPos(tree.getParent().getHeadWordsPos());
-				tempnode.addChild(tree.getParent().getChildren().get(0));
-				tree.getParent().getChildren().get(0).setParent(tempnode);
+				tempnode.addChild(tree.getParent().getFirstChild());
+				tree.getParent().getFirstChild().setParent(tempnode);
 				subTree.set(i, tree.getParent());			
 				//合并之后，以合并后的节点的父节点继续递归
 				if(tree.getParent().getParent() == null){
@@ -214,7 +213,7 @@ public class HeadTreeToActions {
 					if(i >= subTree.size()){
 						return;
 					}
-				}else if(tree.getIndex() == tree.getParent().getChildren().size()-1){
+				}else if(tree.getIndex() == tree.getParent().getChildrenNum()-1){
 					actions.add("join_"+tree.getParent().getNodeName());
 					HeadTreeNode tempnode = new HeadTreeNode("join_"+tree.getParent().getNodeName());
 					tempnode.addChild(subTree.get(i));
@@ -231,9 +230,9 @@ public class HeadTreeToActions {
 					node.setParent(tree.getParent().getParent());
 					node.setHeadWords(tree.getParent().getHeadWords());
 					node.setHeadWordsPos(tree.getParent().getHeadWordsPos());
-					for (int j = 0; j < tree.getParent().getChildren().size(); j++) {								
-						node.addChild(tree.getParent().getChildren().get(j));
-						tree.getParent().getChildren().get(j).setParent(node);						
+					for (int j = 0; j < tree.getParent().getChildrenNum(); j++) {								
+						node.addChild(tree.getParent().getIChild(j));
+						tree.getParent().getIChild(j).setParent(node);						
 					}
 					//对subTreeCopy更改
 					//要更改的位置

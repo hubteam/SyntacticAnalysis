@@ -31,7 +31,7 @@ public class TestTreeToNonterminalAndSpan {
 	private List<EvalStructure> pre2;
 
 	@Before
-	public void setUp(){
+	public void setUp() throws CloneNotSupportedException{
 		pgt = new PhraseGenerateTree();
 		ttn1 = new TreeToEvalStructure();
 		ttn2 = new TreeToEvalStructure();
@@ -48,6 +48,7 @@ public class TestTreeToNonterminalAndSpan {
 		result1.add(new EvalStructure("PP", 4, 7));
 		result1.add(new EvalStructure("VP", 1, 7));
 		result1.add(new EvalStructure("S", 0, 7));
+		
 		result2.add(new EvalStructure("NP", 0,1));
 		result2.add(new EvalStructure("NP", 2, 4));
 		result2.add(new EvalStructure("NP", 5, 7));
@@ -61,5 +62,6 @@ public class TestTreeToNonterminalAndSpan {
 	public void testTreeToNonterminal(){
 		assertEquals(pre1.toString(),result1.toString());
 		assertEquals(pre2.toString(),result2.toString());
+		System.out.println(tree1);
 	}
 }

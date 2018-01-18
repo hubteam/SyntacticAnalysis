@@ -10,7 +10,6 @@ import com.wxw.sequence.SyntacticAnalysisSequenceClassificationModel;
 import com.wxw.tree.TreeNode;
 
 import opennlp.tools.ml.model.MaxentModel;
-import opennlp.tools.ml.model.SequenceClassificationModel;
 import opennlp.tools.util.model.BaseModel;
 /**
  * 分步骤训练的build和check模型
@@ -60,8 +59,8 @@ public class SyntacticAnalysisModelForBuildAndCheck extends BaseModel{
 	}
 	
 
-	public SyntacticAnalysisModelForBuildAndCheck(String languageCode, SequenceClassificationModel<String> buildseqModel,
-			SequenceClassificationModel<String> checkseqModel,
+	public SyntacticAnalysisModelForBuildAndCheck(String languageCode, SyntacticAnalysisSequenceClassificationModel<? extends TreeNode> buildseqModel,
+			SyntacticAnalysisSequenceClassificationModel<? extends TreeNode> checkseqModel,
 			Map<String, String> manifestInfoEntries) {
 		super(COMPONENT_NAME, languageCode, manifestInfoEntries, null);
 		if (buildseqModel == null) {

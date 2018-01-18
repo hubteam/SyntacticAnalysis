@@ -11,7 +11,6 @@ import com.wxw.sequence.SyntacticAnalysisSequenceClassificationModel;
 import com.wxw.tree.TreeNode;
 
 import opennlp.tools.ml.model.MaxentModel;
-import opennlp.tools.ml.model.SequenceClassificationModel;
 import opennlp.tools.util.model.BaseModel;
 
 /**
@@ -56,7 +55,7 @@ public class SyntacticAnalysisModelForChunk extends BaseModel{
 	}
 	
 
-	public SyntacticAnalysisModelForChunk(String languageCode, SequenceClassificationModel<String> seqModel,
+	public SyntacticAnalysisModelForChunk(String languageCode, SyntacticAnalysisSequenceClassificationModel<?> seqModel,
 			Map<String, String> manifestInfoEntries) {
 		super(COMPONENT_NAME, languageCode, manifestInfoEntries, null);
 		if (seqModel == null) {

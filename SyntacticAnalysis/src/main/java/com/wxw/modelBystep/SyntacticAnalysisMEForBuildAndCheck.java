@@ -39,7 +39,6 @@ import opennlp.tools.ml.maxent.io.PlainTextGISModelReader;
 import opennlp.tools.ml.model.AbstractModel;
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.ml.model.MaxentModel;
-import opennlp.tools.ml.model.SequenceClassificationModel;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.TrainingParameters;
 /**
@@ -135,8 +134,8 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
         Map<String, String> manifestInfoEntries = new HashMap<String, String>();
         //event_model_trainer
         TrainerType trainerType = TrainerFactory.getTrainerType(params.getSettings());
-        SequenceClassificationModel<String> buildseqModel = null;
-        SequenceClassificationModel<String> checkseqModel = null;
+        SyntacticAnalysisSequenceClassificationModel<HeadTreeNode> buildseqModel = null;
+        SyntacticAnalysisSequenceClassificationModel<HeadTreeNode> checkseqModel = null;
         if (TrainerType.EVENT_MODEL_TRAINER.equals(trainerType)) {
         	//sampleStream为PhraseAnalysisSampleStream对象
             ObjectStream<Event> buildes = new SyntacticAnalysisSampleEventForBuild(sampleStream, contextGen);

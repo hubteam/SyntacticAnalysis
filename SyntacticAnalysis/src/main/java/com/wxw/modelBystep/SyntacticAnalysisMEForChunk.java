@@ -32,7 +32,6 @@ import opennlp.tools.ml.maxent.io.PlainTextGISModelReader;
 import opennlp.tools.ml.model.AbstractModel;
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.ml.model.MaxentModel;
-import opennlp.tools.ml.model.SequenceClassificationModel;
 import opennlp.tools.tokenize.WhitespaceTokenizer;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.TrainingParameters;
@@ -132,7 +131,7 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
         MaxentModel chunkModel = null;
         Map<String, String> manifestInfoEntries = new HashMap<String, String>();
         TrainerType trainerType = TrainerFactory.getTrainerType(params.getSettings());
-        SequenceClassificationModel<String> seqChunkModel = null;
+        SyntacticAnalysisSequenceClassificationModel<HeadTreeNode> seqChunkModel = null;
         if (TrainerType.EVENT_MODEL_TRAINER.equals(trainerType)) {
             ObjectStream<Event> es = new SyntacticAnalysisSampleEventForChunk(sampleStream, contextGen);
             EventTrainer trainer = TrainerFactory.getEventTrainer(params.getSettings(),

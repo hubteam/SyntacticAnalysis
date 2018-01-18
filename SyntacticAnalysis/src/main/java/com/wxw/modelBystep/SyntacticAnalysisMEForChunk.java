@@ -366,15 +366,14 @@ public class SyntacticAnalysisMEForChunk implements SyntacticAnalysisForChunk<He
 	 * @param posTree pos子树
 	 * @return
 	 */
-	@SuppressWarnings("null")
 	@Override
 	public String[] chunk(List<HeadTreeNode> posTree) {
 		List<List<HeadTreeNode>> allposTree = new ArrayList<>();
 		allposTree.add(posTree);
 		List<HeadTreeNode> chunkTree = tagChunk(allposTree,null);
-		String[] wordandpos = null;
-		String[] chunkTag = null;
-		String[] output = null;
+		String[] wordandpos = new String[chunkTree.size()];
+		String[] chunkTag = new String[chunkTree.size()];
+		String[] output = new String[chunkTree.size()];
 		int k = 0;
 		int index = -1;
 		for (int i = 0; i < chunkTree.size(); i++) {

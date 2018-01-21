@@ -55,9 +55,12 @@ public class SyntacticAnalysisMeasure {
 		
 		for (int i = 0; i < etRef.size(); i++) {
 			for (int j = 0; j < etPre.size(); j++) {
-				if(etRef.get(i).compareTo(etPre.get(j)) == 0){
-					CBs_2_temp++;
-					CBs++;
+				//判断是否是交叉结构
+				if(etRef.get(i).getBegin() < etPre.get(j).getBegin() && etRef.get(i).getEnd() > etPre.get(j).getBegin()){
+					if(etPre.get(j).getEnd() > etRef.get(i).getEnd()){
+						CBs_2_temp++;
+						CBs++;
+					}
 				}
 			}
 		}

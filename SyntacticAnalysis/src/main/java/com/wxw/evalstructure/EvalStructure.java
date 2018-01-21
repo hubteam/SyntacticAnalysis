@@ -5,7 +5,7 @@ package com.wxw.evalstructure;
  * @author 王馨苇
  *
  */
-public class EvalStructure implements Comparable<EvalStructure>{
+public class EvalStructure{
 
 	private String nonterminal;
 	private int begin;
@@ -81,15 +81,5 @@ public class EvalStructure implements Comparable<EvalStructure>{
 	@Override
 	public String toString() {
 		return this.nonterminal+"-("+this.begin+":"+this.end+")";
-	}
-	
-	@Override
-	public int compareTo(EvalStructure o) {
-		if(o.begin > this.begin && o.begin < this.end){
-			if(o.end > this.end){
-				return 0;
-			}
-		}
-		return -1;
 	}
 }

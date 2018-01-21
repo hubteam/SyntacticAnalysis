@@ -18,7 +18,7 @@ import com.wxw.tree.TreeToEvalStructure;
  * @author 王馨苇
  *
  */
-public class TestTreeToNonterminalAndSpan {
+public class TestTreeToEvalStructure {
 
 	private PhraseGenerateTree pgt;
 	private TreeNode tree1;

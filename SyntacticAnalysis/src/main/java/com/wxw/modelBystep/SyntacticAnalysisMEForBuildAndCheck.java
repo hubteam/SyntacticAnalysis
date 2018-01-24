@@ -424,6 +424,7 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 		List<HeadTreeNode> chunkTree = toChunkTreeList(words,poses,chunkTag);
 		return syntacticTree(k,chunkTree);
 	}
+	
 	@Override
 	public ConstituentTree[] syntacticTree(int k, String sentence) {
 		List<String> chunkTags = new ArrayList<>();
@@ -475,7 +476,7 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 						wordTag = string.split("/");
 						words.add(wordTag[0]);
 						poses.add(wordTag[1]);
-						chunkTags.add("_O");
+						chunkTags.add("O");
 					}
 					
 				}else {
@@ -486,7 +487,7 @@ public class SyntacticAnalysisMEForBuildAndCheck implements SyntacticAnalysis<He
 						wordTag = string.split("/");
 						words.add(wordTag[0]);
 						poses.add(wordTag[1]);
-						chunkTags.add("_O");
+						chunkTags.add("O");
 					}
 				}
 			}
